@@ -45,6 +45,10 @@
   
   配置路径 @/config/
   本地localhost接口: 默认localhost:9000,如需修改 请在 @/config/sit.env.js 中修改 BASE_API 属性
+## 快速开发须知
+> 开发本项目时需根据设计稿提前确定好所需的业务模块 ，配置相应的业务权限
+* [模块权限对照表]()
+* [配置文档]()
 ## 发布项目&更新线上代码
  * 执行`npm run build:prod` 命令后在项目目录中会生成一个dist文件，该dist文件中的内容即是我们发布线上的代码包
  * 通过ftp方式上传代码包到服务器上[教程文档](https://docs.qq.com/doc/Dc3RMUEZjY2xrQXNv)

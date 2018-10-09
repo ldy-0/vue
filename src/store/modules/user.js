@@ -128,9 +128,12 @@ const user = {
               let roles = [];
               if (data.data.is_admin == "1") {
                 getSellerAuth().then(res => {
-                  roles = res.data.split(",");
+                  res.data = res.data.replace(/\s/ig,'');
+                  let rolesarry = eval('(' + res.data + ')')
+                  rolesarry.forEach(item => {
+                    roles.push(item.label);
+                  });
                   roles.push("seller");
-                  console.log(roles);
                   setRoles(JSON.stringify(roles));
                   resolve();
                 });
