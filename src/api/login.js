@@ -31,3 +31,16 @@ export function getUserInfo(token) {
   })
 }
 
+export function getSellerAuth() {
+  return request({
+    url: '/api/v2/seller/auth',
+    method: 'get',
+  })
+}
+export function getAdminAuth() {
+  return request({
+    url: '/api/v2/admin/auth',
+    method: 'get',
+  })
+}
+

@@ -1,133 +1,236 @@
 <style lang="stylus">
-.login-container
-  .hbs-login-switch
-    text-align right
-    box-sizing border-box
-    height 40px
-    padding-right 20px
-    .el-switch__label
-      color #aaaaaa 
-      & *
-        font-size 16px
-    .el-switch__label.is-active
-      color #ffffff
-      & *
-        font-size 18px
+.login-container {
+  .hbs-login-switch {
+    text-align: right;
+    box-sizing: border-box;
+    height: 40px;
+    padding-right: 20px;
+
+    .el-switch__label {
+      color: #aaaaaa;
+
+      & * {
+        font-size: 16px;
+      }
+    }
+
+    .el-switch__label.is-active {
+      color: #ffffff;
+
+      & * {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+.forget-password {
+  font-size: 10px;
+  color: #ffffff;
+  text-align: right;
+  margin-bottom: 10px;
+}
 </style>
 
 <template>
-  <div class="login-container">
-    <el-form class="login-form" autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left">
-      <div class="title-container">
-        <h3 class="title" :style="isAdmin?'color:#E6A23C':''">三度云仓-管理后台</h3>
-        <!-- <lang-select class="set-language"></lang-select> -->
-      </div>
-      
-      <el-form-item prop="username">
-        <span class="svg-container svg-container_login">
-          <svg-icon icon-class="user" />
-        </span>
-        <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="手机号码" />
-      </el-form-item>
+  <div>
+    <div class="login-container">
+      <el-form class="login-form" autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left">
+        <div class="title-container">
+          <h3 class="title" :style="isAdmin?'color:#E6A23C':''">{{ITEM_NAME}}</h3>
+          <!-- <lang-select class="set-language"></lang-select> -->
+        </div>
+        
+        <el-form-item prop="username">
+          <span class="svg-container svg-container_login">
+            <svg-icon icon-class="user" />
+          </span>
+          <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="手机号码" />
+        </el-form-item>
 
-      <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
-        <el-input name="password" :type="passwordType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" placeholder="密码" />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon icon-class="eye" />
-        </span>
-      </el-form-item>
+        <el-form-item prop="password">
+          <span class="svg-container">
+            <svg-icon icon-class="password" />
+          </span>
+          <el-input name="password" :type="passwordType" @keyup.enter.native="handleLogin" v-model="loginForm.password" autoComplete="on" placeholder="密码" />
+          <span class="show-pwd" @click="showPwd">
+            <svg-icon icon-class="eye" />
+          </span>
+        </el-form-item>
+        <div class="forget-password" @click="centerDialogVisible = true">忘记密码</div>
+        <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">{{$t('login.logIn')}}</el-button>
 
-      <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">{{$t('login.logIn')}}</el-button>
-
-    </el-form>
-  </div>
+      </el-form>
+    </div>
+    <el-dialog
+        title="重置密码"
+        :visible.sync="centerDialogVisible"
+        width="30%"
+        center>
+        <el-form :model="findForm">
+          <el-form-item label="账号手机号" label-width="90px">
+            <el-input type='text' v-model="findForm.phone" autoComplete="on" placeholder="手机号码" />
+          </el-form-item>
+          <div class="codebox">
+            <el-form-item label="验证码" label-width="90px">
+              <el-input v-model="findForm.code" autoComplete="on" placeholder="验证码" />
+            </el-form-item>
+            <el-button type="primary" style="width:30%;height:36px;margin-left:10px" @click="sendCode">{{codetimeShow?codetime+'秒后获取':'获取验证码'}}</el-button>
+          </div>
+          <el-form-item label="输入新密码" label-width="90px">
+            <el-input v-model="findForm.password1" type='password' autoComplete="on" placeholder="新密码" />
+          </el-form-item>
+          <el-form-item label="确认新密码" label-width="90px">
+            <el-input v-model="findForm.password2" type='password' autoComplete="on" placeholder="确认密码" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="centerDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="resetPassword">确 定</el-button>
+        </div>
+      </el-dialog>
+  </div>  
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
-import LangSelect from '@/components/LangSelect'
+import { isvalidUsername } from "@/utils/validate";
+import LangSelect from "@/components/LangSelect";
 
 export default {
   components: { LangSelect },
-  name: 'login',
+  name: "login",
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!isvalidUsername(value)) {
-        callback(new Error('请输入手机号'))
+        callback(new Error("请输入手机号"));
       } else {
-        callback()
+        callback();
       }
-    }
+    };
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('密码不能少于6位'))
+        callback(new Error("密码不能少于6位"));
       } else {
-        callback()
+        callback();
       }
-    }
+    };
     return {
       // -------------
       isAdmin: false,
-      tabRole: '',
+      tabRole: "",
       // -------------
       loginForm: {
-        username: '',
-        password: ''
+        username: "",
+        password: ""
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        username: [
+          { required: true, trigger: "blur", validator: validateUsername }
+        ],
+        password: [
+          { required: true, trigger: "blur", validator: validatePassword }
+        ]
       },
-      passwordType: 'password',
-      loading: false
-      // showDialog: false
-    }
+      passwordType: "password",
+      loading: false,
+      centerDialogVisible: false,
+      formLabelWidth: "120px",
+      findForm: {
+        phone: "",
+        code: "",
+        password1: "",
+        password2: ""
+      },
+      codetimeShow: false,
+      codetime: 60,
+      ITEM_NAME: process.env.ITEM_NAME
+    };
   },
   methods: {
     // --------------
     // --------------
     showPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
+      if (this.passwordType === "password") {
+        this.passwordType = "";
       } else {
-        this.passwordType = 'password'
+        this.passwordType = "password";
       }
+    },
+    /**
+     * 获取验证码
+     */
+    sendCode() {
+      if (!this.codetimeShow) {
+        let phoneReg = /^[1][0-9][0-9]{9}$/;
+        if (this.findForm.phone == "") {
+          return this.$message("请输入手机号");
+        }
+        if (!phoneReg.test(this.findForm.phone)) {
+          return this.$message("请输入正确手机号");
+        }
+        console.log("发送请求获取验证码");
+        let that = this;
+        that.codetimeShow = true;
+        let interval = setInterval(() => {
+          if (that.codetime-- <= 0) {
+            that.codetime = 60;
+            that.codetimeShow = false;
+            clearInterval(interval);
+          }
+        }, 1000);
+      }
+    },
+    /** 
+     * 重置密码
+    */
+    resetPassword() {
+      if (this.findForm.phone == "") {
+        return this.$message("请输入手机号");
+      }else if (this.findForm.code == "") {
+        return this.$message("请输入短信验证码");
+      }else if (this.findForm.password1 == "") {
+        return this.$message("请输入密码");
+      }else if (this.findForm.password2 == "") {
+        return this.$message("请确认密码");
+      }else if (this.findForm.password1 != this.findForm.password2) {
+        return this.$message("两次密码不一致");
+      }
+      console.log('重置');
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
-          this.loading = true
+          this.loading = true;
           //对 平台 和 卖家 做区分
-          let loginPromise
-          if(this.isAdmin){
-            loginPromise = this.$store.dispatch('LoginByAdminname', {
-              admin_name:this.loginForm.username,
-              admin_password:this.loginForm.password,
-              captcha:1234
-            })
-          }else{
-            loginPromise= this.$store.dispatch('LoginByUsername',{
-              seller_name:this.loginForm.username,
-              member_password:this.loginForm.password,
-              captcha:1234
-            })
+          let loginPromise;
+          if (this.isAdmin) {
+            loginPromise = this.$store.dispatch("LoginByAdminname", {
+              admin_name: this.loginForm.username,
+              admin_password: this.loginForm.password,
+              captcha: 1234
+            });
+          } else {
+            loginPromise = this.$store.dispatch("LoginByUsername", {
+              seller_name: this.loginForm.username,
+              member_password: this.loginForm.password,
+              captcha: 1234
+            });
           }
 
-          loginPromise.then(() => {
-            this.loading = false
-            this.$router.push({ path: '/' })
-          }).catch((e) => {
-            console.log('no', e)
-            this.loading = false
-          })
+          loginPromise
+            .then(() => {
+              this.loading = false;
+              this.$router.push({ path: "/" });
+            })
+            .catch(e => {
+              console.log("no", e);
+              this.loading = false;
+            });
         } else {
-          console.log('error submit!!')
-          return false
+          console.log("error submit!!");
+          return false;
         }
-      })
+      });
     },
     afterQRScan() {
       // const hash = window.location.hash.slice(1)
@@ -154,12 +257,12 @@ export default {
   destroyed() {
     // window.removeEventListener('hashchange', this.afterQRScan)
   }
-}
+};
 </script>
 
 <style rel="stylesheet/scss" lang="scss">
-$bg:#2d3a4b;
-$light_gray:#eee;
+$bg: #2d3a4b;
+$light_gray: #eee;
 
 /* reset element-ui css */
 .login-container {
@@ -188,13 +291,18 @@ $light_gray:#eee;
     color: #454545;
   }
 }
+.v-modal {
+  width: 0 !important;
+}
+.codebox {
+  display: flex;
+}
 </style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
-$bg:#2d3a4b;
-$dark_gray:#889aa4;
-$light_gray:#eee;
+$bg: #2d3a4b;
+$dark_gray: #889aa4;
+$light_gray: #eee;
 
 .login-container {
   position: fixed;
@@ -221,7 +329,7 @@ $light_gray:#eee;
   }
   .svg-container {
     // padding: 6px 5px 6px 15px;
-    padding:5px 5px 5px 10px;
+    padding: 5px 5px 5px 10px;
     color: $dark_gray;
     vertical-align: middle;
     width: 30px;

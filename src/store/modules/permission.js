@@ -69,7 +69,8 @@ const permission = {
         }
         //商家
         else if (roles.indexOf('seller') >= 0) {
-          accessedRouters = asyncRouterMapSeller
+          console.log('---------------',roles)
+          accessedRouters = filterAsyncRouter(asyncRouterMapSeller,roles)
         } 
         else if(roles.indexOf('seller2') >= 0){
           console.log('---------------',roles)

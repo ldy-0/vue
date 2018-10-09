@@ -40,3 +40,11 @@
 
 ## 本地开发 
 * 启动项目 `npm run dev`
+* 正式服构建 `npm run build:prod`
+* 本地localhost `npm run build:sit`
+  
+  配置路径 @/config/
+  本地localhost接口: 默认localhost:9000,如需修改 请在 @/config/sit.env.js 中修改 BASE_API 属性
+## 发布项目&更新线上代码
+ * 执行`npm run build:prod` 命令后在项目目录中会生成一个dist文件，该dist文件中的内容即是我们发布线上的代码包
+ * 通过ftp方式上传代码包到服务器上[教程文档](https://docs.qq.com/doc/Dc3RMUEZjY2xrQXNv)

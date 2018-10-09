@@ -3,7 +3,6 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-/* Layout */
 import Layout from '@/views/layout/Layout'
 
 export const constantRouterMap = [{
@@ -30,7 +29,6 @@ export const constantRouterMap = [{
       import('@/views/errorPage/401'),
     hidden: true
   },
-  // 首页
   {
     path: '',
     component: Layout,
@@ -47,8 +45,6 @@ export const constantRouterMap = [{
       }
     }]
   },
-  //maijia
-  //pt
 ]
 
 export default new Router({

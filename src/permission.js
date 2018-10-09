@@ -32,6 +32,7 @@ router.beforeEach((to, from, next) => {
         let roles = []
         try{
           roles = JSON.parse(getRoles())
+          console.log(roles);
         }catch(e){
           console.log(e)
           roles = []
