@@ -29,6 +29,7 @@
   color: #ffffff;
   text-align: right;
   margin-bottom: 10px;
+  cursor: pointer;
 }
 </style>
 
