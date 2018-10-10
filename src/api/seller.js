@@ -1,23 +1,5 @@
 import request from '@/utils/request'
 
-// test
-export function test2(data) {
-	return request({
-		url: '/api/v2/seller/storeinfo',
-		method: 'put',
-		data
-	})
-}
-export function test(data) {
-	return request({
-		url: '/api/v2/seller/school',
-		method: 'get',
-		params: {
-			limit: 0
-		}
-	})
-}
-// sellerGoods
 //添加商品
 export function addGoods_api(data) {
 	return request({
@@ -43,19 +25,9 @@ export function editGoods_api(data) {
 }
 //获取商品详情
 export function getGoods_api(data) {
-	//console.log(data)
 	return request({
 		url: '/api/v2/seller/goodscommon/' + data,
 		method: 'get',
-		// params: data
-	})
-}
-export function getSchoolList_api(data) { //获取校区列表
-	console.log('inner getPostionList_api')
-	return request({
-		url: '/api/v2/seller/school',
-		method: 'get',
-		params: data
 	})
 }
 //上下架商品
@@ -77,7 +49,7 @@ export function deleGoods_api(data) {
 
 
 
-// order => rOrder
+// 订单操作
 export function changeROrder_api(data) {
 	return request({
 		url: '/api/v2/seller/orderstate?order_id=' + data.order_id,
@@ -100,9 +72,10 @@ export function getROrder_api(data) {
 		method: 'get',
 	})
 }
+//改变订单状态
 export function rOrderState_api(data) {
 	return request({
-		url: '/api/v2/seller/orderstate',
+		url: '/api/v2/seller/orderstate/'+data.order_id,
 		method: 'put',
 		data: data
 	})
@@ -116,55 +89,9 @@ export function pushWoker_api(data) {
 	})
 }
 
-//coupon => coupon
-export function getCouponList_api(data) {
-	return request({
-		url: '/api/v2/seller/fullreductionvoucher',
-		method: 'get',
-		params: data
-	})
-}
-export function addCoupon_api(data) {
-	return request({
-		url: '/api/v2/seller/fullreductionvoucher',
-		method: 'post',
-		data
-	})
-}
-
-export function deleCoupon_api(data) {
-	return request({
-		url: '/api/v2/seller/discountCoupon',
-		method: 'delete',
-		data
-	})
-}
-
-// appointment
-export function getAppointmentList_api(data) {
-	return request({
-		url: '/api/v2/seller/appointment',
-		method: 'get',
-		params: data
-	})
-}
 
 
-//获取商品分类信息
-export function getEntryList_api(data) {
-	return request({
-		url: '/api/v2/seller/storegc',
-		method: 'get',
-		params: data
-	})
-}
-export function editEntry_api(data) {
-	return request({
-		url: '/api/v2/seller/storegc',
-		method: 'put',
-		data
-	})
-}
+
 //商品推荐设置
 export function setting_api(data) {
 	return request({
@@ -223,28 +150,8 @@ export function deleteVote_api(data) {
 		method: 'delete',
 	})
 }
-//server => school
-// this.getSchoolList() 已存在
-export function deleteSchool_api(id) {
-	return request({
-		url: '/api/v2/seller/school?school_id=' + id,
-		method: 'delete',
-	})
-}
-export function addSchool_api(data) {
-	return request({
-		url: '/api/v2/seller/school',
-		method: 'post',
-		data
-	})
-}
-export function editSchool_api(data) {
-	return request({
-		url: '/api/v2/seller/school?school_id=' + data.school_id,
-		method: 'put',
-		data
-	})
-}
+
+
 //获取轮播图列表
 export function getBannerList_api(data) {
 	return request({
@@ -371,7 +278,7 @@ export function getIntroForm_api(data) {
 		params: data
 	})
 }
-// auth
+// 权限管理
 export function getAuthList_api(data) {
 	return request({
 		url: '/api/v2/seller/seller',
@@ -381,9 +288,9 @@ export function getAuthList_api(data) {
 }
 export function deleteAuth_api(data) {
 	return request({
-		url: '/api/v2/seller/seller',
+		url: '/api/v2/seller/seller/'+data.seller_id,
 		method: 'delete',
-		data: data
+		//data: data
 	})
 }
 export function addAuth_api(data) {
@@ -399,186 +306,6 @@ export function editAuth_api(data) {
 		url: '/api/v2/seller/seller/'+data.seller_id,
 		method: 'put',
 		data: data
-	})
-}
-// -----creditShop =>  section---------------
-
-export function getCreditSection_api(data) {
-	return request({
-		url: '/api/v2/seller/integralsubsection',
-		method: 'get',
-		params: data
-	})
-}
-export function addCreditSection_api(data) {
-	return request({
-		url: '/api/v2/seller/integralsubsection',
-		method: 'post',
-		data: data
-	})
-}
-export function deleCreditSection_api(data) {
-	return request({
-		url: '/api/v2/seller/integralsubsection',
-		method: 'delete',
-		data: data
-	})
-}
-export function editCreditSection_api(data) {
-	return request({
-		url: '/api/v2/seller/integralsubsection',
-		method: 'put',
-		data: data
-	})
-}
-
-//————————sales =>sales-------
-// export function getSales_api(data){
-//   return request({
-//     url:'/api/v2/seller/saler',
-//     method: 'get',
-//     params:data
-//   })
-// }
-
-export function getChild_api(data) {
-	return request({
-		url: '/api/v2/saler/getSalerInfo',
-		method: 'get',
-		params: data
-	})
-}
-
-
-export function addSales_api(data) {
-	return request({
-		url: '/api/v2/seller/saler',
-		method: 'post',
-		data: data
-	})
-}
-
-export function deleteSales_api(data) {
-	return request({
-		url: '/api/v2/seller/saler',
-		method: 'delete',
-		data: data
-	})
-}
-export function deleteChildSales_api(data) {
-	return request({
-		url: '/api/v2/seller/salerlevel',
-		method: 'delete',
-		data: data
-	})
-}
-
-
-
-//——————————infomation => infomation--------
-export function getInfo_api(data) {
-	return request({
-		url: '/api/v2/wxtitle/wxtitle',
-		method: 'get',
-		params: data
-	})
-}
-
-export function addInfo_api(data) {
-	return request({
-		url: '/api/v2/wxtitle/wxtitle',
-		method: 'post',
-		data: data
-	})
-}
-
-export function deleteInfo_api(data) {
-	return request({
-		url: '/api/v2/wxtitle/wxtitle',
-		method: 'delete',
-		data: data
-	})
-}
-
-//修改资讯
-// export function editInfo_api(data) {
-//   return request({
-//     url:'/api/v2/wxtitle/wxtitle',
-//     method: 'put',
-//     data: data
-//   })
-// }
-
-
-//---------------cresitShop => creditShop----
-
-export function addCreditGoods_api(data) {
-	return request({
-		url: '/api/v2/seller/integralstore',
-		method: 'post',
-		data
-	})
-}
-export function getCreditGoodsList_api(data) {
-	return request({
-		url: '/api/v2/seller/integralstore',
-		method: 'get',
-		params: data
-	})
-}
-export function editCreditGoods_api(data) {
-	return request({
-		url: '/api/v2/seller/integralstore',
-		method: 'put',
-		data
-	})
-}
-export function getCreditGoods_api(data) {
-	return request({
-		url: '/api/v2/seller/integralstore',
-		method: 'get',
-		params: data
-	})
-}
-
-export function upDownCreditGoods_api(data) {
-	return request({
-		url: '/api/v2/seller/integralsoldout',
-		method: 'get',
-		params: data
-	})
-}
-export function upDownCreditGoods_api2(data) {
-	return request({
-		url: '/api/v2/seller/integralbatchsoldout',
-		method: 'put',
-		data
-	})
-}
-
-export function deleCreditGoods_api(data) {
-	return request({
-		url: '/api/v2/seller/integralstore',
-		method: 'delete',
-		data
-	})
-}
-
-
-//----------setting => payType--------
-export function getCheckList_api(data) {
-	return request({
-		url: '/api/v2/seller/payment',
-		method: 'get',
-		params: data
-	})
-}
-
-export function putCheckList_api(data) {
-	return request({
-		url: '/api/v2/seller/payment',
-		method: 'put',
-		data
 	})
 }
 
@@ -615,219 +342,4 @@ export function editIndustry_api(data) {
 	})
 }
 
-// -----------setting => credit---------
-export function getCredit_api(data) {
-	return request({
-		url: '/api/v2/seller/getintegrate',
-		method: 'get',
-		params: data
-	})
-}
-export function editCredit_api(data) {
-	return request({
-		url: '/api/v2/seller/getintegrate',
-		method: 'put',
-		data
-	})
-}
 
-
-//---------------user-------
-
-
-export function addUser_api(data) {
-	return request({
-		url: '/api/v2/seller/member',
-		method: 'post',
-		data
-	})
-}
-
-//-------------comment => comment-----------
-export function getComment_api(data) {
-	return request({
-		url: '/api/v2/seller/getpcomments',
-		method: 'get',
-		params: data
-	})
-}
-
-export function getCommentItem_api(data) {
-	return request({
-		url: '/api/v2/seller/getpcomments',
-		method: 'get',
-		params: data
-	})
-}
-
-export function deleteComment_api(data) {
-	return request({
-		url: '/api/v2/seller/getpcomments',
-		method: 'get',
-		params: data
-	})
-}
-
-// export function changeStatus_api(data) {
-//   return request({
-//     url: '/api/v2/seller/getpcomments',
-//     method: 'get',
-//     params: data
-//   })
-// }
-
-
-//=================玉秀发api======================================================
-//申请列表
-
-
-export function changeStatus_api(data) {
-	return request({
-		url: '/api/v2/seller/salestatus',
-		method: 'put',
-		data
-	})
-}
-
-export function deleteApplication_api(data) {
-	return request({
-		url: '/api/v2/seller/sale',
-		method: 'delete',
-		data
-	})
-}
-
-//首页分类------------
-//热门推荐商品（废弃）
-export function getIndustryList2_api(data) {
-	return request({
-		url: '/api/v2/seller/indexclass',
-		method: 'get',
-		params: data
-	})
-}
-
-export function addIndustry2_api(data) {
-	return request({
-		url: '/api/v2/seller/indexclass',
-		method: 'post',
-		data
-	})
-}
-export function deleteIndustry2_api(data) {
-	return request({
-		url: '/api/v2/seller/indexclass',
-		method: 'delete',
-		data
-	})
-}
-
-
-//==============================便利店========================================
-//--------分销中心--------------------
-//--------分销统计-------
-export function getSales_api(data) {
-	return request({
-		url: '/api/v2/seller/saler',
-		method: 'get',
-		params: data
-	})
-}
-export function getSalecount_api(data) {
-	return request({
-		url: '/api/v2/seller/salercount',
-		method: 'get',
-		params: data
-	})
-}
-
-//----------分销设置-------------------
-export function getSaleConfig_api(data) {
-	return request({
-		url: '/api/v2/seller/saleconfig',
-		method: 'get',
-		params: data
-	})
-}
-export function editSaleConfig_api(data) {
-	return request({
-		url: '/api/v2/seller/saleconfig',
-		method: 'put',
-		data
-	})
-}
-
-//-------------会员管理---------------
-export function getUser_api(data) {
-	return request({
-		url: '/api/v2/seller/member',
-		method: 'get',
-		params: data
-	})
-}
-export function getSaleChild_api(data) {
-	return request({
-		url: '/api/v2/seller/membersaler',
-		method: 'get',
-		params: data
-	})
-}
-export function changeRanks_api(data) {
-	return request({
-		url: '/api/v2/seller/rank',
-		method: 'put',
-		data
-	})
-}
-
-//=====================分销提现================
-export function getWithdraw_api(data) {
-	return request({
-		url: '/api/v2/seller/withdraw',
-		method: 'get',
-		params: data
-	})
-}
-
-export function changeWithdraw_api(data) {
-	return request({
-		url: '/api/v2/seller/withdraw',
-		method: 'put',
-		data
-	})
-}
-export function deleteWithdra_api(data) {
-	return request({
-		url: '/api/v2/seller/withdraw',
-		method: 'delete',
-		data
-	})
-}
-
-export function getWithdrawRecord_api(data) {
-	return request({
-		url: '/api/v2/seller/withdrawinfo',
-		method: 'get',
-		params: data
-	})
-}
-
-
-
-//
-
-// return => rReturn======================================
-// export function getReturnList(data) {
-//   return request({
-//     url: '/api/v2/seller/refundreturn',
-//     method: 'get',
-//     params:data,
-//   })
-// }
-// export function editReturnList(data) {
-//   return request({
-//     url: '/api/v2/seller/refundreturn',
-//     method: 'put',
-//     data,
-//   })
-// }

@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
+/* Layout */
 import Layout from '@/views/layout/Layout'
 
 export const constantRouterMap = [{
@@ -29,6 +30,7 @@ export const constantRouterMap = [{
       import('@/views/errorPage/401'),
     hidden: true
   },
+  // 首页
   {
     path: '',
     component: Layout,
@@ -36,7 +38,7 @@ export const constantRouterMap = [{
     children: [{
       path: 'home',
       component: () =>
-        import('@/views/aahome/index'),
+        import('@/views/home/index'),
       name: 'home',
       meta: {
         title: 'home',
@@ -55,192 +57,99 @@ export default new Router({
   routes: constantRouterMap
 })
 
-export let asyncRouterMapAdmin = [{
-    path: '/notice',
-    component: Layout,
-    redirect: '/notice/index',
-    meta: {
-      roles: ['affiche']
-    },
-    children: [{
-      path: 'index',
-      component: () =>
-        import('@/views/aanotice/index'),
-      name: 'notice',
-      meta: {
-        title: 'notice',
-        icon: 'notice',
-        noCache: true,
-        roles: ['affiche']
-      }
-    }]
-  },
-  {
-    path: '/manageShop',
-    component: Layout,
-    redirect: '/manageShop/index',
-    meta: {
-      roles: ['store']
-    },
-    children: [{
-      path: 'index',
-      component: () =>
-        import('@/views/aamanageShop/index'),
-      name: 'manageShop',
-      meta: {
-        title: 'manageShop',
-        icon: 'notice',
-        noCache: true,
-        roles: ['store']
-      }
-    }]
-  },
-  {
-    path: '/manageSevice',
-    component: Layout,
-    redirect: '/manageSevice/shopServer',
-    name: 'manageSevice',
-    meta: {
-      title: 'manageSevice',
-      icon: 'notice',
-      roles: ['manage']
-    },
-    children: [{
-      path: 'shopServer',
-      component: () =>
-        import('@/views/aamanageSevice/shopServer'),
-      name: 'shopServer',
-      meta: {
-        title: 'shopServer',
-        noCache: true
-      }
-    }, {
-      path: 'industryList',
-      component: () =>
-        import('@/views/aamanageSevice/industryList'),
-      name: 'industryList',
-      meta: {
-        title: 'industryList',
-        noCache: true
-      }
-    }]
-  },
-  {
-    path: '/auth',
-    component: Layout,
-    redirect: '/auth/index',
-    meta: {
-      roles: ['auth']
-    },
-    children: [{
-      path: 'index',
-      component: () =>
-        import('@/views/aaauth/index'),
-      name: 'auth',
-      meta: {
-        title: 'auth',
-        icon: 'notice',
-        roles: ['auth']
-      }
-    }]
-  },
-  // { path: '*', redirect: '/404', hidden: true }
-]
-
 export let asyncRouterMapSeller = [{
-    path: '/sellerGoods', //商品管理
+    path: '/commodityManagement', //商品管理
     component: Layout,
-    redirect: '/sellerGoods/index',
+    redirect: '/commodityManagement/index',
     meta: {
-      roles: 'goods'
+      roles: 'commodityManagement'
     },
     children: [{
       path: 'index',
       component: () =>
-        import('@/views/absellerGoods/index'),
-      name: 'sellerGoods',
+        import('@/views/commodityManagement/index'),
+      name: 'commodityManagement',
       meta: {
-        title: 'sellerGoods',
+        title: 'commodityManagement',
         icon: 'goods',
         noCache: true
       }
     }]
   }, {
-    path: '/order', //订单管理
+    path: '/orderManagement', //订单管理
     component: Layout,
-    redirect: '/order/rOrder',
+    redirect: '/orderManagement/index',
     meta: {
-      title: 'order',
+      title: 'orderManagement',
       icon: 'orderlist',
-      roles: 'order'
+      roles: 'orderManagement'
     },
     children: [{
-      path: 'rOrder',
+      path: 'index',
       component: () =>
-        import('@/views/aborder/rOrder'),
-      name: 'rOrder',
+        import('@/views/orderManagement/index'),
+      name: 'orderManagement',
       meta: {
-        title: 'order',
+        title: 'orderManagement',
         noCache: true,
         icon: 'orderlist'
       }
     }]
   },
 	{
-	    path: '/member', //人员列表
+	    path: '/memberList', //人员列表
 	    component: Layout,
-	    redirect: '/member/index',
+	    redirect: '/memberList/index',
 	    meta: {
-	      title: 'member',
+	      title: 'memberList',
 	      icon: 'member',
-	      roles: 'user'
+	      roles: 'memberList'
 	    },
 	    children: [{
-	      path: 'member',
+	      path: 'memberList',
 	      component: () =>
-	        import('@/views/member/index'),
-	      name: 'member',
+	        import('@/views/memberList/index'),
+	      name: 'memberList',
 	      meta: {
-	        title: 'member',
+	        title: 'memberList',
 	        noCache: true,
 	        icon: 'worker',
-	
 	      }
 	    }]
 	  },
 
   {
-    path: '/sellerAuth', //权限管理
+    path: '/authorityManagement', //权限管理
     component: Layout,
-    redirect: '/sellerAuth/index',
+    redirect: '/authorityManagement/index',
     meta: {
-      roles: 'auth'
+      roles: 'authorityManagement'
     },
     children: [{
       path: 'index',
       component: () =>
-        import('@/views/sellerAuth/index'),
-      name: 'sellerAuth',
+        import('@/views/authorityManagement/index'),
+      name: 'authorityManagement',
       meta: {
-        title: 'sellerAuth',
+        title: 'authorityManagement',
         icon: 'auth',
         noCache: true,
       }
     }]
   },
   {
-    path: '/infoManage', //运营
+    path: '/infoManagement', //运营
     component: Layout,
-    redirect: '/infoManage/spec',
+    redirect: '/infoManagement/spec',
     meta: {
-      title: 'infoManage',
+      title: 'infoManagement',
       icon: 'infoM',
-      roles: 'setting'
+      roles: 'infoManagement'
     },
     children: [{
         path: 'type', //分类信息
         component: () =>
-          import('@/views/abInfoManage/type'),
+          import('@/views/infoManagement/type'),
         name: 'type',
         meta: {
           title: 'type',
@@ -248,19 +157,19 @@ export let asyncRouterMapSeller = [{
         }
       },
       {
-        path: 'serverRec', //精品推荐
+        path: 'recommended', //精品推荐
         component: () =>
-          import('@/views/abInfoManage/serverRec'),
-        name: 'serverRec',
+          import('@/views/infoManagement/recommended'),
+        name: 'recommended',
         meta: {
-          title: 'serverRec',
+          title: 'recommended',
           noCache: true
         }
       },
       {
         path: 'banner', //首页轮播
         component: () =>
-          import('@/views/abInfoManage/banner'),
+          import('@/views/infoManagement/banner'),
         name: 'benner',
         meta: {
           title: 'banner',
@@ -269,19 +178,19 @@ export let asyncRouterMapSeller = [{
       },
  
       {
-        path: 'material', //案例推广
+        path: 'caseShow', //案例推广
         component: () =>
-          import('@/views/abInfoManage/material'),
-        name: 'material',
+          import('@/views/infoManagement/caseShow'),
+        name: 'caseShow',
         meta: {
-          title: 'material',
+          title: 'caseShow',
           noCache: true
         }
       },
 			{
 				path: 'company', //关于公司
 				component: () =>
-					import('@/views/abInfoManage/company'),
+					import('@/views/infoManagement/company'),
 				name: 'company',
 				meta: {
 					title: 'company',
@@ -291,7 +200,7 @@ export let asyncRouterMapSeller = [{
 			{
 				path: 'news', //新闻咨询
 				component: () =>
-					import('@/views/abInfoManage/news'),
+					import('@/views/infoManagement/news'),
 				name: 'news',
 				meta: {
 					title: 'news',
