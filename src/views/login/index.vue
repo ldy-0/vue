@@ -58,7 +58,7 @@
             <svg-icon icon-class="eye" />
           </span>
         </el-form-item>
-        <div class="forget-password" @click="centerDialogVisible = true">忘记密码</div>
+        <div class="forget-password" v-if="SMS_close=='1'" @click="centerDialogVisible = true">忘记密码</div>
         <el-button type="primary" style="width:100%;margin-bottom:30px;" :loading="loading" @click.native.prevent="handleLogin">{{$t('login.logIn')}}</el-button>
 
       </el-form>
@@ -96,7 +96,7 @@
 <script>
 import { isvalidUsername } from "@/utils/validate";
 import LangSelect from "@/components/LangSelect";
-
+import { getVerificationCode, resetPassword } from "@/api/login";
 export default {
   components: { LangSelect },
   name: "login",
@@ -144,7 +144,8 @@ export default {
       },
       codetimeShow: false,
       codetime: 60,
-      ITEM_NAME: process.env.ITEM_NAME
+      ITEM_NAME: process.env.ITEM_NAME,
+      SMS_close: process.env.SMS_close
     };
   },
   methods: {
@@ -169,7 +170,8 @@ export default {
         if (!phoneReg.test(this.findForm.phone)) {
           return this.$message("请输入正确手机号");
         }
-        console.log("发送请求获取验证码");
+        getVerificationCode({ phone: this.findForm.phone }).then(response => {
+        });
         let that = this;
         that.codetimeShow = true;
         let interval = setInterval(() => {
@@ -181,22 +183,31 @@ export default {
         }, 1000);
       }
     },
-    /** 
+    /**
      * 重置密码
-    */
+     */
     resetPassword() {
       if (this.findForm.phone == "") {
         return this.$message("请输入手机号");
-      }else if (this.findForm.code == "") {
+      } else if (this.findForm.code == "") {
         return this.$message("请输入短信验证码");
-      }else if (this.findForm.password1 == "") {
+      } else if (this.findForm.password1 == "") {
         return this.$message("请输入密码");
-      }else if (this.findForm.password2 == "") {
+      } else if (this.findForm.password2 == "") {
         return this.$message("请确认密码");
-      }else if (this.findForm.password1 != this.findForm.password2) {
+      } else if (this.findForm.password1 != this.findForm.password2) {
         return this.$message("两次密码不一致");
       }
-      console.log('重置');
+      resetPassword({
+        phone: this.findForm.phone,
+        code: this.findForm.code,
+        pass: this.findForm.password2
+      }).then(response => {
+        if(response.status == 0){
+          this.$message(response.data.message);
+          this.centerDialogVisible = false
+        }
+      });
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
