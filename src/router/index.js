@@ -198,73 +198,73 @@ export let asyncRouterMapSeller = [
   //     meta: { title: 'coupon', icon: 'goods', noCache: true }
   //   }]
   // },
-  {
-    path: '/server',
-    component: Layout,
-    redirect: '/server/serverBanner',
-    meta: { title: 'server', icon: 'goods',roles:'manage'},
-    children: [{
-      path: 'serverBanner',
-      component: () => import('@/views/abserver/serverBanner'),
-      name: 'serverBanner',
-      meta: { title: 'serverBanner',  noCache: true }
-    },{
-      path: 'serverEnrty',
-      component: () => import('@/views/abserver/serverEnrty'),
-      name: 'serverEnrty',
-      meta: { title: 'serverEnrty',  noCache: true }
-    },{
-      path: 'serverRec',
-      component: () => import('@/views/abserver/serverRec'),
-      name: 'serverRec',
-      meta: { title: 'serverRec',  noCache: true }
-    },{
-      path: 'serverAct',
-      component: () => import('@/views/abserver/serverAct'),
-      name: 'serverAct',
-      meta: { title: 'serverAct',  noCache: true }
-    },{
-      path: 'serverShop',
-      component: () => import('@/views/abserver/serverShop'),
-      name: 'serverShop',
-      meta: { title: 'serverShop',  noCache: true }
-    },{
-      path: 'serverAllbuy',
-      component: () => import('@/views/abserver/serverAllbuy'),
-      name: 'serverAllbuy',
-      meta: { title: 'serverAllbuy',  noCache: true }
-    },{
-      path: 'serverKill',
-      component: () => import('@/views/abserver/serverKill'),
-      name: 'serverKill',
-      meta: { title: 'serverKill',  noCache: true }
-    },{
-      path: 'serverSchool',
-      component: () => import('@/views/abserver/serverSchool'),
-      name: 'serverSchool',
-      meta: { title: 'serverSchool',  noCache: true }
-    },{
-      path: 'serverGetFlow',
-      component: () => import('@/views/abserver/serverGetFlow'),
-      name: 'serverGetFlow',
-      meta: { title: 'serverGetFlow',  noCache: true }
-    },{
-      path: '/serverActivity',
-      component: () => import('@/views/abserver/serverActivity/index'),
-      meta: { title: 'serverActivity' },
-      children: [{
-        path: 'distribution',
-        component: () => import('@/views/abserver/serverActivity/distribution'),
-        name: 'distribution',
-        meta: { title: 'distribution', noCache: true }
-      },{
-        path: 'vote',
-        component: () => import('@/views/abserver/serverActivity/vote'),
-        name: 'vote',
-        meta: { title: 'vote', noCache: true }
-      }]
-    }]
-  },
+  // {
+  //   path: '/server',
+  //   component: layout,
+  //   redirect: '/server/serverbanner',
+  //   meta: { title: 'server', icon: 'goods',roles:'manage'},
+  //   children: [{
+  //     path: 'serverbanner',
+  //     component: () => import('@/views/abserver/serverbanner'),
+  //     name: 'serverbanner',
+  //     meta: { title: 'serverbanner',  nocache: true }
+  //   },{
+  //     path: 'serverenrty',
+  //     component: () => import('@/views/abserver/serverenrty'),
+  //     name: 'serverenrty',
+  //     meta: { title: 'serverenrty',  nocache: true }
+  //   },{
+  //     path: 'serverrec',
+  //     component: () => import('@/views/abserver/serverrec'),
+  //     name: 'serverrec',
+  //     meta: { title: 'serverrec',  nocache: true }
+  //   },{
+  //     path: 'serveract',
+  //     component: () => import('@/views/abserver/serveract'),
+  //     name: 'serveract',
+  //     meta: { title: 'serveract',  nocache: true }
+  //   },{
+  //     path: 'servershop',
+  //     component: () => import('@/views/abserver/servershop'),
+  //     name: 'servershop',
+  //     meta: { title: 'servershop',  nocache: true }
+  //   },{
+  //     path: 'serverallbuy',
+  //     component: () => import('@/views/abserver/serverallbuy'),
+  //     name: 'serverallbuy',
+  //     meta: { title: 'serverallbuy',  nocache: true }
+  //   },{
+  //     path: 'serverkill',
+  //     component: () => import('@/views/abserver/serverkill'),
+  //     name: 'serverkill',
+  //     meta: { title: 'serverkill',  nocache: true }
+  //   },{
+  //     path: 'serverschool',
+  //     component: () => import('@/views/abserver/serverSchool'),
+  //     name: 'serverSchool',
+  //     meta: { title: 'serverSchool',  noCache: true }
+  //   },{
+  //     path: 'serverGetFlow',
+  //     component: () => import('@/views/abserver/serverGetFlow'),
+  //     name: 'serverGetFlow',
+  //     meta: { title: 'serverGetFlow',  noCache: true }
+  //   },{
+  //     path: '/serverActivity',
+  //     component: () => import('@/views/abserver/serverActivity/index'),
+  //     meta: { title: 'serverActivity' },
+  //     children: [{
+  //       path: 'distribution',
+  //       component: () => import('@/views/abserver/serverActivity/distribution'),
+  //       name: 'distribution',
+  //       meta: { title: 'distribution', noCache: true }
+  //     },{
+  //       path: 'vote',
+  //       component: () => import('@/views/abserver/serverActivity/vote'),
+  //       name: 'vote',
+  //       meta: { title: 'vote', noCache: true }
+  //     }]
+  //   }]
+  // },
   // {
   //   path: '/sellerAuth',
   //   component: Layout,
@@ -281,24 +281,26 @@ export let asyncRouterMapSeller = [
     path: '/design',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'design', icon: 'goods' },
+    meta: { title:'design', icon: 'goods', roles: 'design' },
     children: [{
         path: 'design',
-        component: () => import('@/views/design/design'),
+        // component: () => import('@/views/design/design'),
+        component: () => import('@/views/goodsList/list'),
         name: 'designList',
-        meta: { title: 'designList', icon: 'goods', noCache: true }
+        meta: { title: 'designList', category: '设计师', noCache: true }
       },
       {
         path: 'yijuxueyuan',
         component: () => import('@/views/design/yiju'),
+        // component: () => import('@/views/goodsList/list'),
         name: 'yijuxueyuan',
-        meta: { title: 'design_yijuxueyuan', icon: 'goods', noCache: true }
+        meta: { title: 'design_yijuxueyuan', category: '设计师+', noCache: true }
       },
       {
         path: 'class',
         component: () => import('@/views/classify/class'),
         name: 'class',
-        meta: { title: 'classSet', icon: 'goods', category: '设计师+', noCache: true }
+        meta: { title: 'classSet', category: '设计师+', noCache: true }
       }
     ]
   },
@@ -306,18 +308,18 @@ export let asyncRouterMapSeller = [
     path: '/banbao',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'banbao', icon: 'goods' },
+    meta: { title:'banbao', icon: 'goods', roles: 'bb' },
     children: [{
         path: 'list',
         component: () => import('@/views/banbao/list'),
         name: 'list',
-        meta: { title: 'banbaoList', icon: 'goods', noCache: true }
+        meta: { title: 'banbao', noCache: true }
       },
       {
         path: 'detail',
         component: () => import('@/views/banbao/detail'),
         name: 'detail',
-        meta: { title: 'detail', icon: 'goods', noCache: true }
+        meta: { title: 'banbaoDetail', noCache: true }
       },
     ]
   },
@@ -325,7 +327,7 @@ export let asyncRouterMapSeller = [
     path: '/yijuguanjia',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'yijuguanjia', icon: 'goods' },
+    meta: { title:'yijuguanjia', icon: 'goods', roles: 'gj' },
     children: [
       {
         path: 'list',
@@ -337,7 +339,7 @@ export let asyncRouterMapSeller = [
         path: 'class',
         component: () => import('@/views/classify/class'),
         name: '易居管家-class',
-        meta: { title: 'classset', category: 'yijuguanjia', noCache: true }
+        meta: { title: 'classset', category: '易居管家', noCache: true }
       },
     ]
   },
@@ -345,7 +347,7 @@ export let asyncRouterMapSeller = [
     path: '/zhengju',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'zhengju', icon: 'goods' },
+    meta: { title:'zhengju', icon: 'goods', roles: 'zj' },
     children: [
       {
         path: 'list',
@@ -365,13 +367,13 @@ export let asyncRouterMapSeller = [
     path: '/jicheng',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'jicheng', icon: 'goods' },
+    meta: { title:'jicheng', icon: 'goods', roles: 'jc' },
     children: [
       {
         path: 'list',
         component: () => import('@/views/goodsList/list'),
         name: '集成暖通-list',
-        meta: { title: 'yijuguanjia', category: '集成暖通', noCache: true }
+        meta: { title: 'jicheng', category: '集成暖通', noCache: true }
       },
       {
         path: 'class',
@@ -383,7 +385,7 @@ export let asyncRouterMapSeller = [
         path: 'setting',
         component: () => import('@/views/setting/form'),
         name: '集成暖通-setting',
-        meta: { title: 'setting', category: '集成暖通', noCache: true }
+        meta: { title: 'dingjin', category: '集成暖通', noCache: true }
       },
     ]
   },
@@ -391,7 +393,7 @@ export let asyncRouterMapSeller = [
     path: '/zhucai',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'zhucai', icon: 'goods' },
+    meta: { title:'zhucai', icon: 'goods', roles: 'zc' },
     children: [
       {
         path: 'list',
@@ -409,7 +411,7 @@ export let asyncRouterMapSeller = [
         path: 'setting',
         component: () => import('@/views/setting/form'),
         name: '主材选购-setting',
-        meta: { title: 'setting', category: '主材选购', noCache: true }
+        meta: { title: 'serverSetting', category: '主材选购', noCache: true }
       },
     ]
   },
@@ -417,13 +419,13 @@ export let asyncRouterMapSeller = [
     path: '/jiaju',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'jiaju', icon: 'goods' },
+    meta: { title:'jiaju', icon: 'goods', roles: 'jj' },
     children: [
       {
         path: 'list',
         component: () => import('@/views/goodsList/list'),
         name: '家具选购-list',
-        meta: { title: 'yijuguanjia', category: '家具选购', noCache: true }
+        meta: { title: 'jiaju', category: '家具选购', noCache: true }
       },
       {
         path: 'class',
@@ -435,47 +437,55 @@ export let asyncRouterMapSeller = [
         path: 'setting',
         component: () => import('@/views/setting/form'),
         name: '家具选购-setting',
-        meta: { title: 'setting', category: '家具选购', noCache: true }
+        meta: { title: 'serverSetting', category: '家具选购', noCache: true }
       },
     ]
   },
-  // {
-  //   path: '/haiw',
-  //   component: Layout,
-  //   // redirect: '/sellerAuth/index',
-  //   meta: { title:'haiw', icon: 'goods' },
-  //   children: [
-  //     {
-  //       path: 'list',
-  //       component: () => import('@/views/goodsList/list'),
-  //       name: '易居海外-list',
-  //       meta: { title: 'yijuguanjia', category: '易居海外', noCache: true }
-  //     },
-  //     {
-  //       path: 'class',
-  //       component: () => import('@/views/classify/class'),
-  //       name: '易居海外-class',
-  //       meta: { title: 'classset', category: '易居海外', noCache: true }
-  //     },
-  //   ]
-  // },
+  {
+    path: '',
+    component: Layout,
+    // redirect: '/sellerAuth/index',
+    meta: { title:'haiwai', icon: 'goods', roles: 'hw' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/goodsList/list'),
+        name: '易居海外-list',
+        meta: { title: 'haiwai', category: '易居海外', noCache: true }
+      },
+      {
+        path: 'class',
+        component: () => import('@/views/classify/class'),
+        name: '易居海外-class',
+        meta: { title: 'classset', category: '易居海外', noCache: true }
+      },
+    ]
+  },
   {
     path: '/order',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'order', icon: 'goods' },
+    meta: { title:'order', icon: 'goods', roles: 'order' },
     children: [
       {
         path: 'list',
         component: () => import('@/views/list/list'),
         name: 'orderList',
-        meta: { title: 'orderList', category: 'order', noCache: true }
+        meta: { title: 'orderList', icon: 'goods', category: 'order', noCache: true }
       },
+    ]
+  },
+  {
+    path: '/afterService',
+    component: Layout,
+    // redirect: '/sellerAuth/index',
+    meta: { title:'afterService', icon: 'goods', roles: 'afterService' },
+    children: [
       {
-        path: 'class',
-        component: () => import('@/views/classify/class'),
-        name: '家具选购-class',
-        meta: { title: 'classset', category: '家具选购', noCache: true }
+        path: 'list',
+        component: () => import('@/views/list/list'),
+        name: 'afterService',
+        meta: { title: 'afterService', icon: 'goods', category: 'afterService', noCache: true }
       },
     ]
   },
@@ -483,7 +493,7 @@ export let asyncRouterMapSeller = [
     path: '/user',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'user', icon: 'goods' },
+    meta: { title:'user', icon: 'goods', roles: 'user' },
     children: [
       {
         path: 'user',
@@ -497,31 +507,31 @@ export let asyncRouterMapSeller = [
     path: '/assess',
     component: Layout,
     // redirect: '/sellerAuth/index',
-    meta: { title:'assess', icon: 'goods' },
+    meta: { title:'assess', icon: 'goods', roles: 'assess' },
     children: [
       {
         path: 'assess',
         component: () => import('@/views/list/list'),
         name: 'assessList',
-        meta: { title: 'assessList', category: 'assess', noCache: true }
+        meta: { title: 'assessList', icon: 'goods', category: 'assess', noCache: true }
       },
-      {
-        path: 'auditing',
-        component: () => import('@/views/list/list'),
-        name: 'auditing',
-        meta: { title: 'auditing', category: 'auditing', noCache: true }
-      },
+      // {
+      //   path: 'auditing',
+      //   component: () => import('@/views/list/list'),
+      //   name: 'auditing',
+      //   meta: { title: 'auditing', category: 'auditing', noCache: true }
+      // },
     ]
   },
   {
     path: '/server',
     component: Layout,
     redirect: '/server/serverBanner',
-    meta: { title: 'server', icon: 'goods',roles:'manage'},
+    meta: { title: 'server', icon: 'goods', roles:'server'},
     children: [
       {
         path: 'serverBanner',
-        component: () => import('@/views/abserver/serverBanner'),
+        component: () => import('@/views/server/banner/banner'),
         name: 'serverBanner',
         meta: { title: 'serverBanner',  noCache: true }
       },

@@ -240,46 +240,18 @@ export default {
       if(this.formForNotive.type === 1){
         arr.push(this.formForNotive.fileList2[0].raw)
       }
-      upLoadFile(arr).then(v => {
-        param.img = v[0];
-        param.img2 = v[1];
-        console.log('add img', param)
-      }).catch(e=>{ console.error(e) })
-      //图一
-      // let allUrl1 = await uploadFn(this.formForNotive.fileList1[0].raw)
-      // sendData.banner_pic = allUrl1[0]
 
-      // 跳转 图二
-      // if(this.formForNotive.type === 1){
-      //   let allUrl2 =  await uploadFn(this.formForNotive.fileList2[0].raw)
-      //   sendData.banner_url = allUrl2[0]
-      // }
-      // 默认上传
-      // sendData.banner_order = 1
-      // addBanner_api(sendData).then((data)=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   if(data.status===0){
-      //     this.$notify({
-      //       title: '成功',
-      //       message: '操作成功',
-      //       type: 'success'
-      //     })
-      //     this.getList()
-      //   }else{
-      //     this.$notify({
-      //       title: '失败',
-      //       message: '操作失败',
-      //       type: 'error'
-      //     })
-      //   }
-      // }).catch(e=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   console.error('接口错误')
-      // })
+      upLoadFile(arr).then(v => {
+        param.banner_pic = v[0];
+        param.banner_url = v[1] ? v[1] : '';
+
+        this.submit(param);
+      }).catch(e=>{ console.error(e) })
+      
     },
-    //body
+    submit(param){
+       
+    },
     getList() {
       this.listLoading = true
       let sendData = Object.assign({},this.listQuery)

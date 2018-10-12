@@ -106,10 +106,10 @@ export default {
       // -------------
       loginForm: {
         username: 'admin',
-        password: '123123',
+        // password: '123123',
         // password: '1111111'
         // username: '13297528280',
-        // password: '123456'
+        password: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],

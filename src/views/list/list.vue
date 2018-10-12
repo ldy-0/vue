@@ -69,7 +69,7 @@
   <el-form :inline="true" :model="formInline" class="form">
 
     <el-form-item v-if='showAddBtn'>
-      <el-button type='primary' @click='addItem'>{{className}}</el-button>
+      <el-button type='primary' @click='showDialog'>{{className}}</el-button>
     </el-form-item>
 
     <el-form-item v-if='showSearchByKeyword'>
@@ -77,15 +77,20 @@
       <el-button type="primary" icon="el-icon-search" @click="searchByPhone">查询</el-button>
     </el-form-item>
 
+    <el-form-item v-if='showSearchByOrder'>
+      <el-input style="width: 340px;" placeholder="请输入订单号" v-model="searchKeyWord"></el-input>
+      <el-button type="primary" icon="el-icon-search" @click="searchByPhone">查询</el-button>
+    </el-form-item>
+
     <el-form-item label="时间" v-if='showSearchByDate'>
         <el-date-picker style="width:340px" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
           v-model="listQuery.time">
         </el-date-picker>
-        <el-button type="primary" icon="el-icon-search" @click="searchByPhone">查询</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="searchByDate">查询</el-button>
     </el-form-item>
 
     <el-form-item label="订单状态" :label-width="formLabelWidth" prop='class' v-if='showSelect'> 
-      <el-select v-model="category" placeholder="请选择"> <!--multiple  -->
+      <el-select placeholder="请选择" v-model='orderState' @change='changeStatus'> <!-- multiple  -->
         <el-option v-for="item in categories" :key="item.id" :label="item.title" :value="item.id"></el-option>
       </el-select>
     </el-form-item>
@@ -103,22 +108,27 @@
 
       <el-table-column :label="item.key" :prop="item.value" v-for='(item, index) in classList' :key='index'>
         <template slot-scope="scope">
+          
           <img class='thumb_img' :src='scope.row[item.value]' v-if='item.isImg' />
+
           <div v-else-if='item.isIcon'>
             <i class='el-icon-check' v-if='scope.row[item.value]'></i>
             <i class='el-icon-close' v-else></i>
           </div>
+
           <div v-else>{{scope.row[item.value]}}</div>
         </template>
       </el-table-column>
 
       <el-table-column label="操作" v-if='showOperate'>
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="deleteItem(scope.$index, scope.row)" v-if='showDeliver'>发货</el-button>
-          <el-button size="mini" type="primary" @click="showDetail(scope.$index, scope.row)" v-if='showdetail'>详情</el-button>
-          <el-button size="mini" type="primary" @click="showDetail(scope.$index, scope.row)" v-if='showResolve'>通过</el-button>
-          <el-button size="mini" type="primary" @click="showDetail(scope.$index, scope.row)" v-if='showReject'>拒绝</el-button>
-          <el-button size="mini" type="danger" @click="deleteItem(scope.$index, scope.row)" v-if='showDelete'>删除</el-button>
+          <el-button size="mini" type="text" @click="showDialog(scope.$index, scope.row)" v-if='showEdit'>编辑</el-button>
+          <el-button size="mini" type="text" @click="sendGoods(scope.$index, scope.row)" v-if="showDeliver && scope.row.order_state === '已支付'">发货</el-button>
+          <el-button size="mini" type="text" @click="refund(scope.$index, scope.row)" v-if='showRefund'>{{scope.row.order_state === '待退款' ? '退款' : '已退款'}}</el-button>
+          <el-button size="mini" type="text" @click="showDetail(scope.$index, scope.row)" v-if='showdetail'>详情</el-button>
+          <el-button size="mini" type="text" @click="resolve(scope.$index, scope.row)" v-if='showResolve && !scope.row.geval_state'>通过</el-button>
+          <!-- <el-button size="mini" type="text" @click="reject(scope.$index, scope.row)" v-if='showReject'>拒绝</el-button> -->
+          <el-button size="mini" type="text" @click="showDeleteDialog(scope.$index, scope.row)" v-if='showDelete'>删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -129,24 +139,40 @@
 </el-footer>
 </el-container>
 
-<el-dialog :visible.sync='showDialog'>
-  <el-form>
+<el-dialog :visible.sync='isShowDialog'>
+  <el-form :disabled='isDisabled'>
 
     <el-form-item :label="item.key" :label-width="formLabelWidth" v-for='(item, index) in detailClassList' :key='index' v-if='!item.isHide'>
-      <el-input v-model="detail[item.value]" auto-complete="off" :disabled='true' v-if='item.isText'></el-input>
+
+      <!-- 单行文本 -->
+      <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isText'></el-input>
+
       <img class='detail_img' :src='detail[item.value]' v-if='item.isImg' />
+
       <img class='detail_imgs' :src='v' v-for='(v, i) in detail[item.value]' :key='i' v-if='item.isImgs' />
+
       <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='true' v-if='item.isTexts'></el-input>
+
+      <!-- 单选 -->
+      <el-radio-group v-model='detail[item.value]' v-if='item.isRadio'>
+        <el-radio label=1>是</el-radio>
+        <el-radio label=0>否</el-radio>
+      </el-radio-group>
     </el-form-item>
     
   </el-form>
+
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="isShow=false; waitAddNotice=false;" >取消</el-button>
+    <el-button type="primary" :disabled="waitAddNotice" :loading="waitAddNotice" @click="submitForm('ruleForm')">确 定</el-button>
+  </span>
 </el-dialog>
 
 </div>
 </template>
 <script>
 
-import api from '@/api/seller' 
+import api from '@/api/api' 
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 import upLoadFile from '@/utils/aahbs.js'
 
@@ -168,13 +194,31 @@ export default {
       this.showOperate = true;
       this.showDeliver = true;
       this.showdetail = true;
+      this.isDisabled = true;
       this.detailClassList = this.detailConfig[this.category];
-    }else if(this.category === 'assess'){
+    }else if(this.category === 'afterService'){
       this.showSearchByKeyword = true;
+      this.showSearchByDate = true; 
+      this.showSelect = true;
+      this.showOperate = true;
+      this.showRefund = true;
+      this.showdetail = true;
+      this.isDisabled = true;
+      this.detailClassList = this.detailConfig[this.category];
+      this.categories = [
+        { id: null, title: '全部' },
+        { id: 1, title: '未退款' },
+        { id: 3, title: '已退款' },
+      ]
+    }else if(this.category === 'assess'){
+      this.showSearchByOrder = true;
       this.showSearchByDate = true;
       this.showOperate = true;
       this.showdetail = true;
+      this.showResolve = true;
+      this.showReject = true;
       this.showDelete = true;
+      this.isDisabled = true;
       this.detailClassList = this.detailConfig[this.category];
     }else if(this.category === 'auditing'){
       this.showSearchByKeyword = true;
@@ -188,7 +232,9 @@ export default {
       this.className = '添加成员';
       this.showAddBtn = true;
       this.showOperate = true;
+      this.showEdit = true;
       this.showDelete = true;
+      this.detailClassList = this.detailConfig[this.category];
     }
 
     this.classList = this.config[this.category];
@@ -201,38 +247,54 @@ export default {
       category: '',
       showAddBtn: false,
       showSearchByKeyword: false,
+      showSearchByOrder: false,
       showSearchByDate: false,
       showSelect: false,
       showExport: false,
       showOperate: false,
       showDeliver: false,
+      showRefund: false,
       showdetail: false,
       showResolve: false,
       showReject: false,
+      showEdit: false,
       showDelete: false,
+      isDisabled: false,
       config: {
         'user': [
-          { key: '头像', value: 'name' },
-          { key: '昵称', value: 'company' },
-          { key: '联系方式', value: 'price' },
+          { key: '头像', value: 'member_avatar', isImg: true, },
+          { key: '昵称', value: 'member_truename' },
+          { key: '联系方式', value: 'member_mobile' },
         ],
         'order': [
-          { key: '商品名称', value: 'name' },
-          { key: '订单号', value: 'company' },
-          { key: '买家', value: 'price' },
-          { key: '订单状态', value: 'price' },
-          { key: '金额', value: 'price' },
-          { key: '下单时间', value: 'price' },
+          { key: '', value: 'goods_image', isImg: true },
+          { key: '商品名称', value: 'goods_name' },
+          { key: '订单号', value: 'order_sn' },
+          { key: '买家昵称', value: 'buyer_name' },
+          { key: '买家手机号', value: 'buyer_telephone' },
+          { key: '订单状态', value: 'order_state' },
+          { key: '金额', value: 'order_amount' },
+          { key: '下单时间', value: 'add_time' },
+        ],
+        'afterService': [
+          { key: '', value: 'goods_image', isImg: true },
+          { key: '商品名称', value: 'goods_name' },
+          { key: '订单号', value: 'order_sn' },
+          { key: '买家昵称', value: 'buyer_name' },
+          { key: '买家手机号', value: 'buyer_telephone' },
+          { key: '状态', value: 'order_state' },
+          { key: '金额', value: 'order_amount' },
+          { key: '下单时间', value: 'add_time' },
         ],
         'assess': [
-          { key: '订单号', value: 'company' },
-          { key: '商品名称', value: 'name' },
-          { key: '商品图片', value: 'img', isImg: true },
-          { key: '商品价格', value: 'price' },
-          { key: '用户姓名', value: 'price' },
-          { key: '用户头像', value: 'img', isImg: true },
-          { key: '评价时间', value: 'price' },
-          { key: '评价等级', value: 'level' },
+          { key: '订单号', value: 'geval_orderno' },
+          { key: '商品名称', value: 'geval_goodsname' },
+          { key: '商品图片', value: '', isImg: true },
+          { key: '商品价格', value: 'geval_goodsprice' },
+          { key: '用户姓名', value: 'geval_frommembername' },
+          { key: '用户头像', value: 'geval_frommemberavatar', isImg: true },
+          { key: '评价时间', value: 'assess_time' },
+          { key: '评价等级', value: 'geval_scores' },
         ],
         'auditing': [
           { key: '订单号', value: 'company' },
@@ -243,49 +305,63 @@ export default {
           { key: '评价等级', value: 'level' },
         ],
         'authorize': [
-          { key: '姓名', value: 'name', isIcon: true },
+          { key: '姓名', value: 'seller_nick', },
           { key: '设计师+', value: 'design', isIcon: true },
-          { key: '半包定制', value: 'name', isIcon: true },
-          { key: '易居管家', value: 'design', isIcon: true },
-          { key: '整居定制', value: 'design', isIcon: true },
-          { key: '集成暖通', value: 'design', isIcon: true },
-          { key: '主材选购', value: 'design', isIcon: true },
-          { key: '家具选购', value: 'design', isIcon: true },
-          { key: '易居海外', value: 'design', isIcon: true },
-          { key: '用户列表', value: 'design', isIcon: true },
-          { key: '订单列表', value: 'design', isIcon: true },
-          { key: '运营', value: 'design', isIcon: true },
+          { key: '半包定制', value: 'bb', isIcon: true },
+          { key: '易居管家', value: 'gj', isIcon: true },
+          { key: '整居定制', value: 'zj', isIcon: true },
+          { key: '集成暖通', value: 'jc', isIcon: true },
+          { key: '主材选购', value: 'zc', isIcon: true },
+          { key: '家具选购', value: 'jj', isIcon: true },
+          { key: '易居海外', value: 'hw', isIcon: true },
+          { key: '用户列表', value: 'user', isIcon: true },
+          { key: '订单列表', value: 'order', isIcon: true },
+          { key: '运营', value: 'server', isIcon: true },
         ]
       },
       detailConfig: {
         'order': [
-          { key: '商品名称', value: 'name', isText: true, },
-          { key: '商品图片', value: 'img', isImg: true, },
-          { key: '金额', value: 'price', isText: true, },
-          { key: '数量', value: 'price', isText: true, },
-          { key: '订单编号', value: 'formData.price', isText: true, },
-          { key: '运费', value: 'formData.price', isText: true, },
-          { key: '下单时间', value: 'formData.price', isText: true, },
-          { key: '付款时间', value: 'formData.price', isText: true, },
-          { key: '订单状态', value: 'formData.price', isText: true, },
-          { key: '收货人', value: 'formData.price', isText: true, },
-          { key: '联系方式', value: 'formData.price', isText: true, },
-          { key: '收货地址', value: 'formData.price', isText: true, },
+          { key: '商品名称', value: 'goods_name', isText: true, },
+          { key: '商品图片', value: 'goods_image', isImg: true, },
+          { key: '金额', value: 'order_amount', isText: true, },
+          { key: '数量', value: 'goods_num', isText: true, },
+          { key: '订单编号', value: 'order_sn', isText: true, },
+          { key: '运费', value: 'shipping_fee', isText: true, },
+          { key: '下单时间', value: 'add_time', isText: true, },
+          { key: '付款时间', value: 'payment_time', isText: true, },
+          { key: '订单状态', value: 'order_state', isText: true, },
+          { key: '收货人', value: 'name', isText: true, },
+          { key: '联系方式', value: 'phone', isText: true, },
+          { key: '收货地址', value: 'address', isText: true, },
           { key: '预约时间', value: 'formData.price', isHide: true, },
-          { key: '备注', value: 'formData.price', isHide: true, },
+          { key: '备注', value: 'remark', isHide: true, },
+        ],
+        'afterService': [
+          { key: '商品名称', value: 'goods_name', isText: true, },
+          { key: '商品图片', value: 'goods_image', isImg: true, },
+          { key: '金额', value: 'order_amount', isText: true, },
+          { key: '数量', value: 'goods_num', isText: true, },
+          { key: '订单编号', value: 'order_sn', isText: true, },
+          { key: '运费', value: 'shipping_fee', isText: true, },
+          { key: '下单时间', value: 'add_time', isText: true, },
+          { key: '付款时间', value: 'payment_time', isText: true, },
+          { key: '订单状态', value: 'refund_state', isText: true, },
+          { key: '收货人', value: 'name', isText: true, },
+          { key: '联系方式', value: 'phone', isText: true, },
+          { key: '收货地址', value: 'address', isText: true, },
         ],
         'assess': [
-          { key: '订单号', value: 'price', isText: true, },
-          { key: '商品名称', value: 'name', isText: true, },
+          { key: '订单号', value: 'geval_orderno', isText: true, },
+          { key: '商品名称', value: 'geval_goodsname', isText: true, },
           { key: '商品图片', value: 'img', isImg: true, },
-          { key: '商品价格', value: 'price', isText: true, },
-          { key: '用户姓名', value: 'price', isText: true, },
-          { key: '用户头像', value: 'img', isImg: true, },
+          { key: '商品价格', value: 'geval_goodsprice', isText: true, },
+          { key: '用户姓名', value: 'geval_frommembername', isText: true, },
+          { key: '用户头像', value: 'geval_frommemberavatar', isImg: true, },
           { key: '收货人', value: 'price', isText: true, },
           { key: '联系方式', value: 'price', isText: true, },
-          { key: '评论时间', value: 'price', isText: true, },
-          { key: '评论等级', value: 'price', isText: true, },
-          { key: '评论内容', value: 'content', isTexts: true, },
+          { key: '评论时间', value: 'assess_time', isText: true, },
+          { key: '评论等级', value: 'geval_scores', isText: true, },
+          { key: '评论内容', value: 'geval_content', isTexts: true, },
           { key: '评论图片', value: 'imgs', isImgs: true, },
         ],
         'auditing': [
@@ -301,9 +377,24 @@ export default {
           { key: '评论等级', value: 'price', isText: true, },
           { key: '评论内容', value: 'content', isTexts: true, },
           { key: '评论图片', value: 'imgs', isImgs: true, },
+        ],
+        'authorize': [
+          { key: '账号', value: 'seller_nick', isText: true },
+          { key: '密码', value: 'seller_password', isText: true },
+          { key: '设计师+', value: 'design', isRadio: true },
+          { key: '半包定制', value: 'bb', isRadio: true },
+          { key: '易居管家', value: 'gj', isRadio: true },
+          { key: '整居定制', value: 'zj', isRadio: true },
+          { key: '集成暖通', value: 'jc', isRadio: true },
+          { key: '主材选购', value: 'zx', isRadio: true },
+          { key: '家具选购', value: 'jj', isRadio: true },
+          { key: '易居海外', value: 'hw', isRadio: true },
+          { key: '用户列表', value: 'user', isRadio: true },
+          { key: '订单列表', value: 'order', isRadio: true },
+          { key: '运营', value: 'server', isRadio: true },
         ]
       },
-      showDialog: false,
+      isShowDialog: false,
         waitAddNotice:false,
         isAddItem:true,
         isShow: false,
@@ -343,34 +434,84 @@ export default {
       detailLabelWidth: '40px',
       canAddDetail: true,
       categories: [
-        { id: 1, title: '111' },
-        { id: 3, title: '311' },
+        { id: null, title: '全部' },
+        { id: 0, title: '已取消' },
+        { id: 10, title: '未付款' },
+        { id: 20, title: '已付款' },
+        { id: 30, title: '已发货' },
+        { id: 40, title: '已收货' },
+        { id: 50, title: '未评价' },
       ],
+      orderState: '',
       formInline: {},
       listLoading: false,
       listQuery: {
         page: 1,
         limit: 10,
-        search:"",
-        time:""
       },
       total: 0,
     }
   },
   methods: {
-    addItem(){
-      this.showDialog = true;
+    showDialog(index, row){
+
+      this.detailClassList = row ? this.detailConfig[this.category] : this.detailConfig[this.category].slice(0, 2);
+
+      this.initDetail(row);
+
+      this.isShowDialog = true;
+      this.isAddItem = !row;
+
     },
     searchByPhone(){
       console.log('search ----', this.searchKeyWord);
+      this.listQuery.search = this.searchKeyWord;
+      this.getList();
     },
-    showModal(index, row){ //
-      if(row){
-        this.isAddItem = false
-        console.log(row)
+    searchByDate(){
+      console.log(this.listQuery.time)
+      this.listQuery.starttime = new Date(this.listQuery.time[0]).toISOString().split('T')[0]
+      this.listQuery.endtime = new Date(this.listQuery.time[1]).toISOString().split('T')[0]
+      
+      this.listQuery.page = 1
+      delete this.listQuery.time
+      this.getList()
+    },
+    changeStatus(id){
+      if(this.category === 'order'){
+        this.getOrder(id)
+      }else if(this.category === 'afterService'){
+        this.getAfterService(id)
+      }
+    },
+    submitForm(r){
+
+      // let res = await this.$refs[formName].validate().catch(e => e);
+      // if(!res) return ;
+
+      this.waitAddNotice = true // 防点击
+
+      this.submit();
+    },
+    async submit(){
+      if(!this.isAddItem){
+        let o = this.detail;
+        o.seller_limits = [];
+
+        for(let key in o){ // 设置权限
+          o[key] === '1' ? o.seller_limits.push(key) : void(0);
+        }
       }
 
-      this.isShow = true
+      this.detail.sellergroup_id = 0;
+      this.detail.seller_name = this.detail.seller_nick;
+      console.log('detail', this.detail);
+
+      let res = this.isAddItem ? await api.setUser(this.detail, this) : await api.updateUser(this.detail.seller_id, this.detail, this);
+
+      this.waitAddNotice = false;
+      this.isShowDialog = false;  
+      this.getList();
     },
     handleAvatarSuccess(res, file){
       alert(res, file);
@@ -410,39 +551,6 @@ export default {
       if(index === this.formData.detailList.length-1)this.canAddDetail = true;
       this.formData.detailList.splice(index, 1)
     },
-    async submit(formName){
-      
-      let res = await this.$refs[formName].validate().catch(e => e);
-      if(!res) return ;
-
-      this.waitAddNotice = true
-      console.log('formData', this.formData);
-      // if(this.isAddItem){
-      //   var addres = await api.setTeacher(this.formData);
-      // }
-      
-      this.waitAddNotice = false
-      this.addNewShow = false;
-      // addAuth_api(sendData).then(data=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   if(data.status===0){
-      //     this.$notify.success({ title: '成功', message: '添加成功' })
-      //     this.getList()
-      //   }else{
-      //     this.$notify({
-      //       title: '失败',
-      //       message: '操作失败',
-      //       type: 'error'
-      //     })
-      //   }
-      // }).catch(e=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   console.error('appointmentShop:addIndustry_api 接口错误')
-      // })
-    },
-      
       importDone({ results, header }) { // upload xls success
         this.tableData = results
         this.tableHeader = header
@@ -461,67 +569,75 @@ export default {
         return false
       },
       //
-      async getList() { //获取列表
+      getList() { //获取列表
         this.listLoading = true
+        console.log('listQuery --', this.listQuery);
         
-        // let res = await api.getTeacherList(this.listQuery);
-        this.tableData = [
-          { name: 'sf开始的浪费口水都发送方SAF', 
-            company: 'sfd', 
-            img: 'http://yipingda-1257351977.cos.ap-shanghai.myqcloud.com/1538186038763%E7%BB%84-10%402x.png', 
-            imgs: [ 'http://yipingda-1257351977.cos.ap-shanghai.myqcloud.com/1538186038763%E7%BB%84-10%402x.png', 
-                    'http://yipingda-1257351977.cos.ap-shanghai.myqcloud.com/1538186038763%E7%BB%84-10%402x.png', ],
-            price: '324.34', 
-            level: 4.5 },
-          { name: 'sf开始的浪费口水都发送方SAF', company: 'sfd', price: '324.34', level: 4.5, content: 'sf可是防空双方都是的反馈十六分迫使贷款购房的价格vi哦发动机受到了放到vfgodgvsdfjksdf' },
-        ];
-        this.total = this.tableData.length// res.pagination.total;
-        this.listLoading = false
+        if(this.category === 'authorize'){
+          this.getUser();
+        }else if(this.category === 'user'){
+          this.getMember();
+        }else if(this.category === 'order'){
+          this.getOrder();
+        }else if(this.category === 'afterService'){
+          this.getAfterService();
+        }else if(this.category === 'assess'){
+          this.getAssess();
+        }
+        
       },
       showDetail(index, row){
-        this.showDialog = true;
+        this.isShowDialog = true;
         this.detail = row;
+        if(this.category === 'order'){
+          this.getOrderDetail(row.order_id)
+        }else if(this.category === 'assess'){
+          this.getAssessDetail(row.geval_id)
+        }else if(this.category === 'afterService'){
+          this.getAfterServiceDetail(row.refund_id)
+        }
+
         console.log(index, row, this.detail)
       },
-      deleteItem(index,row){
-        let id = row.id
+      showDeleteDialog(index,row){
+
         this.$confirm(`此操作将删除该条目, 是否继续?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.deleteNewNotice(id)
+          this.deleteItem(row)
         }).catch(()=>{ this.$notify.info({ title: '消息', message: '已取消' }); })
       },
-      deleteNewNotice(id){
-        let sendData = {
-          seller_id:id,
+      async deleteItem(row){
+        if(this.category === 'authorize'){
+          this.deleteUser(row.seller_id);
+        }else if(this.category === 'assess'){
+          this.deleteAssess(row.geval_id)
         }
-        deleteAuth_api(sendData).then(res=>{
-          if(res&&res.status===0){
-              this.$notify.success({ title: '成功', message: '操作成功' });
-            this.getList()
-          }else{
-            this.$notify({ title: '错误', message: '操作失败', type:'error' });
-          }
-        }).catch(err=>{
-          console.error('deleteseller_api')
-        })
-          
-        
+
       },
-    // searchByDate(){
-    //   if(!this.dataRange||!this.dataRange.length||this.dataRange.length!==2){
-    //     return console.log("日期错误")
-    //   }
-    //   let dateS = this.dataRange[0]
-    //   let dateE = this.dataRange[1]
-    //   let Sstr = dateS.getFullYear()+'-'+(dateS.getMonth()+1>9?(dateS.getMonth()+1):('0'+dateS.getMonth()))+'-'+(dateS.getDate()+1>9?(dateS.getDate()+1):('0'+dateS.getDate()))
-    //   let Estr = dateE.getFullYear()+'-'+(dateE.getMonth()+1>9?(dateE.getMonth()+1):('0'+dateE.getMonth()))+'-'+(dateE.getDate()+1>9?(dateE.getDate()+1):('0'+dateE.getDate()))
-    //   this.listQuery.time = Sstr+','+Estr
-    //   this.listQuery.page = 1
-    //   this.getList()
-    // },
+      async deleteUser(id){
+        let res = await api.deleteUser(id, null, this);
+
+        this.getList();
+      },
+      async deleteAssess(id){
+        let res = await api.deleteAssess(id, null, this);
+
+        this.getList();
+      },
+    initDetail(item){
+      this.detail = {};
+      
+      if(typeof item === 'object'){
+        for(let key in item){
+          this.detail[key] = item[key];
+        }
+      }
+      
+      console.log('init detail done --', item, this.detail);
+    },
     handleSizeChange(val) {
       this.listQuery.limit = val
       this.getList()
@@ -530,7 +646,108 @@ export default {
       this.listQuery.page = val
       this.getList()
     },
-    
+    // 
+    async getUser(){
+      let res = await api.getUserList(this.listQuery);
+
+      this.tableData = this.format(res.data);
+      this.total = this.tableData.length// res.pagination.total;
+      this.listLoading = false
+    },
+    format(data){
+      data.forEach(item => item.seller_limits.forEach(v => item[v] = '1') );
+      return data;
+    },
+    async getMember(){
+      
+      let res = await api.getMember(this.listQuery);
+
+      this.tableData = res.data;
+      this.total = res.pagination.total;
+      this.listLoading = false;
+    },
+    async getOrder(item){
+      this.listQuery.order_state = item || null;
+      let res = await api.getOrderList(this.listQuery);
+
+      delete this.listQuery.order_state;
+      this.tableData = res.data;
+      this.total = res.pagination.total;
+      this.listLoading = false;
+    },
+    async getOrderDetail(order_id){
+      let res = await api.getOrderDetail(order_id, {order_id}, this),
+          o = res.data[0];
+
+      for(let key in o.order_reciver_info){
+        o[key] = o.order_reciver_info[key] 
+      }
+      for(let key in o.order_goods[0]){
+        o[key] = o.order_goods[0][key] 
+      }
+      this.initDetail(o) 
+    },
+    async sendGoods(index, row){
+      let param = {
+        order_id: row.order_id,
+        state_type: 'deliver_goods'
+      };
+      let res = await api.updateOrder(row.order_id, param, this)
+
+      this.getOrder(this.orderState)
+    },
+    async getAfterService(item){
+      this.listQuery.refund_state = item;
+      let res = await api.getRefundList(this.listQuery);
+
+      delete this.listQuery.refund_state;
+      this.tableData = res.data;
+      this.total = res.pagination.total;
+      this.listLoading = false;
+    },
+    async refund(index, row){
+      if(row.order_state === '已完成') return ;
+
+      let res = await api.refund(row.refund_id, {}, this);
+
+      this.getList()
+    },
+    async getAfterServiceDetail(id){
+      let res = await api.getRefund(id, null, this),
+          o = res.data;
+
+      for(let key in o.order_reciver_info){
+        o[key] = o.order_reciver_info[key] 
+      }
+      for(let key in o.order_goods[0]){
+        o[key] = o.order_goods[0][key] 
+      }
+      this.initDetail(o)
+    },
+    async getAssess(){
+      let res = await api.getAssessList(this.listQuery)
+
+      res.data.forEach(v => v.assess_time = `${new Date(Number(v.geval_addtime) * 1000).toISOString().split('T')[0]} ${new Date(Number(v.geval_addtime) * 1000).toTimeString().split(' ')[0]}` )
+      this.tableData = res.data;
+      this.total = res.pagination.total;
+      this.listLoading = false;
+    },
+    async getAssessDetail(id){
+      let res = await api.getAssessDetail(id, null, this),
+          o = res.data;
+
+      o.assess_time = `${new Date(Number(o.geval_addtime) * 1000).toISOString().split('T')[0]} ${new Date(Number(o.geval_addtime) * 1000).toTimeString().split(' ')[0]}`
+      o.imgs = o.geval_image !== '' ? JSON.parse(o.geval_image) : []
+      this.initDetail(o)
+    },
+    async resolve(index, row){
+      let res = await api.auditingAssess(row.geval_id, null, this);
+
+      this.getList()
+    },
+    async reject(){
+      // let res = await 
+    }
   }
 }
 </script>

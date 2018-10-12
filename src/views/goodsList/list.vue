@@ -66,7 +66,7 @@
 
 <template>
 <div>
-<el-dialog :title="isAddItem ? `新增${className}` : `编辑${className}` " :visible.sync="isShow" width="30%">
+<el-dialog :title="isAddItem ? `新增${className}` : `编辑${className}` " :visible.sync="isShow" width="30%" @close='closeDialog'>
 
   <el-form :model="formData"  ref="ruleForm" :rules="rules" >
 
@@ -91,7 +91,7 @@
     </el-form-item>
 
     <!-- 设计师 -->
-    <el-form-item label="设计公司" :label-width="formLabelWidth" prop="company" v-if='isDesign'>
+    <el-form-item label="设计公司" :label-width="formLabelWidth" prop="company" v-if='showCompany'>
       <el-input v-model="formData.company" auto-complete="off"></el-input>
     </el-form-item>
 
@@ -144,7 +144,7 @@
       <!-- 多规格 -->
       <el-button type='primary' size='mini' @click="addSku" v-if="skuType === '多规格'">添加规格</el-button>
 
-      <el-form class='sku_form' :inline='true' :model="item" ref="ruleFormChild2" :rules="skuRules" v-for='(item, index) in formData.skuList' :key='index' v-if="skuType === '多规格'">
+      <el-form class='sku_form' :inline='true' :model="item" ref="skuRuleForm" :rules="skuRules" v-for='(item, index) in formData.skuList' :key='index' v-if="skuType === '多规格'">
 
         <i class='sku_close el-icon-close' @click='deleteSku(index)'></i>
         <el-form-item class='sku_item' label="名称" prop="sp_value" >
@@ -186,7 +186,7 @@
   </el-form>
 
   <span slot="footer" class="dialog-footer">
-    <el-button @click="isShow=false" >取消</el-button>
+    <el-button @click="isShow=false; waitAddNotice=false;" >取消</el-button>
     <el-button v-if="isAddItem" type="primary" @click="submitForm('ruleForm')"
      :disabled="waitAddNotice"
      :loading="waitAddNotice">确 定</el-button>
@@ -205,7 +205,7 @@
     </el-form-item>
 
     <el-form-item v-if='showSearch'>
-      <el-input style="width: 340px;" placeholder="请输入联系方式" v-model="searchKeyWord"></el-input>
+      <el-input style="width: 340px;" placeholder="请输入姓名" v-model="searchKeyWord"></el-input>
       <el-button type="primary" icon="el-icon-search" @click="searchByPhone">查询</el-button>
     </el-form-item>
 
@@ -261,7 +261,7 @@ export default {
 
   created(){
     this.category = this.$route.query.category;
-    console.log(this.category)
+    console.log('category: --', this.category)
     let goodsList = [ '易居管家', '整居定制', '集成暖通', '主材选购', '家具选购', '易居海外' ];
     let index = goodsList.indexOf(this.category);
     
@@ -269,7 +269,9 @@ export default {
     this.categoryId = index + 2;
     this.classList = this.config[this.category];
 
-    if(this.category === '易居管家'){
+    if(this.category === '设计师'){
+      this.showCompany = true;
+    }else if(this.category === '易居管家'){
       this.showSearch = false;
       this.showUnit = true;
     }else if(this.category === '整居定制'){
@@ -316,6 +318,7 @@ export default {
     this.getList();
 
     this.getClass();
+    
   },
 
   data() {
@@ -323,15 +326,15 @@ export default {
       category: '',
       categoryId: 1,
       config: {
-        '设计师+': [
-          { key: '姓名', value: 'name' },
-          { key: '所属设计公司', value: 'company' },
-          { key: '定金', value: 'price' },
-          { key: '评分', value: 'level' },
+        '设计师': [
+          { key: '姓名', value: 'goods_name' },
+          { key: '所属设计公司', value: 'school_name' },
+          { key: '定金', value: 'goods_price' },
+          { key: '评分', value: 'evaluation_good_star' },
         ],
         '易居管家': [
-          { key: '名字', value: 'name' },
-          { key: '价格', value: 'company' },
+          { key: '名字', value: 'goods_name' },
+          { key: '价格', value: 'goods_price' },
         ],
         '整居定制': [
           { key: '名字', value: 'goods_name' },
@@ -339,8 +342,8 @@ export default {
           { key: '库存', value: 'goods_storage' },
         ],
         '集成暖通': [
-          { key: '名字', value: 'name' },
-          { key: '价格', value: 'company' },
+          { key: '名字', value: 'goods_name' },
+          { key: '价格', value: 'goods_price' },
         ],
         '主材选购': [
           { key: '名字', value: 'goods_name' },
@@ -367,7 +370,7 @@ export default {
         rules: {
           name: [
               { required: true, message: '请输入昵称', trigger: 'blur', min: 1, },
-              { required: true, message: '不能超过15个字符!', trigger: 'blur', max: 15 }
+              // { required: true, message: '不能超过15个字符!', trigger: 'blur', max: 15 }
           ],
           company: [
               { required: true, message: '请输入公司名', trigger: 'blur', min: 1, },
@@ -387,7 +390,7 @@ export default {
       skuRules: {
         sp_value: [
             { required: true, message: '请输入昵称', trigger: 'blur', min: 1, },
-            { required: true, message: '不能超过15个字符!', trigger: 'blur', max: 15 }
+            // { required: true, message: '不能超过15个字符!', trigger: 'blur', max: 15 }
         ],
         price: [
             { required: true, message: '请输入价格' },
@@ -407,15 +410,16 @@ export default {
       tableData: [],
       searchKeyWord: '',
       imgs: [],
-      isDesign: false,
+      showCompany: false,
       showUnit: false,
       showTwoClass: false,
       showAmount: false,
       showFreight: false,
       showSku: false,
-      units: [ '200/1day', '200/1kg'],
+      units: [ '/平方米', '/天', '/次'],
       categories: [],
       twoCategories: [],
+      isTwo: false, // 主材选购二级分类是否有三级分类
       skuType: '统一规格',
       detailLabelWidth: '40px',
       canAddDetail: true,
@@ -425,25 +429,35 @@ export default {
         page: 1,
         limit: 10,
         storegc_id: null,
+        search: '',
       },
       total: 0,
     }
   },
   methods: {
     async getClass(id){
-      console.log(id)
+      // console.log(id)
       let res = await api.getClassList({ parent_id: id || this.categoryId }, this);
       id ? this.twoCategories = res.data || [] : this.categories = res.data || [];
 
+      if(this.category === '主材选购' && this.twoCategories.length > 0){
+        this.isTwo = true;
+      }
+
       if(id){
         this.categories.forEach(v => v.storegc_id === id ? this.formData.categoryName = v.storegc_name : void(0) );
+        
       } 
     },
     getTwoClass(id){ this.categories.forEach(v => v.storegc_id === id ? this.formData.categoryName = v.storegc_name : void(0) ) },
     searchByPhone(){
       console.log('search ----', this.searchKeyWord);
+      this.listQuery.search = this.searchKeyWord;
+      this.getList();
     },
     async showModal(index, row){ //
+      this.isTwo = false;
+      this.isAddItem = true;
       this.initFormData();
 
       if(row){
@@ -457,8 +471,8 @@ export default {
     },
     async changeState(index, row){
       let param = {
-        type: !row.goods_state ? 'offline' : 'online', 
-        goods_commonid: row.goods_commonid,
+        type: row.goods_state ? 'offline' : 'online', 
+        goods_commonid: [ row.goods_commonid ],
       };
 
       console.log(param)
@@ -469,11 +483,14 @@ export default {
     handleAvatarSuccess(res, file){
       alert(res, file);
     },
+    closeDialog(){
+      this.waitAddNotice = false;
+    },
     exceed(){ this.$message({ type: 'error', message: '图片不能超过4张!' }) },
     addImage(e, list) {
       
       console.log('upload before', e, list)
-      this.imgs = list;
+      this.imgs.push(e);
       // upLoadFile(e.raw).then(v => {
       //   // this.formData.case_img = v[0]
       //   // this.case_img = true
@@ -516,18 +533,37 @@ export default {
       
       let res = await this.$refs[formName].validate().catch(e => e);
       if(!res) return ;
+
+      
  
       // 有三级分类必须选择三级分类(主材选购除外)
       if(this.showTwoClass && this.category !== '主材选购' && !this.formData.twoCategory) return this.$message.error({ message: '请选择三级分类' });
+      // 主材
+      if(this.isTwo && !this.formData.twoCategory) return this.$message.error({ message: '请选择三级分类' });
       // 多规格
       if(this.showSku && this.skuType === '多规格' && this.formData.skuList.length < 2) return this.$message.error({ message: '多规格至少需要设置两类' });
+      if(this.skuType === '多规格'){
+        console.log(this.$refs);
+        let rules = this.$refs['skuRuleForm'],
+            pass = true;
+
+        for(let i = 0, len = rules.length; i < len; i++){
+          let r = await rules[i].validate().catch(e => e);
+          console.log('rules --', r);
+          if(!r) pass = false;
+        }
+        if(!pass) return ;
+        // console.log('submit', r);
+      }
 
       this.waitAddNotice = true
 
+      console.log('this.imgs:--', this.imgs);
       upLoadFile(this.imgs.map(v => v.raw)).then(v => {
 
-        if(this.imgs.length > 0) this.formData.imgs = this.formData.imgs.map(v => v.url);
-        console.log('upload done', this.imgs, this.formData.imgs)
+        // if(this.imgs.length > 0) this.formData.imgs = this.formData.imgs.map(v => v.url);
+        this.formData.imgs = this.isAddItem ? v : v.concat( this.formData.imgs.map(v => v.url) );
+        console.log('upload done', v, this.formData.imgs)
 
         this.submit();
       }).catch(e=>{ console.error(e) })
@@ -549,16 +585,24 @@ export default {
             gc_id_1: this.categoryId,
             gc_id_2: o.category,
             gc_id_3: o.twoCategory,
-            goods_storage: o.amount,
+            goods_storage: o.amount || 9999999,
             spec_name: o.skuList.map((v, i) => i), 
             spec_value: o.skuList.map(v => v.sp_value), 
             spec: o.skuList,
-            goods_freight: o.freight,
+            goods_freight: o.freight || 0,
             goods_body: o.detailList,
             is_virtual: 0,
+            school_name: o.company || 0, // 设计师
+            unit: o.unit, // 易居管家
             goods_advword: '',
             goods_serial: '',
           };
+
+      if(this.category === '设计师'){
+        delete param.spec;
+        delete param.spec_name;
+        delete param.spec_value;
+      }
 
       if(!this.isAddItem){
         param.goods_faker_salenum = 0;
@@ -571,6 +615,7 @@ export default {
       this.waitAddNotice = false;
       this.isAddItem = true;
       this.isShow = false;
+      this.imgs = [];
       this.initFormData();
 
       this.getList();
@@ -644,16 +689,17 @@ export default {
       this.formData = {
         id: item.goods_commonid || null, 
         name: item.goods_name || '',
-        imgs: item.goodsimagesList && item.goodsimagesList.map(v => { return { url: v.goodsimage_url } }) || [],
+        imgs: item.goodsimagesList && item.goodsimagesList.map(v => { return { url: v.goodsimage_url, } }) || [],
         company: item.goods_company || '',
         price: Number(item.goods_price) || null,
+        company: item.school_name,
         unit: item.unit || '',
         category: item.gc_id_2 || null,
         twoCategory: item.gc_id_3 || null,
         categoryName: item.gc_name || '',
-        amount: item.SKUList && Number(item.SKUList[0].goods_storage) || '',
+        amount: item.SKUList && item.SKUList[0] && Number(item.SKUList[0].goods_storage) || '',
         freight: Number(item.goods_freight) || null,
-        skuList: item.SKUList && item.SKUList.map(v => { return { sp_value: v.goods_spec, stock: v.goods_storage, price: v.goods_price  } }) || [],
+        skuList: item.SKUList && item.SKUList.map(v => { return { sp_value: v.goods_spec, stock: Number(v.goods_storage), price: Number(v.goods_price)  } }) || [],
         detailList: item.goods_body || [],
         // spec_name: [],
         // spec_value: [],

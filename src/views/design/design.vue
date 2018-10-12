@@ -113,11 +113,6 @@
       </el-form>
 
     </el-form-item>
-    <!-- <el-form-item label="授予权限" v-if="!isAddItem" :label-width="formLabelWidth" >
-      <el-checkbox-group v-model="formData.checkboxGroup1">
-      <el-checkbox-button v-for="(item,index) of rolesList" :label="item.label" :key="index">{{item.text}}</el-checkbox-button>
-    </el-checkbox-group>
-    </el-form-item> -->
   </el-form>
 
   <span slot="footer" class="dialog-footer">
@@ -140,7 +135,7 @@
     </el-form-item>
 
     <el-form-item>
-      <el-input style="width: 340px;" placeholder="请输入联系方式" v-model="searchKeyWord"></el-input>
+      <el-input style="width: 340px;" placeholder="请输入姓名" v-model="searchKeyWord"></el-input>
       <el-button type="primary" icon="el-icon-search" @click="searchByPhone">查询</el-button>
     </el-form-item>
 
@@ -152,19 +147,6 @@
 
       <el-table-column :label="item.key" :prop="item.value" v-for='(item, index) in classList' :key='index'></el-table-column>
 
-      <!-- <el-table-column label="订单">
-        <template slot-scope="scope">
-          <i v-if="scope.row.super||(scope.row.checkboxGroup1&&scope.row.checkboxGroup1.indexOf('order')!==-1)" class="el-icon-check big-icon"></i>
-          <i v-else class="el-icon-close big-icon-no"></i>
-        </template>
-      </el-table-column>
-      <el-table-column 
-        label="超级管理员" 
-        prop="super">
-        <template slot-scope="scope">
-          <el-tag size="medium" :type="scope.row.super?'':'info'">{{ scope.row.super?'是':'否'}}</el-tag>
-        </template>
-      </el-table-column> -->
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="showModal(scope.$index, scope.row)">编辑</el-button>
@@ -259,7 +241,6 @@ export default {
         page: 1,
         limit: 10,
         search:"",
-        time:""
       },
       total: 0,
     }
@@ -267,6 +248,7 @@ export default {
   methods: {
     searchByPhone(){
       console.log('search ----', this.searchKeyWord);
+      this.getlist();
     },
     showModal(index, row){ //
       if(row){

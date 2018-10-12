@@ -67,7 +67,7 @@
         <el-date-picker style="width:340px" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
           v-model="listQuery.time">
         </el-date-picker>
-        <el-button type="primary" icon="el-icon-search" @click="searchByPhone">查询</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="searchByDate">查询</el-button>
     </el-form-item>
 
     <el-form-item label="">
@@ -85,7 +85,7 @@
 
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button size="mini" type="danger" @click="deleteItem(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" type="danger" @click="showDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -101,7 +101,7 @@
 </template>
 <script>
 
-import api from '@/api/seller' 
+import api from '@/api/api' 
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 import upLoadFile from '@/utils/aahbs.js'
 
@@ -147,11 +147,11 @@ export default {
       className: '设计师',
       classList: [
         { key: '姓名', value: 'name' },
-        { key: '联系方式', value: 'company' },
-        { key: '小区地址', value: 'price' },
-        { key: '面积', value: 'level' },
-        { key: '意向风格', value: 'level' },
-        { key: '备注', value: 'level' },
+        { key: '联系方式', value: 'telephone' },
+        { key: '小区地址', value: 'address' },
+        { key: '面积', value: 'acreage' },
+        { key: '意向风格', value: 'style' },
+        { key: '备注', value: 'remark' },
       ],
       searchKeyWord: '',
       imgs: [],
@@ -172,19 +172,14 @@ export default {
         time:""
       },
       total: 0,
+      downloadLoading: false,
     }
   },
   methods: {
     searchByPhone(){
       console.log('search ----', this.searchKeyWord);
-    },
-    showModal(index, row){ //
-      if(row){
-        this.isAddItem = false
-        console.log(row)
-      }
-
-      this.isShow = true
+      this.listQuery.search = this.searchKeyWord;
+      this.getList()
     },
     handleAvatarSuccess(res, file){
       alert(res, file);
@@ -224,38 +219,6 @@ export default {
       if(index === this.formData.detailList.length-1)this.canAddDetail = true;
       this.formData.detailList.splice(index, 1)
     },
-    async submit(formName){
-      
-      let res = await this.$refs[formName].validate().catch(e => e);
-      if(!res) return ;
-
-      this.waitAddNotice = true
-      console.log('formData', this.formData);
-      // if(this.isAddItem){
-      //   var addres = await api.setTeacher(this.formData);
-      // }
-      
-      this.waitAddNotice = false
-      this.addNewShow = false;
-      // addAuth_api(sendData).then(data=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   if(data.status===0){
-      //     this.$notify.success({ title: '成功', message: '添加成功' })
-      //     this.getList()
-      //   }else{
-      //     this.$notify({
-      //       title: '失败',
-      //       message: '操作失败',
-      //       type: 'error'
-      //     })
-      //   }
-      // }).catch(e=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   console.error('appointmentShop:addIndustry_api 接口错误')
-      // })
-    },
       
       importDone({ results, header }) { // upload xls success
         this.tableData = results
@@ -274,57 +237,65 @@ export default {
         })
         return false
       },
+      async handleDownload() {
+        this.downloadLoading = true
+        let allRes = this.tableData 
+        console.log('allRes',allRes)
+        if(!allRes){
+          this.downloadLoading = false
+          return console.log('获取数据失败:handleDownload')
+        }
+        import('@/vendor/Export2Excel').then(excel => {
+          const tHeader = this.classList.map(v => v.key)
+          const filterVal = this.classList.map(v => v.value) 
+
+          let data = this.tableData.map(v => filterVal.map(val => v[val] || '' ) )
+          console.log(tHeader, filterVal, data)
+          // const data = this.formatJson(filterVal, tableData)
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: 'list',
+            autoWidth: true 
+          })
+          this.downloadLoading = false
+        })
+      },
       //
       async getList() { //获取列表
         this.listLoading = true
         
-        // let res = await api.getTeacherList(this.listQuery);
-        this.tableData = [
-          { name: 'sf开始的浪费口水都发送方SAF', company: 'sfd', price: '324.34', level: 4.5 },
-          { name: 'sf开始的浪费口水都发送方SAF', company: 'sfd', price: '324.34', level: 4.5 },
-        ];
-        this.total = this.tableData.length// res.pagination.total;
+        let res = await api.getCustommadeinfo(this.listQuery);
+
+        this.tableData = res.data
+        this.total = res.pagination.total;
         this.listLoading = false
       },
-      deleteItem(index,row){
+      showDelete(index, row){
         let id = row.id
         this.$confirm(`此操作将删除该条目, 是否继续?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.deleteNewNotice(id)
+          this.deleteItem(id)
         }).catch(()=>{ this.$notify.info({ title: '消息', message: '已取消' }); })
       },
-      deleteNewNotice(id){
-        let sendData = {
-          seller_id:id,
-        }
-        deleteAuth_api(sendData).then(res=>{
-          if(res&&res.status===0){
-              this.$notify.success({ title: '成功', message: '操作成功' });
-            this.getList()
-          }else{
-            this.$notify({ title: '错误', message: '操作失败', type:'error' });
-          }
-        }).catch(err=>{
-          console.error('deleteseller_api')
-        })
-          
-        
+      async deleteItem(id){
+       let res = await api.deleteCustommadeinfo(id, {id}, this) 
+       
+       this.getList()
       },
-    // searchByDate(){
-    //   if(!this.dataRange||!this.dataRange.length||this.dataRange.length!==2){
-    //     return console.log("日期错误")
-    //   }
-    //   let dateS = this.dataRange[0]
-    //   let dateE = this.dataRange[1]
-    //   let Sstr = dateS.getFullYear()+'-'+(dateS.getMonth()+1>9?(dateS.getMonth()+1):('0'+dateS.getMonth()))+'-'+(dateS.getDate()+1>9?(dateS.getDate()+1):('0'+dateS.getDate()))
-    //   let Estr = dateE.getFullYear()+'-'+(dateE.getMonth()+1>9?(dateE.getMonth()+1):('0'+dateE.getMonth()))+'-'+(dateE.getDate()+1>9?(dateE.getDate()+1):('0'+dateE.getDate()))
-    //   this.listQuery.time = Sstr+','+Estr
-    //   this.listQuery.page = 1
-    //   this.getList()
-    // },
+    searchByDate(){
+      let query = this.listQuery;
+
+      query.starttime = new Date(query.time[0]).toISOString().split('T')[0]
+      query.endtime = new Date(query.time[1]).toISOString().split('T')[0]
+
+      delete this.listQuery.time
+      this.listQuery.page = 1
+      this.getList()
+    },
     handleSizeChange(val) {
       this.listQuery.limit = val
       this.getList()

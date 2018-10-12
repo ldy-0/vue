@@ -100,7 +100,7 @@
 </template>
 <script>
 
-import api from '@/api/seller' 
+import api from '@/api/api' 
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 import upLoadFile from '@/utils/aahbs.js'
 
@@ -122,19 +122,19 @@ export default {
       category: '',
       config: {
         '集成暖通': [
-          { key: '定金比例', value: 'frontMoney', isText: true },
+          { key: '定金比例', value: 'value', isText: true },
         ],
         '主材选购': [
-          { key: '设计服务', value: 'design_server', isText: true },
-          { key: '安装服务', value: 'install_server', isText: true },
-          { key: '搬运服务', value: 'move_server', isText: true },
+          { key: '设计服务', value: '设计服务', isText: true },
+          { key: '安装服务', value: '安装服务', isText: true },
+          { key: '搬运服务', value: '搬运服务', isText: true },
         ],
         '家具选购':[
-          { key: '安装服务', value: 'install_server', isText: true },
-          { key: '搬运服务', value: 'move_server', isText: true },
+          { key: '安装服务', value: '安装服务', isText: true },
+          { key: '搬运服务', value: '搬运服务', isText: true },
         ],
         'help': [
-          { key: '文字内容', value: 'content', isTexts: true },
+          { key: '文字内容', value: 'value', isTexts: true },
         ]
       },
       rules: {
@@ -142,19 +142,19 @@ export default {
             { required: true, message: '请输入昵称', trigger: 'blur', min: 1, },
             { required: true, message: '不能超过15个字符!', trigger: 'blur', max: 15 }
         ],
-        frontMoney: [
+        value: [
             { required: true, message: '请输入定金比例' },
-            { type:'number', message: '值必须为数字' },
+            // { type:'number', message: '值必须为数字' },
         ],
-        design_server: [
+        '设计服务': [
             { required: true, message: '请输入设计服务费' },
             { type:'number', message: '值必须为数字' },
         ],
-        install_server: [
+        '安装服务': [
             { required: true, message: '请输入安装服务费' },
             { type:'number', message: '值必须为数字' },
         ],
-        move_server: [
+        '搬运服务': [
             { required: true, message: '请输入搬运服务费' },
             { type:'number', message: '值必须为数字' },
         ],
@@ -169,10 +169,7 @@ export default {
           { label:'goods', text:'商品' },
         ],
       formLabelWidth:'80px',
-      formData: {
-        design_server: '',
-        move_server:'',
-      },
+      formData: {},
       tableData: [],
       searchKeyWord: '',
       imgs: [],
@@ -205,24 +202,6 @@ export default {
 
       this.isShow = true
     },
-    handleAvatarSuccess(res, file){
-      alert(res, file);
-    },
-    exceed(){
-      this.$message({ type: 'error', message: '图片不能超过4张!' })
-    },
-    addImage(e) {
-      
-      console.log('upload before', e, this.imgs)
-      upLoadFile(e.raw).then(v => {
-        // this.formData.case_img = v[0]
-        // this.case_img = true
-        // console.log(this.formData.imgs)
-        this.imgs.push(v[0])
-        console.log(this.imgs)
-      }).catch(e=>{ console.error(e) })
-
-    },
     addDetail(){
       if(!this.canAddDetail)return this.$message({ message: '' });
       this.canAddDetail = false;
@@ -238,12 +217,7 @@ export default {
       }).catch(e=>{ console.error(e) })
 
     },
-    deleteDetail(index){
-      console.log(index);
-      if(index === this.formData.detailList.length-1)this.canAddDetail = true;
-      this.formData.detailList.splice(index, 1)
-    },
-    async submit(){
+    async submitForm(){
       
       let res = await this.$refs['form'].validate().catch(e => e);
       if(!res) return ;
@@ -253,76 +227,47 @@ export default {
       // if(this.isAddItem){
       //   var addres = await api.setTeacher(this.formData);
       // }
+      this.submit();
       
       this.waitAddNotice = false
       this.addNewShow = false;
-      // addAuth_api(sendData).then(data=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   if(data.status===0){
-      //     this.$notify.success({ title: '成功', message: '添加成功' })
-      //     this.getList()
-      //   }else{
-      //     this.$notify({
-      //       title: '失败',
-      //       message: '操作失败',
-      //       type: 'error'
-      //     })
-      //   }
-      // }).catch(e=>{
-      //   this.waitAddNotice = false
-      //   this.addNewShow = false
-      //   console.error('appointmentShop:addIndustry_api 接口错误')
-      // })
-    },
       
-      async editAuth(formName){
-        let res = await new Promise((res,rej)=>{
-        this.$refs[formName].validate((valid) => {
-            if (valid) {
-              res(true)
-            } else {
-              res(false)
-            }
-          })
-        })
-        if(!res){
-          return 
-        }
-        this.waitAddNotice = true
-        let sendData = {
-          // 后端生成
-          seller_id:this.formData.id,
-          // 前段统一
-          seller_nick:this.formData.username,
-          // seller_name:this.formData.account,
-          seller_password:this.formData.password,
-          seller_limits:this.formData.checkboxGroup1,
-          sellergroup_id:0,
-        }
-        editAuth_api(sendData).then(data=>{
-          this.waitAddNotice = false
-          this.addNewShow = false
-          if(data.status===0){
-            this.$notify({
-              title: '成功',
-              message: '操作成功',
-              type: 'success'
-            })
-            this.getList()
-          }else{
-            this.$notify({
-              title: '失败',
-              message: '操作失败',
-              type: 'error'
-            })
-          }
-        }).catch(e=>{
-          this.waitAddNotice = false
-          this.addNewShow = false
-          console.error('editAuth_api 接口错误')
-        })
-      },
+    },
+    async submit(){
+      console.log('formData --', this.formData);
+
+      if(this.category === '集成暖通'){
+        this.setDepositscale();
+      }else if(this.category === '主材选购'){
+        this.setExtraservice(5);
+      }else if(this.category === '家具选购'){
+        this.setExtraservice(6);
+      }else if(this.category === 'help'){
+        this.setHelp();
+      }
+      
+    },
+    async setDepositscale(){
+      let res = await api.updateDepositscale(this.formData, this);
+
+      this.getDepositscale();
+    },
+    async setExtraservice(id){
+      let o = this.formData,
+          value = [];
+
+      for(let key in o){
+        value.push(`${key}:${o[key]}`); 
+      }
+      
+      let res = await api.updateExtraservice(id, { value }, this);
+
+      this.getExtraservice(id);
+    },
+    async setHelp(){
+      
+      let res = await api.updateHelp(this.formData, this);  
+    },
       importDone({ results, header }) { // upload xls success
         this.tableData = results
         this.tableHeader = header
@@ -345,52 +290,38 @@ export default {
         this.listLoading = true
         
         // let res = await api.getTeacherList(this.listQuery);
-        this.tableData = [
-          { name: 'sf开始的浪费口水都发送方SAF', company: 'sfd', price: '324.34', level: 4.5 },
-          { name: 'sf开始的浪费口水都发送方SAF', company: 'sfd', price: '324.34', level: 4.5 },
-        ];
-        this.total = this.tableData.length// res.pagination.total;
+        if(this.category === '集成暖通'){
+          this.getDepositscale();
+        }else if(this.category === '主材选购'){
+          this.getExtraservice(5);
+        }else if(this.category === '家具选购'){
+          this.getExtraservice(6);
+        }else if(this.category === 'help'){
+          this.getHelp();
+        }
+        
         this.listLoading = false
       },
-      deleteItem(index,row){
-        let id = row.id
-        this.$confirm(`此操作将删除该条目, 是否继续?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.deleteNewNotice(id)
-        }).catch(()=>{ this.$notify.info({ title: '消息', message: '已取消' }); })
+      async getDepositscale(){
+        let res = await api.getDepositscale(null, this);
+
+        this.formData= { value: Number(res) };
       },
-      deleteNewNotice(id){
-        let sendData = {
-          seller_id:id,
-        }
-        deleteAuth_api(sendData).then(res=>{
-          if(res&&res.status===0){
-              this.$notify.success({ title: '成功', message: '操作成功' });
-            this.getList()
-          }else{
-            this.$notify({ title: '错误', message: '操作失败', type:'error' });
-          }
-        }).catch(err=>{
-          console.error('deleteseller_api')
-        })
-          
+      async getExtraservice(id){
         
+        let res = await api.getExtraservice(id, null, this);
+
+        if(res){
+          this.formData = {};
+          res.forEach(v => this.formData[v.split(':')[0]] = Number(v.split(':')[1]) );
+        }
+
+      },     
+      async getHelp(){
+        let res = await api.getHelp(null, this);
+        this.formData = {};
+        this.formData.value = res;
       },
-    // searchByDate(){
-    //   if(!this.dataRange||!this.dataRange.length||this.dataRange.length!==2){
-    //     return console.log("日期错误")
-    //   }
-    //   let dateS = this.dataRange[0]
-    //   let dateE = this.dataRange[1]
-    //   let Sstr = dateS.getFullYear()+'-'+(dateS.getMonth()+1>9?(dateS.getMonth()+1):('0'+dateS.getMonth()))+'-'+(dateS.getDate()+1>9?(dateS.getDate()+1):('0'+dateS.getDate()))
-    //   let Estr = dateE.getFullYear()+'-'+(dateE.getMonth()+1>9?(dateE.getMonth()+1):('0'+dateE.getMonth()))+'-'+(dateE.getDate()+1>9?(dateE.getDate()+1):('0'+dateE.getDate()))
-    //   this.listQuery.time = Sstr+','+Estr
-    //   this.listQuery.page = 1
-    //   this.getList()
-    // },
     handleSizeChange(val) {
       this.listQuery.limit = val
       this.getList()

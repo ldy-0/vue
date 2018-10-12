@@ -110,8 +110,8 @@
 
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="showModal(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="showDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" type="primary" @click="showModal(scope.$index, scope.row)" v-if="category !== '易居管家' || ['家政保洁', '施工员', '项目经理'].indexOf(scope.row.storegc_name) === -1">编辑</el-button>
+          <el-button size="mini" type="danger" @click="showDelete(scope.$index, scope.row)" v-if="category !== '易居管家' || ['家政保洁', '施工员', '项目经理'].indexOf(scope.row.storegc_name) === -1">删除</el-button>
           <el-button size="mini" type="primary" @click="showTwoClass(scope.$index, scope.row)" v-if='hasTwoClass'>二级分类</el-button>
         </template>
       </el-table-column>
