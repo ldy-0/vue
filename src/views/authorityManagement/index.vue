@@ -142,8 +142,31 @@ export default {
       waitAddNotice: false,
       addNewShow: false,
       isAddItem: true,
-      // rolesList:['appointment','auth','order','goods'],
-      rolesList: [],
+      //以下来匹配路由权限的，label和路由roles一致，才有权限（seller表示是超级管理员，不用匹配，seller2则不是超级管理员）
+      rolesList:[
+      	{
+      		label:'commodityManagement',
+      		text:'商品管理'
+      	},
+      	{
+      		label:'orderManagement',
+      		text:'订单管理'
+      	},
+      	{
+      		label:'memberList',
+      		text:'人员列表'
+      	},
+      	{
+      		label:'authorityManagement',
+      		text:'权限管理'
+      	},
+      	{
+      		label:'infoManagement',
+      		text:'运营'
+      	},
+      
+      
+      ],
       formLabelWidth: "140px", //弹框1 左侧文字默认宽度
       formForNotive: Object.assign({}, formForNotive),
       rules: {

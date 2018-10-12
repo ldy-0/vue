@@ -117,7 +117,7 @@ export default {
     };
     return {
       // -------------
-      isAdmin: false,
+      isAdmin: false, //控制平台和商家角色
       tabRole: "",
       // -------------
       loginForm: {

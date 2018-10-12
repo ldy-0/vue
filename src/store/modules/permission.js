@@ -1,4 +1,4 @@
-import { asyncRouterMapSeller, constantRouterMap } from '@/router'
+import { asyncRouterMapAdmin,asyncRouterMapSeller, constantRouterMap } from '@/router'
 
 /**
  * 通过meta.role判断是否与当前用户权限匹配
@@ -69,8 +69,7 @@ const permission = {
         }
         //商家
         else if (roles.indexOf('seller') >= 0) {
-          console.log('---------------',roles)
-          accessedRouters = filterAsyncRouter(asyncRouterMapSeller,roles)
+          accessedRouters = asyncRouterMapSeller
         } 
         else if(roles.indexOf('seller2') >= 0){
           console.log('---------------',roles)
@@ -79,7 +78,7 @@ const permission = {
             // for(let i=0,len=asyncRouterMapSeller.length;i<len;i++){
             // hbs:make some diff
             // try{
-            //   if(asyncRouterMapAdmin[i].path=='/authorityManagement'){
+            //   if(asyncRouterMapAdmin[i].path=='/sellerAuth'){
             //     authIndex = i
             //     asyncRouterMapAdmin.splice(authIndex,1)
             //     accessedRouters = asyncRouterMapAdmin
