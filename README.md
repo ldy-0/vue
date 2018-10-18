@@ -33,6 +33,7 @@
 ├── index.html                 // html模板
 └── package.json               // package.json
 ```
+
 ## 安装
 * 安装依赖 `npm install`
   > 强烈建议不要用直接使用 cnpm 安装，会有各种诡异的 bug，可以通过重新指定 registry 来解决 npm 安装速度慢的问题。[解决方案](https://github.com/PanJiaChen/vue-element-admin/issues/24)
