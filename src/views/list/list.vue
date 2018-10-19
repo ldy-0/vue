@@ -134,7 +134,7 @@
     </el-table>
 </el-main>
 <el-footer>
-  <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,2,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total">
+  <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total">
   </el-pagination>
 </el-footer>
 </el-container>
@@ -154,9 +154,9 @@
       <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='true' v-if='item.isTexts'></el-input>
 
       <!-- 单选 -->
-      <el-radio-group v-model='detail[item.value]' v-if='item.isRadio'>
-        <el-radio label=1>是</el-radio>
-        <el-radio label=0>否</el-radio>
+      <el-radio-group v-model='detail[item.value]' @change='changeRadio(item, $event)' v-if='item.isRadio'>
+        <el-radio label='1'>是</el-radio>
+        <el-radio label='0'>否</el-radio>
       </el-radio-group>
     </el-form-item>
     
@@ -386,7 +386,7 @@ export default {
           { key: '易居管家', value: 'gj', isRadio: true },
           { key: '整居定制', value: 'zj', isRadio: true },
           { key: '集成暖通', value: 'jc', isRadio: true },
-          { key: '主材选购', value: 'zx', isRadio: true },
+          { key: '主材选购', value: 'zc', isRadio: true },
           { key: '家具选购', value: 'jj', isRadio: true },
           { key: '易居海外', value: 'hw', isRadio: true },
           { key: '用户列表', value: 'user', isRadio: true },
@@ -483,6 +483,9 @@ export default {
       }else if(this.category === 'afterService'){
         this.getAfterService(id)
       }
+    },
+    changeRadio(item, value){
+      console.log('- radio -', this.detail, item, value)
     },
     submitForm(r){
 
@@ -628,14 +631,18 @@ export default {
         this.getList();
       },
     initDetail(item){
-      this.detail = {};
+      let o = {};
       
       if(typeof item === 'object'){
-        for(let key in item){
-          this.detail[key] = item[key];
+        if(this.category === 'authorize'){
+          for(let key in item){ o[key] = item[key]; }
+          this.detailClassList.map(v => v.value).forEach(v => o[v] = item[v] || '0')
+        }else{
+          for(let key in item){ o[key] = item[key]; }
         }
       }
-      
+     
+      this.detail = o;
       console.log('init detail done --', item, this.detail);
     },
     handleSizeChange(val) {
@@ -656,6 +663,7 @@ export default {
     },
     format(data){
       data.forEach(item => item.seller_limits.forEach(v => item[v] = '1') );
+      if(data[0].is_admin === 1) data.shift()
       return data;
     },
     async getMember(){

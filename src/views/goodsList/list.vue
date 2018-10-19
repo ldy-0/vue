@@ -70,7 +70,7 @@
 
   <el-form :model="formData"  ref="ruleForm" :rules="rules" >
 
-    <el-form-item label="姓名" :label-width="formLabelWidth" prop="name">
+    <el-form-item :label="category === '设计师' ? '姓名' : '名称' " :label-width="formLabelWidth" prop="name">
       <el-input v-model="formData.name" auto-complete="off"></el-input>
     </el-form-item>
     
@@ -112,8 +112,8 @@
       </el-select>
     </el-form-item>
 
-    <!-- 整居定制, 主材选购', '家具选购', '易居海外-->
-    <el-form-item label="三级分类" :label-width="formLabelWidth" prop='twoCategory' v-if='showTwoClass'> 
+    <!-- 易居管家(2018.10.16补充)，整居定制, 主材选购', '家具选购', '易居海外-->
+    <el-form-item label="二级分类" :label-width="formLabelWidth" prop='twoCategory' v-if='showTwoClass'> 
       <el-select v-model="formData.twoCategory" placeholder="请选择" @change='getTwoClass'> <!--multiple  -->
         <el-option v-for="item in twoCategories" :key="item.storegc_id" :label="item.storegc_name" :value="item.storegc_id"></el-option>
       </el-select>
@@ -240,7 +240,7 @@
     </el-table>
 </el-main>
 <el-footer>
-  <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,2,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total">
+  <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total">
   </el-pagination>
 </el-footer>
 </el-container>
@@ -273,6 +273,7 @@ export default {
       this.showCompany = true;
     }else if(this.category === '易居管家'){
       this.showSearch = false;
+      this.showTwoClass = true;
       this.showUnit = true;
     }else if(this.category === '整居定制'){
       this.showSearch = false;

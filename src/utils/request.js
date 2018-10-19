@@ -10,8 +10,8 @@ const service = axios.create({
   // baseURL: window.api, // api的base_url
   // baseURL: process.env.BASE_API, // api的base_url
   // baseURL: 'https://www.njjncm.com/', // api的base_url
-  // baseURL: 'http://www.yijulifehall.com:88/', // api的base_url
-  baseURL: 'http://132.232.75.240:88/', // api的base_url
+  baseURL: 'http://www.yijulifehall.com/', // api的base_url
+  // baseURL: 'http://132.232.75.240:88/', // api的base_url
   
   timeout: 20000 // request timeout
 })

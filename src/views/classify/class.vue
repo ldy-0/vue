@@ -137,7 +137,8 @@ export default {
 
   async created(){
     this.category = this.$route.query.category;
-    let singleClassList = [ '设计师+', '易居管家', '集成暖通' ];
+    // let singleClassList = [ '设计师+', '易居管家', '集成暖通' ];
+    let singleClassList = [ '设计师+', '集成暖通' ];
     console.log('--', this.category)
 
     this.hasTwoClass = singleClassList.indexOf(this.category) !== -1 ? false : true;

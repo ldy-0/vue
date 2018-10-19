@@ -134,17 +134,17 @@ export default {
           { key: '搬运服务', value: '搬运服务', isText: true },
         ],
         'help': [
-          { key: '文字内容', value: 'value', isTexts: true },
+          { key: '文字内容', value: 'helpValue', isTexts: true },
         ]
       },
       rules: {
-        name: [
+        'name': [
             { required: true, message: '请输入昵称', trigger: 'blur', min: 1, },
             { required: true, message: '不能超过15个字符!', trigger: 'blur', max: 15 }
         ],
-        value: [
+        'value': [
             { required: true, message: '请输入定金比例' },
-            // { type:'number', message: '值必须为数字' },
+            { type:'number', message: '值必须为数字' },
         ],
         '设计服务': [
             { required: true, message: '请输入设计服务费' },
@@ -157,6 +157,9 @@ export default {
         '搬运服务': [
             { required: true, message: '请输入搬运服务费' },
             { type:'number', message: '值必须为数字' },
+        ],
+        'helpValue': [
+            { required: true, message: '内容不能为空' },
         ],
       },
       showDesign: false,
@@ -320,7 +323,7 @@ export default {
       async getHelp(){
         let res = await api.getHelp(null, this);
         this.formData = {};
-        this.formData.value = res;
+        this.formData.helpValue = res;
       },
     handleSizeChange(val) {
       this.listQuery.limit = val
