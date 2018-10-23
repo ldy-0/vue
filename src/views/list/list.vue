@@ -470,8 +470,10 @@ export default {
     },
     searchByDate(){
       console.log(this.listQuery.time)
-      this.listQuery.starttime = new Date(this.listQuery.time[0]).toISOString().split('T')[0]
-      this.listQuery.endtime = new Date(this.listQuery.time[1]).toISOString().split('T')[0]
+      // this.listQuery.starttime = new Date(this.listQuery.time[0]).toISOString().split('T')[0]
+      // this.listQuery.endtime = new Date(this.listQuery.time[1]).toISOString().split('T')[0]
+      this.listQuery.starttime = new Date(this.listQuery.time[0]).toLocaleDateString().replace(/\//g, '-');
+      this.listQuery.endtime = new Date(this.listQuery.time[1]).toLocaleDateString().replace(/\//g, '-');
       
       this.listQuery.page = 1
       delete this.listQuery.time

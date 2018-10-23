@@ -251,6 +251,8 @@ export default {
       
     },
     async setDepositscale(){
+      if(this.formData.value < 0 || this.formData.value > 100) return this.$message.error({ message: '定金比例必须在1-100之间' });
+
       let res = await api.updateDepositscale(this.formData, this);
 
       this.getDepositscale();
@@ -260,6 +262,9 @@ export default {
           value = [];
 
       for(let key in o){
+        
+        if(o[key] < 0) return this.$message.error({ message: '服务费不能小于0' });
+
         value.push(`${key}:${o[key]}`); 
       }
       
@@ -269,7 +274,7 @@ export default {
     },
     async setHelp(){
       
-      let res = await api.updateHelp(this.formData, this);  
+      let res = await api.updateHelp({ value: this.formData.helpValue }, this);  
     },
       importDone({ results, header }) { // upload xls success
         this.tableData = results

@@ -10,7 +10,7 @@ const service = axios.create({
   // baseURL: window.api, // api的base_url
   // baseURL: process.env.BASE_API, // api的base_url
   // baseURL: 'https://www.njjncm.com/', // api的base_url
-  baseURL: 'http://www.yijulifehall.com/', // api的base_url
+  baseURL: 'https://www.yijulifehall.com/', // api的base_url
   // baseURL: 'http://132.232.75.240:88/', // api的base_url
   
   timeout: 20000 // request timeout
@@ -57,14 +57,14 @@ service.interceptors.response.use(
       // return Promise.reject('request.js拦截响应 res.status == 1')
       return response;
     } else if(res&&res.status === 10){
-        Message({
-          message: res.error,
-          type: 'error',
-          duration: 5 * 1000
-        })
-        store.dispatch('FedLogOut').then(() => {
-          location.reload() 
-        })
+        // Message({
+        //   message: res.error,
+        //   type: 'error',
+        //   duration: 5 * 1000
+        // })
+        // store.dispatch('FedLogOut').then(() => {
+        //   location.reload() 
+        // })
     }else  {
       // return response.data
       return response

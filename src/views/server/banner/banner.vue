@@ -20,6 +20,7 @@
           list-type="picture-card" 
           :on-preview="preview"
           :on-change="changeImg" 
+          :on-remove="changeImg" 
           :file-list="formData.img"
           >
           <i class="el-icon-plus" ></i>
@@ -38,11 +39,11 @@
       <el-upload 
               :auto-upload="false"
               action=""
-              :limit="imgLimit"
               :on-exceed='exceed'
               list-type="picture-card" 
               :on-preview="preview" 
               :on-change="changeImgUrl" 
+              :on-remove="changeImgUrl" 
               :file-list="formData.img_url" 
               >
               <i class="el-icon-plus"></i>
@@ -145,6 +146,9 @@ export default {
       dialogVisible: false,
       formData: {},
       imgs: [],
+      hasImg: false,
+      img_urls: [],
+      hasImgUrl: false,
       imgLimit:1,
       classs: [
         { value: 0, label:'不跳转' },
@@ -191,6 +195,7 @@ export default {
   methods: {
     async showModal(index, row){ //
       this.initFormData();
+      this.isAddItem = true;
 
       if(row){
         this.isAddItem = false
@@ -207,6 +212,7 @@ export default {
         this.changeType(2);
       }
 
+      this.hasImg = this.hasImgUrl = this.isAddItem;
       this.isShow = true
     },
     exceed(files, filelist){
@@ -218,12 +224,15 @@ export default {
         console.log('preview----',arguments)
       },
       changeImg(e){
-        this.imgs[0] = e.raw;
+        this.hasImg = true;
+        if(e.raw) this.imgs[0] = e.raw;
         console.log('upload img--', this.imgs);
       },
-      changeImgUrl(e) {
-        this.imgs[1] = e.raw;
-        console.log('upload imgUrl--', this.imgs);
+      changeImgUrl(e, list) {
+        this.hasImgUrl = true;
+        this.img_urls = list;
+        // this.imgs[1] = e.raw;
+        console.log('upload imgUrl--', this.imgs, list);
       },
     async changeType(i){
       if(i === 2){
@@ -261,17 +270,13 @@ export default {
       console.log(val); 
     },
     async submitForm(formName){
-      // let res = await this.$refs[formName].validate()
-      // console.log('submit', res, this.formData)
-      // if(!res){
-      //   return 
-      // }
 
-      if(this.isAddItem && !this.imgs[0]){
+      if(this.hasImg && !this.imgs[0]){
+        console.log('---', this.formData.img)
         return this.$message({ message: '请选择一张图片' });
       }
 
-      if(this.isAddItem && this.formData.type === 1 && !this.imgs[1]){
+      if(this.hasImgUrl && this.formData.type === 1 && this.img_urls.length < 1){
         return this.$message({ message: '请选择跳转图片' });
       }
 
@@ -281,44 +286,45 @@ export default {
 
       this.waitAddNotice = true;
 
-      if(this.imgs.length > 0){
-        upLoadFile(this.imgs[0] ? this.imgs : this.imgs[1]).then(v => {
-          if(this.isAddItem){
-            this.formData.img.push(v[0]); // 轮播图
-            this.formData.img_url.push(v[1] || ''); // 跳转图片
+      let imgs = [], // 已上传图片列表
+          hasBanner = this.imgs[0]; 
+      this.img_urls.forEach(v => v.raw ? this.imgs.push(v.raw) : imgs.push(v.url) )
+
+      if(this.hasImg || this.hasImgUrl){
+
+        upLoadFile(this.imgs).then(v => {
+          if(hasBanner){
+            this.formData.img[0] = v[0];
+            this.formData.img_url = v.slice(1);
           }else{
-            if(this.imgs[0]){ // 轮播图修改
-              this.formData.img = [v[0]];
-              this.formData.img_url = [v[1] || v[0]];
-            }else{ // 仅跳转图片修改
-              this.formData.img_url = v;
-            }
+            this.formData.img_url = v.slice(0);
           }
+         console.log('upload success :', this.formData) 
           
-          this.submit();
+          this.submit(imgs.length && imgs);
         }).catch(e=>{ console.error(e) })
+
       }else{
         this.submit();
       }
        
       
     },
-    async submit(){
+    async submit(imgs){
       let o = this.formData,
           pic = o.img[0],
-          url = o.img_url[0],
+          url = imgs ? imgs.concat(o.img_url)[0] : o.img_url[0], // [0],
             param = {
               banner_pic: pic.url || pic,
               banner_url: o.type === 2 ? o.id : o.type === 1 ? url.url || url : null,
               type: o.type,
             };
 
-      console.log('param --', param);
+      console.log('param --', param, this.isAddItem);
       let res = this.isAddItem ? await api.setBanner(param, this) : await api.updateBanner(this.formData.banner_id, param, this);
 
       this.getList();
       this.waitAddNotice = false;
-      this.isAddItem = true;
       this.isShow = false;
       this.imgs = [];
     },

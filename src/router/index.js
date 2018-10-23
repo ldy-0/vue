@@ -278,6 +278,26 @@ export let asyncRouterMapSeller = [
   //   }]
   // },
   {
+    path: '/yijuguanjia',
+    component: Layout,
+    // redirect: '/sellerAuth/index',
+    meta: { title:'yijuguanjia', icon: 'goods', roles: 'gj' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/goodsList/list'),
+        name: '易居管家-list',
+        meta: { title: 'yijuguanjia', category: '易居管家', noCache: true }
+      },
+      {
+        path: 'class',
+        component: () => import('@/views/classify/class'),
+        name: '易居管家-class',
+        meta: { title: 'classset', category: '易居管家', noCache: true }
+      },
+    ]
+  },
+  {
     path: '/design',
     component: Layout,
     // redirect: '/sellerAuth/index',
@@ -323,26 +343,7 @@ export let asyncRouterMapSeller = [
       },
     ]
   },
-  {
-    path: '/yijuguanjia',
-    component: Layout,
-    // redirect: '/sellerAuth/index',
-    meta: { title:'yijuguanjia', icon: 'goods', roles: 'gj' },
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/goodsList/list'),
-        name: '易居管家-list',
-        meta: { title: 'yijuguanjia', category: '易居管家', noCache: true }
-      },
-      {
-        path: 'class',
-        component: () => import('@/views/classify/class'),
-        name: '易居管家-class',
-        meta: { title: 'classset', category: '易居管家', noCache: true }
-      },
-    ]
-  },
+  
   {
     path: '/zhengju',
     component: Layout,

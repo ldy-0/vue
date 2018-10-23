@@ -517,9 +517,9 @@ async function updateGoods(id, data, _this){
   return res.data.error !== '' ? _this.$notify.error({ title: '错误信息', message: res.data.error, }) : _this.$notify.success({ title: '提示', message: '更新成功' })// res.data; 
 }
 
-async function deleteGoods(data, _this){
+async function deleteGoods(id, data, _this){
   let res = await request({
-    url: `/api/v1/seller/goodscommon`,
+    url: `/api/v2/seller/goodscommon/${id}`,
     method: 'DELETE',
     data,
   });
@@ -596,7 +596,7 @@ async function updateCustommade(data, _this){
     data,
   });
   console.log('res ', res);
-  return res.data.error !== '' ? _this.$notify.error({ title: '错误信息', message: res.data.error, }) : _this.$notify.success({ title: '提示', message: '添加成功' })// res.data;
+  return res.data.error !== '' ? _this.$notify.error({ title: '错误信息', message: res.data.error, }) : _this.$notify.success({ title: '提示', message: '修改成功' })// res.data;
 }
 
 async function getCustommadeList(params, _this){

@@ -53,9 +53,9 @@ let stop = false
 
 export default {
   mounted(){
-    getAllBuyList_api({page:1,limit:10}).then(data=>{
-      console.log(data)
-    })
+    // getAllBuyList_api({page:1,limit:10}).then(data=>{
+    //   console.log(data)
+    // })
     setTimeout(()=>{
       this.down = "hbs-down"
     },800)

@@ -206,7 +206,8 @@ export default {
         this.listLoading = true
         
         let res = await api.getCustommadeList();
-        this.formData.detailList = res.data;
+        this.formData.detailList = res.data || [];
+        console.log('banbao detailList:', this.formData.detailList)
         
         this.listLoading = false
       },

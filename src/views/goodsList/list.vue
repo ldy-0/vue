@@ -66,7 +66,7 @@
 
 <template>
 <div>
-<el-dialog :title="isAddItem ? `新增${className}` : `编辑${className}` " :visible.sync="isShow" width="30%" @close='closeDialog'>
+<el-dialog :title="isAddItem ? `新增${className}` : `编辑${className}` " :visible.sync="isShow" width="60%" @close='closeDialog'>
 
   <el-form :model="formData"  ref="ruleForm" :rules="rules" >
 
@@ -84,7 +84,8 @@
         :file-list='formData.imgs' 
         :on-exceed='exceed'
         :on-success="handleAvatarSuccess"
-        :on-change='addImage'> <!--:show-file-list="false" -->
+        :on-change='changeImage' 
+        :on-remove='changeImage'> <!--:show-file-list="false" -->
         <!-- <img v-if="case_img" :src="formData.case_img" class="avatar"> -->
         <i class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
@@ -96,7 +97,7 @@
     </el-form-item>
 
     <el-form-item label="价格" :label-width="formLabelWidth" prop="price">
-      <el-input v-model.number="formData.price" auto-complete="off"></el-input>
+      <el-input v-model.number="formData.price" auto-complete="off" @input='getPrice'></el-input>
     </el-form-item>
 
     <!-- 易居管家 -->
@@ -120,7 +121,7 @@
     </el-form-item>
 
     <!-- 整居定制 -->
-    <el-form-item label='库存' :label-width='formLabelWidth' prop='amount' v-if='showAmount'>
+    <el-form-item label='库存' :label-width='formLabelWidth' prop='amount' v-if="showAmount && skuType !== '多规格'">
       <el-input v-model.number="formData.amount" auto-complete="off"></el-input>
     </el-form-item>
     
@@ -186,7 +187,7 @@
   </el-form>
 
   <span slot="footer" class="dialog-footer">
-    <el-button @click="isShow=false; waitAddNotice=false;" >取消</el-button>
+    <el-button @click="isShow=false; waitAddNotice=false; canAddDetail=true;" >取消</el-button>
     <el-button v-if="isAddItem" type="primary" @click="submitForm('ruleForm')"
      :disabled="waitAddNotice"
      :loading="waitAddNotice">确 定</el-button>
@@ -378,7 +379,7 @@ export default {
           ],
           price: [
             { required: true, message: '请输入价格' },
-            { type:'number', message: '值必须为数字' },
+            { type:'number', message: '值必须为数字', },
           ],
           category: [
             { required: true, message: '请选择分类', trigger: 'change' }
@@ -451,6 +452,11 @@ export default {
       } 
     },
     getTwoClass(id){ this.categories.forEach(v => v.storegc_id === id ? this.formData.categoryName = v.storegc_name : void(0) ) },
+    getPrice(v){
+      let price = Number(v)
+      // isNaN(price) && this.$message.error({ message: '值必须为数字!' });
+      // price < 0.01 && this.$message.error({ message: '价格不能小于0.01' }); 
+    },
     searchByPhone(){
       console.log('search ----', this.searchKeyWord);
       this.listQuery.search = this.searchKeyWord;
@@ -486,19 +492,14 @@ export default {
     },
     closeDialog(){
       this.waitAddNotice = false;
+      this.canAddDetail = true;
     },
     exceed(){ this.$message({ type: 'error', message: '图片不能超过4张!' }) },
-    addImage(e, list) {
+    changeImage(e, list) {
       
       console.log('upload before', e, list)
-      this.imgs.push(e);
-      // upLoadFile(e.raw).then(v => {
-      //   // this.formData.case_img = v[0]
-      //   // this.case_img = true
-      //   // console.log(this.formData.imgs)
-      //   this.imgs.push(v[0])
-      //   console.log(this.imgs)
-      // }).catch(e=>{ console.error(e) })
+      // this.imgs.push(e);
+      this.imgs = list;
 
     },
     addSku(){
@@ -509,7 +510,7 @@ export default {
       index === 0 ? this.$notify.info({ content: 'a' }) : this.formData.skuList.splice(index, 1)
     },
     addDetail(){
-      if(!this.canAddDetail)return this.$message({ message: '' });
+      if(!this.canAddDetail)return this.$message({ message: '请选择图片' });
       this.canAddDetail = false;
       this.formData.detailList.push({ img: '', content: '' })
     },
@@ -535,7 +536,15 @@ export default {
       let res = await this.$refs[formName].validate().catch(e => e);
       if(!res) return ;
 
-      
+      if(isNaN(this.formData.price)) return this.$message.error({ message: '值必须为数字!' });
+
+      if(this.formData.price < 0.01 || this.formData.skuList.some(v => v.price < 0.01)) return this.$message.error({ message: '价格不能小于0.01' }); 
+
+      if(this.formData.amount < 0 || this.formData.skuList.some(v => v.stock < 0)) return this.$message.error({ message: '库存不能小于0' }); 
+
+      if(this.formData.amount % 1 !== 0 || this.formData.skuList.some(v => v.stock % 1 !== 0)) return this.$message.error({ message: '库存必须为整数' }); 
+
+      if(this.formData.freight < 0 ) return this.$message.error({ message: '运费不能小于0' }); 
  
       // 有三级分类必须选择三级分类(主材选购除外)
       if(this.showTwoClass && this.category !== '主材选购' && !this.formData.twoCategory) return this.$message.error({ message: '请选择三级分类' });
@@ -559,23 +568,28 @@ export default {
 
       this.waitAddNotice = true
 
-      console.log('this.imgs:--', this.imgs);
-      upLoadFile(this.imgs.map(v => v.raw)).then(v => {
+      let imgs = [], // 已上传图片链接
+          files = [] 
+      this.imgs.forEach(v => v.raw ? files.push(v.raw) : imgs.push(v.url))
+      console.log('this.imgs:--', this.imgs, imgs, files);
+
+      upLoadFile(files).then(v => {
 
         // if(this.imgs.length > 0) this.formData.imgs = this.formData.imgs.map(v => v.url);
-        this.formData.imgs = this.isAddItem ? v : v.concat( this.formData.imgs.map(v => v.url) );
-        console.log('upload done', v, this.formData.imgs)
+        // this.formData.imgs = this.isAddItem ? v : v.concat( this.formData.imgs.map(v => v.url) );
+        this.imgs.length === 0 ? imgs = this.formData.imgs.map(v => v.url) : imgs = imgs.concat(v)
+        console.log('upload done', v, imgs, this.formData.imgs)
 
-        this.submit();
+        this.submit(imgs);
       }).catch(e=>{ console.error(e) })
       
     },
-    async submit(){
+    async submit(imgs){
       this.formData.skuList.forEach(v => v.marketprice = v.price)
       let o = this.formData,
           param = {
             goods_name: o.name,
-            goods_image: o.imgs, 
+            goods_image: imgs, 
             goods_marketprice: o.price,
             goods_costprice: '',
             goods_price: o.price,
@@ -587,17 +601,23 @@ export default {
             gc_id_2: o.category,
             gc_id_3: o.twoCategory,
             goods_storage: o.amount || 9999999,
-            spec_name: o.skuList.map((v, i) => i), 
-            spec_value: o.skuList.map(v => v.sp_value), 
-            spec: o.skuList,
             goods_freight: o.freight || 0,
             goods_body: o.detailList,
             is_virtual: 0,
+            // spec: o.skuList,
+            // spec_name: o.skuList.map((v, i) => i),
+            // spec_value: o.skuList.map(v => v.sp_value),
             school_name: o.company || 0, // 设计师
             unit: o.unit, // 易居管家
             goods_advword: '',
             goods_serial: '',
           };
+      
+      if(this.skuType === '多规格'){
+        param.spec = o.skuList
+        param.spec_name = o.skuList.map((v, i) => i)
+        param.spec_value = o.skuList.map(v => v.sp_value)
+      }
 
       if(this.category === '设计师'){
         delete param.spec;
@@ -660,7 +680,7 @@ export default {
         }).catch(()=>{ this.$notify.info({ title: '消息', message: '已取消' }); })
       },
       async deleteItem(id){
-        let res = await api.deleteGoods({ goods_commonid: id }, this);
+        let res = await api.deleteGoods(id, { goods_commonid: id }, this);
 
         this.getList();
       },
@@ -686,6 +706,10 @@ export default {
     },
     initFormData(item){
       item = item || {};
+
+      if(item.gc_id_3){
+        this.getClass(item.gc_id_2);
+      }
 
       this.formData = {
         id: item.goods_commonid || null, 

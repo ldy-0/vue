@@ -111,13 +111,14 @@ const user = {
         return loginByUsername(userInfo).then(response => {
           // const data = response
           const data = response.data
+          console.log('login res :', data)
           if(data&&data.status===0){
             //把getuserinfo的事情做完
             const sessionID = data.data['token']
             commit('SET_TOKEN', sessionID)
             setToken(sessionID)
             let roles = data.data.permission
-            if(data.data.is_admin===1){
+            if(Number(data.data.is_admin) === 1){
               roles.push('seller')
             }else{
               roles.push('seller2')

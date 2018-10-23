@@ -39,7 +39,7 @@ let upLoadFile = function (allFile){
           cos.sliceUploadFile({
               Bucket: Bucket,
               Region: Region,
-              Key: new Date().getTime()+file.name.slice(-100),
+              Key: String(new Date().getTime()), // +file.name.slice(-100),
               Body: file,
               onHashProgress: function (progressData) {
                   console.log('校验中', JSON.stringify(progressData));
