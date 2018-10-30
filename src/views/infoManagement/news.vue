@@ -324,7 +324,7 @@
 			//获取案例列表
 			dynamicList() {
 				let sendData = Object.assign({}, this.listQuery)
-				sendData.type="news"
+				sendData.dynamic_type="news"
 				getActList_api(sendData).then(res => {
 					this.tableData = res.data
 					if (res.status == 0) {

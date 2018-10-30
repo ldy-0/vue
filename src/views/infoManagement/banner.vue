@@ -19,8 +19,8 @@
 					<img @click="handlePictureCardPreview(scope.row)" :src="scope.row.banner_pic" style="width:100px">
 				</template>
 			</el-table-column>
-			<el-table-column label="标题" prop='banner_title'>
-			</el-table-column>
+		<!-- 	<el-table-column label="标题" prop='banner_title'>
+			</el-table-column> -->
 			<el-table-column label="跳转图片">
 				<template slot-scope="scope">
 					<img @click="handlePictureCardPreview(scope.row)" :src="scope.row.banner_url" style="width:100px">
@@ -43,9 +43,9 @@
 						<i class="el-icon-plus"></i>
 					</el-upload>
 				</el-form-item>
-				<el-form-item label="标题" prop="banner_title">
+			<!-- 	<el-form-item label="标题" prop="banner_title">
 					<el-input v-model="form.banner_title"   placeholder="请输入标题"></el-input>
-				</el-form-item>
+				</el-form-item> -->
 				<el-form-item label="活动区域">
 					<el-select v-model="form.region" placeholder="跳转类型(图片,无)" @change="changeSelect" :disabled ="dialogStatus == 'edit'">
 						<el-option label="图片" value="true"></el-option>
@@ -129,7 +129,7 @@
 				//表单内容
 				form: {
 					banner_pic: [],
-					banner_title: '',
+					//banner_title: '',
 					region: '',
 					banner_url: [],
 
@@ -145,11 +145,11 @@
 						message: '请上传图片',
 						trigger: 'change'
 					}, ],
-					banner_title: [{
-						required: true,
-						message: '请填写标题',
-						trigger: 'blur'
-					}]
+// 					banner_title: [{
+// 						required: true,
+// 						message: '请填写标题',
+// 						trigger: 'blur'
+// 					}]
 				},
 				//正在上传图片
 				isUpimg: false,
@@ -291,7 +291,7 @@
 				sendData.banner_type = 'firstPic';
 				sendData.banner_pic = this.form.banner_pic[0].url;
 				sendData.banner_url=this.form.banner_url[0] ? this.form.banner_url[0].url : null;
-				sendData.banner_title=this.form.banner_title
+				//sendData.banner_title=this.form.banner_title
 				addBanner_api(sendData).then(res => {
 					if (res.status == 0) {
 						this.dialogFormVisible = false;
@@ -313,10 +313,24 @@
 				console.log(this.form)
 				//return
 				let sendData = {}
+				if(this.form.banner_pic[0].url){		
+				sendData.banner_pic = this.form.banner_pic.length==0 ? '' :this.form.banner_pic[0].url;
+				  if(this.form.banner_url){
+					  sendData.banner_url=this.form.banner_url;
+				  }else{
+					  sendData.banner_url=''
+				  }
+				}else{
+					if(Array.isArray(this.form.banner_url) && this.form.banner_url.length!=0){
+						sendData.banner_url=this.form.banner_url[0].url;
+					}else{
+						sendData.banner_url=this.form.banner_url.length==0 ? '' :this.form.banner_url;
+					}
+					sendData.banner_pic = this.form.banner_pic.length==0 ? '' :this.form.banner_pic;
+					
+				}
 				sendData.banner_type = 'firstPic';
-				sendData.banner_pic = this.form.banner_pic.length==0 ? '' :this.form.banner_pic;
-				sendData.banner_url=this.form.banner_url.length==0 ? '' :this.form.banner_url;
-				sendData.banner_title=this.form.banner_title
+			//	sendData.banner_title=this.form.banner_title
 				sendData.banner_id = this.form.banner_id
 				console.log("修改的对象")
 				console.log(sendData)
@@ -331,6 +345,17 @@
 							duration: 2000
 						})
 						this.getBannerList()
+					}else{
+							this.dialogFormVisible = false;
+							this.isloading = false;
+							this.$notify({
+								title: '成功',
+								message: '修改成功',
+								type: 'success',
+								duration: 2000
+							})
+							this.getBannerList()
+						
 					}
 				})
 			},

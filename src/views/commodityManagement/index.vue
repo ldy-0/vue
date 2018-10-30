@@ -188,6 +188,7 @@
 	} from '@/api/seller'
 	import uploadFn from '@/utils/aahbs'
 
+
 	//初始化常量
 	const form = {
 		goods_name: '',
@@ -551,10 +552,12 @@
 				this.isUpimg = true
 				console.log("change")
 				let imgurl = await uploadFn(file.raw);
+				
 				this.isUpimg = false
 				console.log(this.form)
-				this.form.goods_image.push(imgurl[0])
-
+				this.form.goods_image.push(
+				{url: imgurl[0]}
+				)
 			},
 			//商品详情图
 			async handleImgChange_detail(file, fileLis) {
@@ -562,8 +565,9 @@
 				console.log(this.form)
 				this.isUpimg = true
 				let imgurl = await uploadFn(file.raw);
+			
 				console.log(imgurl)
-
+       
 				this.isUpimg = false
 				this.form.formObjRepeat[this.moddele_idx].Repeat_images.push({
 					url: imgurl[0]

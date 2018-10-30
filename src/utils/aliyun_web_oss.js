@@ -11,6 +11,8 @@ import {getPolicy_api} from '@/api/common';
 			
           const fd = new FormData()
 		      const Obj=res.data
+					console.log("返回的对象参数")
+					console.log(Obj)
             let index1 = file.name.lastIndexOf(".");
             let index2 = file.name.length;
             let postf = file.name.substring(index1, index2); //后缀名

@@ -84,7 +84,7 @@
 				</el-form> -->
 				<el-form :inline="true" class="form">
 					<el-form-item label="导出下列表格为Excel">
-						<el-button type="primary" icon="document" @click="handleDownload" :loading="downloadLoading">导出</el-button>
+						<el-button type="primary" icon="document"  @click="handleDownload" :loading="downloadLoading">导出</el-button>
 					</el-form-item>
 				</el-form>
 			</el-header>
@@ -477,6 +477,13 @@
 				this.downloadLoading = true
 				//请求全部订单数据
 				let allOrder = await this.getOrderList(true);
+				if(!allOrder){
+					return this.$notify({
+          title: '警告',
+          message: '暂无数据',
+          type: 'warning'
+        });
+				}
 							//console.log("数据")
 						//	console.log(allOrder)
 				import ('@/vendor/Export2Excel').then(excel => {
@@ -526,7 +533,12 @@
 
 					if (res.status == 0) {
 						if (isall) {
-							return res.data
+							if(res.data){
+								return res.data
+							}else{
+								this.downloadLoading=false;
+							}
+							
 						} else {
 							this.tableData = res.data
 						//	this.tableData.all_amount=Number(this.tableData.order_amount)+Number(this.tableData.tail_amount)

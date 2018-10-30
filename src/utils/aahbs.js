@@ -1,7 +1,7 @@
 import {upFileToken_api} from '@/api/common' 
 // const COS = require('./cos-js-sdk-v5.min.js')
 const COS = window.COS
-const Bucket = 'threecloud-1253114089';
+const Bucket = 'enshihotel-1253114089';
 const Region = 'ap-shanghai';
 //只接受 文件数组 非类数组！！如果你想对类数组处理可以在下面进行转换
 let upLoadFile = function (allFile){
@@ -32,6 +32,7 @@ let upLoadFile = function (allFile){
                   ExpiredTime: data.expiredTime,
               })
         }).catch(err=>{
+					console.log("错误")
           console.log(err,'upFileToken_api')
         })
         }

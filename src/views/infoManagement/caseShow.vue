@@ -208,6 +208,10 @@
 				this.form.dynamic_images = []
 				this.dialogFormVisible = true //打开内容弹框
 				this.dialogStatus = 'create'
+				this.formObjRepeat= [ {
+					Repeat_images: [],
+					Repeat_title:''
+				}]
 			},
 			//添加图片模块
 			addGraphic(){
@@ -324,7 +328,7 @@
 			//获取案例列表
 			dynamicList() {
 				let sendData = Object.assign({}, this.listQuery)
-				sendData.type="material"
+				sendData.dynamic_type="material"
 				getActList_api(sendData).then(res => {
 					this.tableData = res.data
 					if (res.status == 0) {
