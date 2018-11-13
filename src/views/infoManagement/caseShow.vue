@@ -128,7 +128,7 @@
 		getActList_api,
 		deleAct_api
 	} from '@/api/seller'
-	import uploadFn from '@/utils/aahbs'
+	import uploadFn from '@/utils/tencent_cos'
 	export default {
 		created() {
 			//获取首页列表

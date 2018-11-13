@@ -48,7 +48,7 @@ import seller from './seller'
 import {test} from '@/api/seller'
 import { getRoles } from '@/utils/auth' // getToken from cookie
 
-import uploadFn from '@/utils/aahbs'
+import uploadFn from '@/utils/tencent_cos'
 let stop = false
 
 export default {

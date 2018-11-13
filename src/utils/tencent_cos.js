@@ -1,5 +1,4 @@
 import {upFileToken_api} from '@/api/common' 
-// const COS = require('./cos-js-sdk-v5.min.js')
 const COS = window.COS
 const Bucket = 'enshihotel-1253114089';
 const Region = 'ap-shanghai';

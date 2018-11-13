@@ -186,7 +186,7 @@
 		getIndustryList_api,
 		setting_api
 	} from '@/api/seller'
-	import uploadFn from '@/utils/aahbs'
+	import uploadFn from '@/utils/tencent_cos'
 
 
 	//初始化常量
