@@ -8,7 +8,7 @@ import {
 } from "@/api/login";
 import { getToken, setToken, removeToken, setRoles } from "@/utils/auth";
 import store from "@/store";
-
+import Vue from "vue";
 const user = {
   state: {
     // 用户身份
@@ -128,8 +128,8 @@ const user = {
               let roles = [];
               if (data.data.is_admin == "1") {
                 getSellerAuth().then(res => {
-                  res.data = res.data.replace(/\s/ig,'');
-                  let rolesarry = eval('(' + res.data + ')')
+                  res.data = res.data.replace(/\s/gi, "");
+                  let rolesarry = eval("(" + res.data + ")");
                   rolesarry.forEach(item => {
                     roles.push(item.label);
                   });
@@ -143,6 +143,12 @@ const user = {
                 setRoles(JSON.stringify(roles));
                 resolve();
               }
+            } else if (data && data.status === 1) {
+              Vue.prototype.$message({
+                message: data.error,
+                type: "warning"
+              });
+              return Promise.reject("error");
             } else {
               //接口ok，权限问题，提示登出
               return Promise.reject("error");

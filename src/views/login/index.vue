@@ -170,7 +170,7 @@ export default {
         if (!phoneReg.test(this.findForm.phone)) {
           return this.$message("请输入正确手机号");
         }
-        getVerificationCode({ phone: this.findForm.phone }).then(response => {
+        getVerificationCode({ mobile: this.findForm.phone,type: 2 }).then(response => {
         });
         let that = this;
         that.codetimeShow = true;
@@ -199,13 +199,14 @@ export default {
         return this.$message("两次密码不一致");
       }
       resetPassword({
-        phone: this.findForm.phone,
+        mobile: this.findForm.phone,
         code: this.findForm.code,
-        pass: this.findForm.password2
+        password: this.findForm.password2
       }).then(response => {
         if(response.status == 0){
-          this.$message(response.data.message);
           this.centerDialogVisible = false
+        }else {
+          this.$message(response.error);
         }
       });
     },

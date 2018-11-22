@@ -48,7 +48,7 @@ export function getAdminAuth() {
 //获取改密验证码
 export function getVerificationCode(data) {
   return request({
-    url: '/api/v2/notify/code',
+    url: '/api/v2/common/mobilecode',
     method: 'post',
     data
   })
@@ -57,8 +57,8 @@ export function getVerificationCode(data) {
 //重置密码
 export function resetPassword(data) {
   return request({
-    url: '/api/v2/notify/reset',
-    method: 'put',
+    url: '/api/v2/seller/smspassword',
+    method: 'post',
     data
   })
 }
