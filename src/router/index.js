@@ -252,6 +252,25 @@ export let asyncRouterMapSeller = [{
       }
     }]
   },
+  {
+    path: '/refundModule', //退货退款模块
+    component: Layout,
+    redirect: '/refundModule/rReturn',
+    meta: { title: '退款管理', icon: 'orderlist',roles:'refundModule'},
+    children: [{
+      path: 'rReturn',
+      component: () => import('@/views/refundModule/rReturn'),
+      name: 'rReturn',
+      meta: { title: 'rReturn', icon: 'orderlist',noCache: true }
+    }
+    // , {
+    //   path: 'vReturn',
+    //   component: () => import('@/views/refundModule/vReturn'),
+    //   name: 'vReturn',
+    //   meta: { title: 'vReturn', noCache: true }
+    // }
+   ]
+  },
 	{
 	    path: '/memberList', //人员列表
 	    component: Layout,
@@ -332,7 +351,16 @@ export let asyncRouterMapSeller = [{
           noCache: true
         }
       },
- 
+      {
+        path: 'feedBack', //首页轮播
+        component: () =>
+          import('@/views/infoManagement/feedBack'),
+        name: 'feedBack',
+        meta: {
+          title: 'feedBack',
+          noCache: true
+        }
+      },
       {
         path: 'caseShow', //案例推广
         component: () =>

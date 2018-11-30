@@ -204,10 +204,20 @@
 			
 			//新增
 			CreateItem() {
-				this.form = {};
-				this.form.dynamic_images = []
+				this.isloading =false,
+				this.isUpimg=false,
+				this.form = Object.assign({}, this.form)
+				this.form= {
+					dynamic_title: '',
+					dynamic_images: [],
+					dynamic_content: '',
+				}
 				this.dialogFormVisible = true //打开内容弹框
 				this.dialogStatus = 'create'
+				this.formObjRepeat= [ {
+					Repeat_images: [],
+					Repeat_title:''
+				}]
 			},
 			//添加图片模块
 			addGraphic(){
@@ -255,10 +265,10 @@
 			
 			//删除图片
 			handleRemoveOne(file, fileList) {
-				console.log(file, fileList);
+				this.form.dynamic_images=fileList;	
 			},
 			handleRemoveTwo(file, fileList) {
-				console.log(file, fileList);
+				this.formObjRepeat[this.moddele_idx].Repeat_images=[]
 			},
 			//预览图片
 			handlePictureCardPreview(file) {
@@ -275,6 +285,7 @@
 						this.isloading = false;
 						this.addDynamic()
 					} else {
+						this.isloading = false;
 						console.log('error submit!!');
 						return false;
 					}

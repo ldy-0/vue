@@ -22,6 +22,7 @@ export default {
     record:'提现记录',
     statistics:'分销统计',
     rReturn:'售后订单',
+    feedBack: '评价管理',
     
     // --------------------
     //卖家

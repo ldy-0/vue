@@ -44,30 +44,42 @@
 </style>
 
 <template>
-	<div>
-		 <!--预览图片开始 -->
-		 <el-dialog :visible.sync="dialogVisible">
-		 	<img width="100%" :src="dialogImageUrl" alt="">
-		 </el-dialog>
-		 <!--预览图片结束 -->
-		<el-container class="notice">
-			<div class="filter-container">
-				<div class="search_div">
-				<el-select  v-model="orderState" placeholder="请选择"  @change="handleSelect">
-					<el-option v-for="item in orderStateOptions" :key="item.value" :label="item.label" :value="item.value">
-					</el-option>
-				</el-select>
-				<el-button type="primary" @click="tableListSearch()" icon="el-icon-search">状态查询</el-button>
-				</div>
-		 		<div class="search_div">
-				<el-date-picker size='large' v-model="time_interval" type="daterange" align="right" unlink-panels range-separator="至"
-				start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions_time"  >
-				</el-date-picker>
-				<el-button type="primary" icon="el-icon-search" @click="handelTimesearch()">时间查询</el-button>
-				</div> 
-			</div>
-			<el-header class="header" style="height:auto !important">
-		<!-- 		<el-form :inline="true" class="form">
+  <div>
+    <!--预览图片开始 -->
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt>
+    </el-dialog>
+    <!--预览图片结束 -->
+    <el-container class="notice">
+      <div class="filter-container">
+        <div class="search_div">
+          <el-select v-model="orderState" placeholder="请选择" @change="handleSelect">
+            <el-option
+              v-for="item in orderStateOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+          <el-button type="primary" @click="tableListSearch()" icon="el-icon-search">状态查询</el-button>
+        </div>
+        <div class="search_div">
+          <el-date-picker
+            size="large"
+            v-model="time_interval"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :picker-options="pickerOptions_time"
+          ></el-date-picker>
+          <el-button type="primary" icon="el-icon-search" @click="handelTimesearch()">时间查询</el-button>
+        </div>
+      </div>
+      <el-header class="header" style="height:auto !important">
+        <!-- 		<el-form :inline="true" class="form">
 					<el-form-item label="订单状态">
 						<el-select v-model="orderState" placeholder="请选择" @change="handleSelect">
 							<el-option v-for="item in orderStateOptions" :key="item.value" :label="item.label" :value="item.value">
@@ -81,84 +93,96 @@
 					<el-form-item>
 						<el-button type="primary" icon="el-icon-search" >查询</el-button>
 					</el-form-item>
-				</el-form> -->
-				<el-form :inline="true" class="form">
-					<el-form-item label="导出下列表格为Excel">
-						<el-button type="primary" icon="document"  @click="handleDownload" :loading="downloadLoading">导出</el-button>
-					</el-form-item>
-				</el-form>
-			</el-header>
-			<!--中间订单列表开始 -->
-			<el-main>
-				<el-table :data="tableData" stripe v-loading="listLoading" element-loading-text="给我一点时间" style="width: 100%">
-					<el-table-column label="订单号" prop="order_sn">
-					</el-table-column>
-					<el-table-column label="金额" prop="order_amount">
-					</el-table-column>
-					<el-table-column label="下单时间" prop="add_time">
-					</el-table-column>
-					<el-table-column label="订单状态">
-						<template slot-scope="scope">
-							<el-tag size="medium">{{ scope.row.order_state_id | regState }}</el-tag>
-						</template>
-					</el-table-column>
-					<el-table-column label="操作">
-						<template slot-scope="scope">
-							<el-button size="mini" type="info" @click="lookItem(scope.$index, scope.row)">查看明细</el-button>
-							<el-button size="mini" type="danger" @click="selectWorker(scope.$index, scope.row)" v-if=" scope.row.order_state_id== 20 || scope.row.order_state_id== 12">发货</el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-			</el-main>
-			<!--中间订单列表结束 -->
-			<!--底部分页开始 -->
-			<el-footer>
-				<el-pagination background @size-change="handleSizeChange()" @current-change="handleCurrentChange" :current-page="listQuery.page"
-				    :page-sizes="[10,20,30]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total">
-				</el-pagination>
-			</el-footer>
-			<!--底部分页结束 -->
-			<!--查看订单详情弹框开始 -->
-			<el-dialog title="订单明细" :visible.sync="detailShow" width="80%">
-				<el-form :model="orderDetail" ref="ruleForm" size="medium">
-					<el-row style="border:1px solid #ccc;margin-bottom:20px">
-						<el-col :span="4">
-							<div class="grid-content bg-purple">
-								<el-form-item label="订单号" :label-width="formLabelWidth">
-									<p class="hbs-no-margin-p">
-										{{orderDetail.order_sn}}
-									</p>
-								</el-form-item>
-							</div>
-						</el-col>
-						<el-col :span="6">
-							<div class="grid-content bg-purple">
-								<el-form-item label="下单时间" :label-width="formLabelWidth">
-									<p class="hbs-no-margin-p">
-										{{orderDetail.add_time}}
-									</p>
-								</el-form-item>
-							</div>
-						</el-col>
-						<el-col :span="3">
-							<div class="grid-content bg-purple">
-								<el-form-item label="金额" :label-width="formLabelWidth">
-									<p class="hbs-no-margin-p">
-										{{orderDetail.order_amount}}
-									</p>
-								</el-form-item>
-							</div>
-						</el-col>
-						<el-col :span="3">
-							<div class="grid-content bg-purple">
-								<el-form-item label="定金" :label-width="formLabelWidth">
-									<p class="hbs-no-margin-p">
-										{{orderDetail.order_deposit}}
-									</p>
-								</el-form-item>
-							</div>
-						</el-col>
-<!-- 						<el-col :span="4">
+        </el-form>-->
+        <el-form :inline="true" class="form">
+          <el-form-item label="导出下列表格为Excel">
+            <el-button
+              type="primary"
+              icon="document"
+              @click="handleDownload"
+              :loading="downloadLoading"
+            >导出</el-button>
+          </el-form-item>
+        </el-form>
+      </el-header>
+      <!--中间订单列表开始 -->
+      <el-main>
+        <el-table
+          :data="tableData"
+          stripe
+          v-loading="listLoading"
+          element-loading-text="给我一点时间"
+          style="width: 100%"
+        >
+          <el-table-column label="订单号" prop="order_sn"></el-table-column>
+          <el-table-column label="金额" prop="order_amount"></el-table-column>
+          <el-table-column label="下单时间" prop="add_time"></el-table-column>
+          <el-table-column label="订单状态">
+            <template slot-scope="scope">
+              <el-tag size="medium">{{ scope.row.order_state }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button size="mini" type="info" @click="lookItem(scope.$index, scope.row)">查看明细</el-button>
+              <el-button
+                size="mini"
+                type="danger"
+                @click="selectWorker(scope.$index, scope.row)"
+                v-if=" scope.row.order_state_id== 20"
+              >发货</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-main>
+      <!--中间订单列表结束 -->
+      <!--底部分页开始 -->
+      <el-footer>
+        <el-pagination
+          background
+          @size-change="handleSizeChange()"
+          @current-change="handleCurrentChange"
+          :current-page="listQuery.page"
+          :page-sizes="[10,20,30]"
+          :page-size="listQuery.limit"
+          layout="total, sizes, prev, pager, next"
+          :total="total"
+        ></el-pagination>
+      </el-footer>
+      <!--底部分页结束 -->
+      <!--查看订单详情弹框开始 -->
+      <el-dialog title="订单明细" :visible.sync="detailShow" width="80%">
+        <el-form :model="orderDetail" ref="ruleForm" size="medium">
+          <el-row style="border:1px solid #ccc;margin-bottom:20px">
+            <el-col :span="5">
+              <div class="grid-content bg-purple">
+                <el-form-item label="订单号" :label-width="formLabelWidth">
+                  <p class="hbs-no-margin-p">{{orderDetail.order_sn}}</p>
+                </el-form-item>
+              </div>
+            </el-col>
+            <el-col :span="7">
+              <div class="grid-content bg-purple">
+                <el-form-item label="下单时间" :label-width="formLabelWidth">
+                  <p class="hbs-no-margin-p">{{orderDetail.add_time}}</p>
+                </el-form-item>
+              </div>
+            </el-col>
+            <el-col :span="3">
+              <div class="grid-content bg-purple">
+                <el-form-item label="金额" :label-width="formLabelWidth">
+                  <p class="hbs-no-margin-p">{{orderDetail.order_amount}}</p>
+                </el-form-item>
+              </div>
+            </el-col>
+            <!-- <el-col :span="3">
+              <div class="grid-content bg-purple">
+                <el-form-item label="定金" :label-width="formLabelWidth">
+                  <p class="hbs-no-margin-p">{{orderDetail.order_deposit}}</p>
+                </el-form-item>
+              </div>
+            </el-col> -->
+            <!-- 						<el-col :span="4">
 							<div class="grid-content bg-purple">
 								<el-form-item label="总价" :label-width="formLabelWidth">
 									<p class="hbs-no-margin-p">
@@ -166,62 +190,86 @@
 									</p>
 								</el-form-item>
 							</div>
-						</el-col> -->
-						<el-col :span="4">
-							<div class="grid-content bg-purple-light">
-								<el-form-item label="订单状态" :label-width="formLabelWidth">
-									<p class="hbs-no-margin-p">
-										{{orderDetail.order_state_id | regState}}
-									</p>
-								</el-form-item>
-							</div>
-						</el-col>
-					</el-row>
-					<el-form-item label="客户信息" :label-width="formLabelWidth" style="border:1px solid #ccc;">
-						<el-form>
-							<el-form-item label="收货地址" :label-width="formLabelWidth">
-								<p class="hbs-no-margin-p">
-									{{orderDetail.order_reciver_info.address}}
-								</p>
-							</el-form-item>
-							<el-form-item label="收货人" :label-width="formLabelWidth">
-								<p class="hbs-no-margin-p">
-									{{orderDetail.order_reciver_info.name}}
-								</p>
-							</el-form-item>
-							<el-form-item label="收货人电话" :label-width="formLabelWidth">
-								<p class="hbs-no-margin-p">
-									{{orderDetail.order_reciver_info.phone}}
-								</p>
-							</el-form-item>
-						</el-form>
-					</el-form-item>
-					<el-form-item label="商品信息" :label-width="formLabelWidth" style="border:1px solid #ccc;padding:10px 0 0 0">
-						<el-table :data="orderDetail.order_goods" stripe element-loading-text="给我一点时间" style="margin-top:-10px;">
-							<el-table-column label="商品图片">
-								<template slot-scope="scope">
-									<img :src="scope.row.goods_image"  @click="handlePictureCardPreview(scope.row.goods_image)" alt="" width="80px">
-								</template>
-							</el-table-column>
-							<el-table-column label="商品名" prop="goods_name">
-							</el-table-column>
-							<el-table-column label="单价" prop="goods_price">
-							</el-table-column>
-							<el-table-column label="租用开始时间" prop="goods_start">
-							</el-table-column>
-							<el-table-column label="租用结束时间" prop="goods_end">
-							</el-table-column>
-						</el-table>
-					</el-form-item>
-				</el-form>
-				<span slot="footer" class="dialog-footer">
-					<el-button @click="detailShow = false">返 回</el-button>
-				</span>
-
-			</el-dialog>
-			<!--查看订单详情弹框结束 -->
-		</el-container>
-	</div>
+            </el-col>-->
+            <el-col :span="6">
+              <div class="grid-content bg-purple-light">
+                <el-form-item label="订单状态" :label-width="formLabelWidth">
+                  <p class="hbs-no-margin-p">{{orderDetail.order_state}}</p>
+                </el-form-item>
+              </div>
+            </el-col>
+          </el-row>
+          <el-form-item label="客户信息" :label-width="formLabelWidth" style="border:1px solid #ccc;">
+            <el-form>
+              <el-form-item label="收货地址" :label-width="formLabelWidth">
+                <p class="hbs-no-margin-p">{{orderDetail.order_reciver_info.address}}</p>
+              </el-form-item>
+              <el-form-item label="收货人" :label-width="formLabelWidth">
+                <p class="hbs-no-margin-p">{{orderDetail.order_reciver_info.name}}</p>
+              </el-form-item>
+              <el-form-item label="收货人电话" :label-width="formLabelWidth">
+                <p class="hbs-no-margin-p">{{orderDetail.order_reciver_info.phone}}</p>
+              </el-form-item>
+            </el-form>
+          </el-form-item>
+          <el-form-item
+            label="商品信息"
+            :label-width="formLabelWidth"
+            style="border:1px solid #ccc;padding:10px 0 0 0"
+          >
+            <el-table
+              :data="orderDetail.order_goods"
+              stripe
+              element-loading-text="给我一点时间"
+              style="margin-top:-10px;"
+            >
+              <el-table-column label="商品图片">
+                <template slot-scope="scope">
+                  <img
+                    :src="scope.row.goods_image"
+                    @click="handlePictureCardPreview(scope.row.goods_image)"
+                    alt
+                    width="80px"
+                  >
+                </template>
+              </el-table-column>
+              <el-table-column label="商品名" prop="goods_name"></el-table-column>
+              <el-table-column label="单价" prop="goods_price"></el-table-column>
+            </el-table>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="detailShow = false">返 回</el-button>
+        </span>
+      </el-dialog>
+      <!--查看订单详情弹框结束 -->
+    </el-container>
+    <el-dialog title="发货信息" :visible.sync="centerDialogVisible" width="30%" center>
+      <el-form :model="findForm">
+        <el-form-item label="快递公司名称" label-width="100px">
+          <el-input
+            type="text"
+            v-model="findForm.companyName"
+            autocomplete="on"
+            placeholder="公司名称"
+          />
+        </el-form-item>
+        <el-form-item label="快递单号" label-width="100px">
+          <el-input v-model="findForm.expressNumber" autocomplete="on" placeholder="单号"/>
+        </el-form-item>
+        <el-form-item label="联系人" label-width="100px">
+          <el-input v-model="findForm.linkmanName" autocomplete="on" placeholder="姓名"/>
+        </el-form-item>
+        <el-form-item label="联系电话" label-width="100px">
+          <el-input v-model="findForm.linkmanPhone" autocomplete="on" placeholder="电话号码"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="centerDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="postExpressage">确 定</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 <script>
 	import {
@@ -249,33 +297,7 @@
 			// console.log(arr)
 				return arr
 			},
-			regState: function(code){
-				 if(!code) return '暂无状态';
-				 let state = '';
-				// console.log("过滤")
-				// console.log(code)
-				 switch (code) {
-				 	case '0':
-				 		state = '已取消'
-				 		break;
-						case '10':
-							state = '未支付'
-							break;
-				 	case '20':
-				 		state = '已支付'
-				 		break;
-				 	case '30':
-				 		state = '已发货'
-				 		break;
-				 	case '40':
-				 		state = '已完成'
-				 		break;
-				 	default:
-				 		state = '部分支付'
-				 }
-				 
-				 return state
-			}
+		    
 		},
 		data() {
 			return {
@@ -397,6 +419,13 @@
 				orderState: '',
 				//正在保存
 				isloading: false,
+				 findForm: {
+					companyName: "",
+					expressNumber: "",
+					linkmanName: "",
+					linkmanPhone: "",
+				},
+				centerDialogVisible: false,
 			}
 		},
 		methods: {
@@ -430,14 +459,21 @@
 			},
 // 			//派单之前的确认
 			selectWorker(idx,raw) {
-				 
+				console.log(raw.order_id);
+					 
         this.$confirm('确认发货?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-					this.pushOrderDetail=raw;
-         this.pushOrder()
+			this.centerDialogVisible = true;
+			this.pushOrderDetail= raw,
+				this.findForm = {
+				companyName: "",
+				expressNumber: "",
+				linkmanName: "",
+				linkmanPhone: "",
+				}
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -448,6 +484,9 @@
 		  
 			
 			},
+			postExpressage() {
+				this.pushOrder()      
+    },
 			handleSelectionChange(val) {
 				console.log("工人选中")
 				console.log(val)
@@ -566,13 +605,17 @@
 				 
 				 console.log(this.pushOrderDetail)
 	       //return
-				 let sendData={}
-				  sendData.order_id=this.pushOrderDetail.order_id;
-					sendData.state_type='deliver_goods';
+				 let sendData={
+					order_id : this.pushOrderDetail.order_id,
+					shipping_code : this.findForm,
+					state_type:'deliver_goods'
+				 }
+				  
 				rOrderState_api(sendData).then(res=>{
 					if(res.status==0){
 						this.dialogTableVisible = false;
 						this.isloading=false;
+						this.centerDialogVisible = false;
 						this.$notify({
 												title: '发货',
 												message: '发货成功',
@@ -584,7 +627,8 @@
 						  this.$notify.error({
                    title: '错误',
                  message: '发货失败'
-                 });
+				 });
+				 this.centerDialogVisible = false;
 								 this.dialogTableVisible = false;
 								 this.isloading=false;
 					}

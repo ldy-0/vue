@@ -68,7 +68,7 @@
 		<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
 			<el-form :rules="rules" ref="form" :model="form" label-width="120px">
 				<el-form-item label="轮播图(1-4张)" prop="dynamic_images">
-					<el-upload action="" list-type="picture-card" accept="image/*" :limit="4" :auto-upload="false" :file-list="form.dynamic_images"
+					<el-upload action="" list-type="picture-card" accept="image/*" :limit="4" :auto-upload="false" :file-list="form.dynamic_images| filterUrl"
 					 :on-change="handleImgChangeOne" :on-preview="handlePictureCardPreview" :on-remove="handleRemoveOne">
 						<i class="el-icon-plus"></i>
 					</el-upload>
@@ -134,6 +134,31 @@
 			//获取首页列表
 			this.dynamicList()
 		},
+		filters: {
+    //这里进行加入url到Ui框架
+    filterUrl: function(value) {
+      //console.log("进来的")
+      let arr = [];
+      // console.log(value)
+      if (!Array.isArray(value)) {
+        arr.push({
+          url: value
+        }),
+          (value = arr);
+      } else {
+        for (let i = 0; i < value.length; i++) {
+          if (!value[i].url) {
+            value[i] = {
+              url: value[i]
+            };
+          }
+        }
+      }
+      //console.log("过滤的")
+      //console.log(value)
+      return value;
+    }
+  },
 		data() {
 			return {
 				//案例列表
@@ -171,6 +196,7 @@
 					dynamic_images: [],
 					dynamic_content: '',
 				},
+
 				//图片预览弹框是否打开
 				dialogVisible: false,
 				//要预览的图片
@@ -204,8 +230,14 @@
 			
 			//新增
 			CreateItem() {
-				this.form = {};
-				this.form.dynamic_images = []
+				this.isloading =false,
+				this.isUpimg=false,
+				this.form = Object.assign({}, this.form)
+				this.form= {
+					dynamic_title: '',
+					dynamic_images: [],
+					dynamic_content: '',
+				}
 				this.dialogFormVisible = true //打开内容弹框
 				this.dialogStatus = 'create'
 				this.formObjRepeat= [ {
@@ -259,10 +291,11 @@
 			
 			//删除图片
 			handleRemoveOne(file, fileList) {
-				console.log(file, fileList);
+				this.form.dynamic_images=fileList;				
 			},
 			handleRemoveTwo(file, fileList) {
 				console.log(file, fileList);
+				this.formObjRepeat[this.moddele_idx].Repeat_images=[]
 			},
 			//预览图片
 			handlePictureCardPreview(file) {
@@ -272,13 +305,14 @@
 			//保存内容
 			onSubmit(form) {
 				console.log(this.$refs)
-				this.isloading = true;
 				// return
+				this.isloading = true;
 				this.$refs['form'].validate((valid) => {
 					if (valid) {
 						this.isloading = false;
 						this.addDynamic()
 					} else {
+						this.isloading = false;
 						console.log('error submit!!');
 						return false;
 					}

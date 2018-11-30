@@ -115,6 +115,7 @@
 						<i class="el-icon-plus"></i>
 					</el-upload>
 				</el-form-item>
+        <p class="hbs-margin-left140">图片建议尺寸：宽750*高750</p>
 				<el-form-item label="商品名称" prop="goods_name" label-width="140px">
 					<el-input v-model="form.goods_name"></el-input>
 				</el-form-item>
@@ -169,10 +170,12 @@
 				<el-form-item label="基础销量" prop="goods_faker_salenum" label-width="140px">
 					<el-input type="number" v-model="form.goods_faker_salenum"></el-input>
 				</el-form-item>
+        
 				<!-- 这里添加动态图文个数开始 -->
 				<el-form-item label="商品详情" label-width="140px">
 					<el-button size="mini" type="success" @click="addGraphic()">添加内容</el-button>
 				</el-form-item>
+        <p class="hbs-margin-left140">图片建议尺寸：宽750*高不限</p>
 				<!-- 这里添加动态图文个数结束 -->
 				<!-- 图文模块部分开始 -->
 				<div v-for="(formItem,index) of form.formObjRepeat" :key="index" @click="getIndex(index)">
@@ -644,8 +647,10 @@ export default {
           console.log(this.sendData);
           //这里判断是编辑商品还是新增商品
           if (this.dialogStatus == "edit") {
+            this.isloading = false;
             this.editGoods(this.form);
           } else {
+            this.isloading = false;
             console.log("发送这一不");
             console.log(this.sendData);
             this.addGoods(this.sendData);
@@ -795,7 +800,7 @@ export default {
       console.log(this.form.goods_body);
     },
     //删除商品详情图
-    handleRemove_detail(file, fileList) {
+    handleRemove_detail(file, fileList) {      
       console.log(fileList);
       let that = this;
       // 				if(this.dialogStatus=='edit'){
