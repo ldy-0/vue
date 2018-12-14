@@ -119,6 +119,9 @@
 				<el-form-item label="商品名称" prop="goods_name" label-width="140px">
 					<el-input v-model="form.goods_name"></el-input>
 				</el-form-item>
+				<el-form-item label="商品排序" prop="goods_sort" label-width="140px">
+					<el-input v-model="form.goods_sort" type="number" placeholder="商品显示顺序"></el-input>
+				</el-form-item>
           <el-form-item label="规格" label-width='140px' >
 					<!-- size 和 size2xxx 都是单独的属性 -->
 						<el-tabs v-model="form.size" style="margin-top:-3px;margin-left:10px">
@@ -418,6 +421,13 @@ export default {
             trigger: "change"
           }
         ],
+        goods_sort: [
+          {
+            required: false,
+            message: "选填项",
+            trigger: "blur"
+          }
+        ],
         goods_advword: [
           {
             required: true,
@@ -642,6 +652,7 @@ export default {
           for (let key in this.form) {
             this.sendData[key] = this.form[key];
           }
+          sendData.goods_sort =Number(this.form.goods_sort);
           console.log("form最后");
           console.log(this.form);
           console.log(this.sendData);
@@ -846,6 +857,7 @@ export default {
         this.form.formObjRepeat = JSON.parse(resObj.goods_body);
         this.form.goods_storage = resObj.SKUList[0].goods_storage;
         this.form.size = resObj.spec_value ? "mutil" : "one";
+        
         console.log(this.form.size);
         // 此时需要 判断 规格 单或多
         let tempForm2 = {}; //单规格 零时变量
