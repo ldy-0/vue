@@ -3,20 +3,18 @@
     <el-button icon='el-icon-upload' size="mini" :style="{background:color,borderColor:color}" @click=" dialogVisible=true" type="primary">上传图片
     </el-button>
     <el-dialog append-to-body :visible.sync="dialogVisible">
-      <!-- https://httpbin.org/post :before-upload="beforeUpload"  :on-success="handleSuccess"-->
-      <el-upload class="editor-slide-upload" action="" :auto-upload='false' :multiple="true" :file-list="fileList" :show-file-list="true"
-        list-type="picture-card" :on-remove="changeImg" :on-change='changeImg' >
+      <el-upload class="editor-slide-upload" action="https://httpbin.org/post" :multiple="true" :file-list="fileList" :show-file-list="true"
+        list-type="picture-card" :on-remove="handleRemove" :on-success="handleSuccess" :before-upload="beforeUpload">
         <el-button size="small" type="primary">点击上传</el-button>
       </el-upload>
       <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="submitImg">确 定</el-button>
+      <el-button type="primary" @click="handleSubmit">确 定</el-button>
     </el-dialog>
   </div>
 </template>
 
 <script>
 // import { getToken } from 'api/qiniu'
-import uploadFn from '@/utils/tencent_cos'
 
 export default {
   name: 'editorSlideUpload',
@@ -34,23 +32,6 @@ export default {
     }
   },
   methods: {
-    changeImg(file, fileList) {
-      this.fileList = fileList;
-    },
-    async submitImg() {
-      let loading = this.$loading({ text: '正在上传中 ...' });
-      // if(!this.fileList.length) this.$emit();
-
-      let res = await uploadFn(this.fileList.map(v => v.raw));
-      console.warn(this.fileList, res);
-
-      this.$emit('successCBK', res.map(v => { return { url: v }; }));
-
-      this.listObj = {}
-      this.fileList = []
-      this.dialogVisible = false
-      loading.close();
-    },
     checkAllSuccess() {
       return Object.keys(this.listObj).every(item => this.listObj[item].hasSuccess)
     },

@@ -176,12 +176,17 @@
         
 				<!-- 这里添加动态图文个数开始 -->
 				<el-form-item label="商品详情" label-width="140px">
-					<el-button size="mini" type="success" @click="addGraphic()">添加内容</el-button>
+					<el-button size="mini" type="success" @click="addGraphic()" v-if="dialogStatus === 'edit' && form.formObjRepeat">添加内容</el-button>
+          <editor style='width: 800px; height: 300px;' 
+                  :menubar='editorConfig.menu' 
+                  :height='editorConfig.height' 
+                  v-model='form.goods_body' 
+                  v-if="dialogStatus === 'create' || !form.formObjRepeat" />
 				</el-form-item>
-        <p class="hbs-margin-left140">图片建议尺寸：宽750*高不限</p>
+        <p class="hbs-margin-left140" v-if="dialogStatus === 'edit' && form.formObjRepeat">图片建议尺寸：宽750*高不限</p>
 				<!-- 这里添加动态图文个数结束 -->
 				<!-- 图文模块部分开始 -->
-				<div v-for="(formItem,index) of form.formObjRepeat" :key="index" @click="getIndex(index)">
+				<div v-for="(formItem,index) of form.formObjRepeat" :key="index" @click="getIndex(index)" v-if="dialogStatus === 'edit' && form.formObjRepeat">
 					<el-form :model="formItem">
 						<el-row :gutter="20" class="graphic">
 							<el-col :span="24">
@@ -234,6 +239,7 @@ import {
   setting_api
 } from "@/api/seller";
 import uploadFn from "@/utils/tencent_cos";
+import config from './config';
 
 //初始化常量
 const form = {
@@ -293,6 +299,7 @@ const editData = {
   goods_faker_salenum: "",
 };
 export default {
+  mixins: [config],
   created() {
     //获取自定义商品分类
     this.getGoodsClass();
@@ -644,7 +651,7 @@ export default {
       }
       this.sendData = Object.assign({}, sendData);
        
-      this.form.goods_body = JSON.stringify(this.form.formObjRepeat);
+      if(this.dialogStatus === 'edit' && this.form.formObjRepeat) this.form.goods_body = JSON.stringify(this.form.formObjRepeat);
       
       this.$refs["form"].validate(valid => {
         if (valid) {
@@ -854,7 +861,7 @@ export default {
         for (let i = 0; i < arr.length; i++) {
           this.form.goods_image.push(arr[i].goodsimage_url);
         }
-        this.form.formObjRepeat = JSON.parse(resObj.goods_body);
+        this.form.formObjRepeat = resObj.goods_body[0] === '[' ? JSON.parse(resObj.goods_body) : null;
         this.form.goods_storage = resObj.SKUList[0].goods_storage;
         this.form.size = resObj.spec_value ? "mutil" : "one";
         
