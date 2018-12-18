@@ -680,6 +680,7 @@ export default {
           delete getData[key];
         }
       }
+      getData.type = 'sort'
       getGoodsList_api(getData).then(res => {
         if (res.status == 0) {
           this.listLoading = false;
