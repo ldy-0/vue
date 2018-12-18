@@ -1,5 +1,4 @@
 <template>
-    <!-- <el-header class='header'> -->
 
       <el-form :inline="true" class="form">
 
@@ -7,18 +6,18 @@
           <el-button type="primary" icon="el-icon-edit-outline" @click="showForm">{{config.title}}</el-button>
         </el-form-item>
 
-        <el-form-item v-if='config.showSearchByKeyWord'>
-            <el-input :style="{ width: config.inputWidth }" :placeholder="config.placeholder" v-model="keyword"></el-input>
+        <el-form-item v-if='config.showKeywordSearch'>
+            <el-input :style="{ width: config.width }" :placeholder="config.placeHolder" v-model="keyword"></el-input>
             <el-button type="primary" icon="el-icon-search" @click="searchByKeyWord">查询</el-button>
         </el-form-item>
 
-        <el-form-item label="时间" v-if='config.showSearchByDate'>
+        <el-form-item label="时间" v-if='config.dateWidth'>
             <el-date-picker :style="{ width: config.dateWidth }" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
             </el-date-picker>
             <el-button type="primary" icon="el-icon-search" @click="searchByDate">查询</el-button>
         </el-form-item>
 
-        <el-form-item label="订单状态" :label-width="config.selectWidth" v-if='config.showSelect'> 
+        <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
           <el-select placeholder="请选择" v-model='orderState' @change='changeStatus'> <!-- multiple  -->
             <el-option v-for="item in config.categories" :key="item.id" :label="item.title" :value="item.id"></el-option>
           </el-select>
@@ -31,7 +30,6 @@
 
       </el-form>
 
-    <!-- </el-header> -->
 </template>
 
 <script>
@@ -45,6 +43,7 @@ export default {
           inputWidth: '340px',
           dateWidth: '400px',
           placeholder: '请输入联系方式',
+          selectLabel: '订单状态',
           // categories: [
           //   { id: null, title: '全部' },
           //   { id: 0, title: '已取消' },
@@ -85,9 +84,9 @@ export default {
 
       this.$emit('searchByDate', date);
     },
-    changeStatus(){
-      console.log('change state', this.orderState);
-      this.$emit('changeState', this.orderState);
+    changeStatus() {
+      console.log('change state', this.orderState)
+      this.$emit('changeState', this.orderState)
     },
     async exportFile() {
       let loading = this.$loading({ fullscreen: true })
