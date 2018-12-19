@@ -342,6 +342,7 @@ export default {
     },
     editItem(index, rowData) {
       console.log(rowData);
+      this.rules.password[0].required = false
       // this.editLoading = true
       this.formForNotive = Object.assign({}, rowData);
       this.isAddItem = false;
