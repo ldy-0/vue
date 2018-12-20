@@ -181,7 +181,7 @@
                   :menubar='editorConfig.menu' 
                   :height='editorConfig.height' 
                   v-model='form.goods_body' 
-                  v-if="dialogStatus === 'create' || !form.formObjRepeat" />
+                  v-if="dialogFormVisible && !form.formObjRepeat" />
 				</el-form-item>
         <p class="hbs-margin-left140" v-if="dialogStatus === 'edit' && form.formObjRepeat">图片建议尺寸：宽750*高不限</p>
 				<!-- 这里添加动态图文个数结束 -->
@@ -746,12 +746,13 @@ export default {
       this.formForNotiveChild2List = Object.assign([], formForNotiveChild2List);
       console.log(this.form);
       this.form.goods_image = [];
-      this.form.formObjRepeat = [
-        {
-          Repeat_images: [],
-          Repeat_title: ""
-        }
-      ];
+      this.form.formObjRepeat = null;
+      // this.form.formObjRepeat = [
+      //   {
+      //     Repeat_images: [],
+      //     Repeat_title: ""
+      //   }
+      // ];
       this.dialogFormVisible = true; //打开内容弹框
       this.dialogStatus = "create";
     },
