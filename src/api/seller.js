@@ -389,3 +389,32 @@ export function auditingAssess(id, data, _this) {
     data
   });
 }
+//添加公司介绍
+export function addCompany_api(data) {
+  return request({
+    url: "/api/v2/seller/company",
+    method: "post",
+    data
+  });
+}
+//获取公司介绍列表
+export function getCompany_api(data) {
+  return request({
+    url: "/api/v2/seller/company",
+    method: "get",
+    params: data
+  });
+}
+export function deleteCompany_api(id) {
+  return request({
+    url: "/api/v2/seller/company/" + id,
+    method: "delete"
+  });
+}
+export function putCompany_api(id, data) {
+  return request({
+    url: `/api/v2/seller/company/${id}`,
+    method: "PUT",
+    data
+  });
+}
