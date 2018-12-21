@@ -389,7 +389,7 @@ export function auditingAssess(id, data, _this) {
     data
   });
 }
-//添加公司介绍
+//公司
 export function addCompany_api(data) {
   return request({
     url: "/api/v2/seller/company",
@@ -397,7 +397,6 @@ export function addCompany_api(data) {
     data
   });
 }
-//获取公司介绍列表
 export function getCompany_api(data) {
   return request({
     url: "/api/v2/seller/company",
@@ -414,6 +413,34 @@ export function deleteCompany_api(id) {
 export function putCompany_api(id, data) {
   return request({
     url: `/api/v2/seller/company/${id}`,
+    method: "PUT",
+    data
+  });
+}
+//新闻
+export function addInformation_api(data) {
+  return request({
+    url: "/api/v2/seller/information",
+    method: "post",
+    data
+  });
+}
+export function getInformation_api(data) {
+  return request({
+    url: "/api/v2/seller/information",
+    method: "get",
+    params: data
+  });
+}
+export function deleteInformation_api(id) {
+  return request({
+    url: "/api/v2/seller/information/" + id,
+    method: "delete"
+  });
+}
+export function putInformation_api(id, data) {
+  return request({
+    url: `/api/v2/seller/information/${id}`,
     method: "PUT",
     data
   });

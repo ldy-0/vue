@@ -15,7 +15,7 @@ export default {
     banner:'首页轮播图',
 		company: '公司介绍' ,
     caseShow: '案例展示',
-		news: '新闻咨询',
+		news: '新闻咨讯',
     memberList:'人员列表',
     manage:'提现管理',
     setting:'分销设置',
