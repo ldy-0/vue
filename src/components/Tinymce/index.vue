@@ -84,6 +84,8 @@ export default {
         imagetools_cors_hosts: ['www.tinymce.com', 'codepen.io'],
         default_link_target: '_blank',
         link_title: false,
+        resize: false,
+        language: 'zh_CN',
         init_instance_callback: editor => {
           if (_this.value) {
             editor.setContent(_this.value)
