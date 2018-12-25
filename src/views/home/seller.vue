@@ -88,7 +88,7 @@
 </template>
 
 <script>
-// import { getHomeData_api,getNotice_api} from "@/api/seller";
+import { getHomeData_api,getNotice_api} from "@/api/seller";
 import Chart from "@/components/Charts/lineMarker";
 import Moment from "@/utils/moment";
 export default {

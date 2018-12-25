@@ -44,10 +44,10 @@
       <el-table-column label="公司图片">
         <template slot-scope="scope">
           <img
-            :key="item.url"
+            :key="item"
             @click="handlePictureCardPreview(item)"
             v-for="item in scope.row.company_image"
-            :src="item.url"
+            :src="item"
             style="width:80px;margin-right: 10px;"
           >
         </template>
@@ -366,12 +366,19 @@ export default {
         }
       });
     },
-
+    delUrlfun(e) {
+      let arr = [];
+      for (let i = 0; i < e.length; i++) {
+        arr.push(e[i].url);
+      }
+      return arr;
+    },
     //新增/编辑案例
     addDynamic() {
       let sendData = {};
       for (let key in this.form) {
         if (key == "company_image") {
+          this.form.company_image = this.delUrlfun(this.form.company_image);
           sendData[key] = JSON.stringify(this.form.company_image);
         } else {
           sendData[key] = this.form[key];

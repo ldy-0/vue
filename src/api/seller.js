@@ -445,3 +445,18 @@ export function putInformation_api(id, data) {
     data
   });
 }
+//订单流水
+export function getHomeData_api(data){
+  return request({
+      url: '/api/v2/seller/salesstats',
+      method: 'get',
+      params: data
+  })
+}
+export function getNotice_api(data) {
+  return request({
+    url: '/api/v2/seller/affiche',
+    method: 'get',
+    data: data
+  })
+}

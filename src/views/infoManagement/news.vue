@@ -23,6 +23,10 @@
 </style>
 <template>
   <div class="app-container">
+    <!--预览图片开始 -->
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt>
+    </el-dialog>
     <!--顶部菜单开始 -->
     <div class="filter-container">
       <el-button
@@ -37,6 +41,17 @@
     <!--中间表格开始 -->
     <el-table :data="tableData" style="width: 100%">
       <el-table-column label="新闻标题" prop="information_title"></el-table-column>
+      <el-table-column label="新闻图片" prop="information_image">
+        <template slot-scope="scope">
+          <img
+            :key="item"
+            @click="handlePictureCardPreview(item)"
+            v-for="item in scope.row.information_image"
+            :src="item"
+            style="width:80px;margin-right: 10px;"
+          >
+        </template>
+      </el-table-column>
       <el-table-column label="分类" prop="label"></el-table-column>
       <el-table-column label="添加时间" prop="addtime"></el-table-column>
       <el-table-column label="操作">
@@ -75,6 +90,21 @@
         <el-form-item label="新闻标题" prop="information_title">
           <el-input v-model="form.information_title" placeholder="请输入新闻标题"></el-input>
         </el-form-item>
+        <el-form-item label="新闻图片" prop="information_image">
+          <el-upload
+            action
+            list-type="picture-card"
+            accept="image/*"
+            :limit="1"
+            :auto-upload="false"
+            :file-list="form.information_image"
+            :on-change="handleImgChange"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemoveOne"
+          >
+            <i class="el-icon-plus"></i>
+          </el-upload>
+        </el-form-item>
         <el-form-item label="新闻内容">
           <editor
             style="width: 100%; height:600px;"
@@ -105,11 +135,13 @@ import {
   deleteInformation_api,
   putInformation_api
 } from "@/api/seller";
+import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 const form = {
   classify_id: null,
   information_title: "",
-  information_content: ""
+  information_content: "",
+  information_image: []
 };
 import Moment from "@/utils/moment";
 export default {
@@ -123,7 +155,7 @@ export default {
       //新闻列表
       tableData: [
         {
-          company_image: [],
+          information_image: [],
           information_title: ""
         }
       ],
@@ -172,7 +204,7 @@ export default {
             message: "长度在1到20个字"
           }
         ],
-        company_image: [
+        information_image: [
           {
             required: true,
             message: "请传1至3张图片",
@@ -214,6 +246,24 @@ export default {
       this.dialogStatus = "create";
       this.form = Object.assign({}, form);
     },
+    //上传图片
+    async handleImgChange(file, fileList) {
+      this.isUpimg = true;
+      let imgurl = await uploadFn(file.raw);
+      this.isUpimg = false;
+      this.form.information_image.push({
+        url: imgurl[0]
+      });
+    },
+    //预览图片
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    //删除图片
+    handleRemoveOne(file, fileList) {
+      this.form.information_image = [];
+    },
     //保存内容
     onSubmit(form) {
       console.log(this.$refs);
@@ -231,7 +281,6 @@ export default {
     },
     //编辑对应项
     handleEdit(row) {
-      console.log("编辑");
       this.form = Object.assign({}, row);
       this.dialogStatus = "edit";
       this.categoryStateOptions.forEach(item => {
@@ -281,35 +330,42 @@ export default {
       let sendData = Object.assign({}, this.listQuery);
       console.log(sendData);
       getInformation_api(sendData).then(res => {
-        
         if (res.status == 0) {
-          this.tableData = res.data;
           this.total = res.pagination.total;
           res.data.forEach(item => {
             item.addtime = Moment(item.addtime * 1000).format(
               "yyyy-MM-dd HH:mm:ss"
             );
+            item.information_image = JSON.parse(item.information_image);
             this.categoryStateOptions.forEach(itemOptions => {
               if (itemOptions.value == item.classify_id) {
                 item.label = itemOptions.label;
               }
             });
           });
-          console.log(this.tableData);
+          this.tableData = res.data;
         }
       });
     },
-
+    delUrlfun(e) {
+      let arr = [];
+      for (let i = 0; i < e.length; i++) {
+        arr.push(e[i].url);
+      }
+      return arr;
+    },
     //新增/编辑新闻
     addDynamic() {
       let sendData = {};
       for (let key in this.form) {
-        if (key == "company_image") {
-          sendData[key] = JSON.stringify(this.form.company_image);
+        if (key == "information_image") {
+          this.form.information_image = this.delUrlfun(this.form.information_image);
+          sendData[key] = JSON.stringify(this.form.information_image);
         } else {
           sendData[key] = this.form[key];
         }
       }
+
       if (this.dialogStatus === "create") {
         addInformation_api(sendData).then(res => {
           if (res.status == 0) {
