@@ -228,7 +228,7 @@ export default {
           },
           {
             min: 1,
-            max: 20,
+            max: 50,
             message: "长度在1到20个字"
           }
         ],
@@ -273,6 +273,7 @@ export default {
       this.dialogFormVisible = true; //打开内容弹框
       this.dialogStatus = "create";
       this.form = Object.assign({}, form);
+      this.form.video_image = []
     },
     //上传图片
     async handleImgChange(file, fileList) {

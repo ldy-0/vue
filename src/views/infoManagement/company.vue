@@ -277,6 +277,7 @@ export default {
       this.dialogFormVisible = true; //打开内容弹框
       this.dialogStatus = "create";
       this.form = Object.assign({}, form);
+      this.form.company_image = []
     },
     //上传图片
     async handleImgChangeOne(file, fileList, index) {
