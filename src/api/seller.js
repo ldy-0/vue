@@ -453,10 +453,31 @@ export function getHomeData_api(data){
       params: data
   })
 }
-export function getNotice_api(data) {
+//视频列表
+export function addVideo_api(data) {
   return request({
-    url: '/api/v2/seller/affiche',
-    method: 'get',
-    data: data
-  })
+    url: "/api/v2/seller/video",
+    method: "post",
+    data
+  });
+}
+export function getVideo_api(data) {
+  return request({
+    url: "/api/v2/seller/video",
+    method: "get",
+    params: data
+  });
+}
+export function deleteVideo_api(id) {
+  return request({
+    url: "/api/v2/seller/video/" + id,
+    method: "delete"
+  });
+}
+export function putVideo_api(id, data) {
+  return request({
+    url: `/api/v2/seller/video/${id}`,
+    method: "PUT",
+    data
+  });
 }

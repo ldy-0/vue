@@ -390,6 +390,16 @@ export let asyncRouterMapSeller = [{
 					title: 'news',
 					noCache: true
 				}
+      },
+      {
+				path: 'videos', //视频列表
+				component: () =>
+					import('@/views/infoManagement/videos'),
+				name: 'videos',
+				meta: {
+					title: 'videos',
+					noCache: true
+				}
 			},
 
     ]

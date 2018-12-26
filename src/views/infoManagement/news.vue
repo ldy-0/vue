@@ -97,7 +97,7 @@
             accept="image/*"
             :limit="1"
             :auto-upload="false"
-            :file-list="form.information_image"
+            :file-list="form.information_image | filterUrl"
             :on-change="handleImgChange"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemoveOne"
@@ -149,6 +149,30 @@ export default {
   created() {
     //获取首页列表
     this.dynamicList();
+  },
+  filters: {
+    //这里进行加入url到Ui框架
+    filterUrl: function(value) {
+      let arr = [];
+      // console.log(value)
+      if (!Array.isArray(value)) {
+        arr.push({
+          url: value
+        }),
+          (value = arr);
+      } else {
+        for (let i = 0; i < value.length; i++) {
+          if (!value[i].url) {
+            value[i] = {
+              url: value[i]
+            };
+          }
+        }
+      }
+      //console.log("过滤的")
+      //console.log(value)
+      return value;
+    }
   },
   data() {
     return {

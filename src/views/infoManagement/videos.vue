@@ -27,7 +27,6 @@
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt>
     </el-dialog>
-    <!--预览图片结束 -->
     <!--顶部菜单开始 -->
     <div class="filter-container">
       <el-button
@@ -41,19 +40,19 @@
     <!--顶部菜单结束 -->
     <!--中间表格开始 -->
     <el-table :data="tableData" style="width: 100%">
-      <el-table-column label="公司图片">
+      <el-table-column label="视频标题" prop="video_title"></el-table-column>
+      <el-table-column label="视频封面" prop="video_image">
         <template slot-scope="scope">
           <img
             :key="item"
             @click="handlePictureCardPreview(item)"
-            v-for="item in scope.row.company_image"
+            v-for="item in scope.row.video_image"
             :src="item"
             style="width:80px;margin-right: 10px;"
           >
         </template>
       </el-table-column>
-      <el-table-column label="公司名" prop="company_name"></el-table-column>
-
+      <el-table-column label="添加时间" prop="addtime"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button size="mini" type="primary" @click="handleEdit(scope.row)">编辑</el-button>
@@ -77,39 +76,27 @@
     <!--内容弹框开始 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="90%">
       <el-form :rules="rules" ref="form" :model="form" label-width="120px">
-        <el-form-item label="公司图片" prop="company_image">
+        <el-form-item label="视频标题" prop="video_title">
+          <el-input v-model="form.video_title" placeholder="请输入视频标题"></el-input>
+        </el-form-item>
+        <el-form-item label="视频封面" prop="video_image">
           <el-upload
             action
             list-type="picture-card"
             accept="image/*"
-            :limit="10"
+            :limit="1"
             :auto-upload="false"
-            :file-list="form.company_image | filterUrl"
-            :on-change="handleImgChangeOne"
+            :file-list="form.video_image | filterUrl"
+            :on-change="handleImgChange"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemoveOne"
           >
             <i class="el-icon-plus"></i>
           </el-upload>
         </el-form-item>
-        <el-form-item label="公司名称" prop="company_name">
-          <el-input v-model="form.company_name" placeholder="请输入公司名称"></el-input>
-        </el-form-item>
-        <el-form-item label="公司地址" prop="company_site">
-          <el-input v-model="form.company_site" placeholder="请输入公司地址"></el-input>
-        </el-form-item>
-        <el-form-item label="公司联系手机" prop="company_phone">
-          <el-input v-model="form.company_phone" placeholder="请输入公司手机号"></el-input>
-        </el-form-item>
-        <el-form-item label="公司座机" prop="company_call">
-          <el-input v-model="form.company_call" placeholder="请输入公司座机"></el-input>
-        </el-form-item>
-        <el-form-item label="公司邮箱" prop="company_email">
-          <el-input v-model="form.company_email" placeholder="请输入公司座机"></el-input>
-        </el-form-item>
-        <el-form-item label="公司视频" prop="company_view">
+        <el-form-item label="视频内容">
           <el-upload
-            v-if="form.company_view ==null"
+            v-if="form.video_lik ==null"
             class="avatar-uploader el-upload--text"
             :auto-upload="false"
             action
@@ -121,21 +108,15 @@
             <i v-if="isUpimg">上传中...</i>
           </el-upload>
           <video
-            v-if="form.company_view !=null"
-            :src="form.company_view"
+            v-if="form.video_lik !=null"
+            :src="form.video_lik"
             class="company-video"
             controls="controls"
           >您的浏览器不支持视频播放</video>
-          <el-button @click="deleteVideo" v-if="form.company_view !=null" type="danger">删除</el-button>
+          <el-button @click="deleteVideo" v-if="form.video_lik !=null" type="danger">删除</el-button>
         </el-form-item>
-        <el-form-item label="介绍内容">
-          <editor
-            style="width: 100%; height:600px;"
-            v-model="form.company_content"
-            :menubar="editorConfig.menu"
-            :height="500"
-            v-if="dialogFormVisible"
-          />
+        <el-form-item label="排序序号" prop="video_order">
+          <el-input v-model="form.video_order" placeholder="请输入排序序号0为最前，以此类推"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button
@@ -153,25 +134,20 @@
 </template>
 <script>
 import {
-  addCompany_api,
-  getCompany_api,
-  deleteCompany_api,
-  putCompany_api
+  addVideo_api,
+  getVideo_api,
+  deleteVideo_api,
+  putVideo_api
 } from "@/api/seller";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 const form = {
-  company_site: "",
-  company_phone: "",
-  company_call: "",
-  company_email: "",
-  company_name: "",
-  company_content: null,
-  company_image: [],
-  company_view: null,
-  company_longitude: "",
-  company_latitude: ""
+  video_title: "",
+  video_lik: null,
+  video_image: [],
+  video_order: ''
 };
+import Moment from "@/utils/moment";
 export default {
   mixins: [config],
   created() {
@@ -204,11 +180,11 @@ export default {
   },
   data() {
     return {
-      //案例列表
+      //视频列表
       tableData: [
         {
-          company_image: [],
-          company_name: ""
+          video_image: [],
+          video_title: ""
         }
       ],
       //弹框动态详情
@@ -244,10 +220,10 @@ export default {
       dialogImageUrl: "",
       //表单验证规则
       rules: {
-        company_name: [
+        video_title: [
           {
             required: true,
-            message: "请输入公司名称",
+            message: "请输入视频名称",
             trigger: "blur"
           },
           {
@@ -256,7 +232,7 @@ export default {
             message: "长度在1到20个字"
           }
         ],
-        company_image: [
+        video_image: [
           {
             required: true,
             message: "请传1至3张图片",
@@ -268,22 +244,42 @@ export default {
       isloading: false,
       //正在上传图片
       isUpimg: false,
-      editId: null
+      editId: null,
+      categoryStateOptions: [
+        {
+          value: "",
+          label: "无"
+        },
+        {
+          value: 1,
+          label: "分类一"
+        },
+        {
+          value: 2,
+          label: "分类二"
+        },
+        {
+          value: 3,
+          label: "分类三"
+        }
+      ],
+      category: ""
     };
   },
   methods: {
     //新增
     CreateItem() {
+      this.category = "";
       this.dialogFormVisible = true; //打开内容弹框
       this.dialogStatus = "create";
       this.form = Object.assign({}, form);
     },
     //上传图片
-    async handleImgChangeOne(file, fileList, index) {
+    async handleImgChange(file, fileList) {
       this.isUpimg = true;
       let imgurl = await uploadFn(file.raw);
       this.isUpimg = false;
-      this.form.company_image.push({
+      this.form.video_image.push({
         url: imgurl[0]
       });
     },
@@ -293,27 +289,36 @@ export default {
       let imgurl = await uploadFn(file.raw);
       if (imgurl) {
         this.isUpimg = false;
-        this.form.company_view = imgurl[0];
+        this.form.video_lik = imgurl[0];
       }
     },
-    async handleImgChangeTwo(file, fileList) {
-      this.isUpimg = true;
-      let imgurl = await uploadFn(file.raw);
-      this.isUpimg = false;
-      this.formObjRepeat[this.moddele_idx].Repeat_images.push({
-        url: imgurl[0]
-      });
+    beforeUploadVideo(file) {
+      if (
+        [
+          "video/mp4",
+          "video/ogg",
+          "video/flv",
+          "video/avi",
+          "video/wmv",
+          "video/rmvb"
+        ].indexOf(file.type) == -1
+      ) {
+        this.$message.error("请上传正确的视频格式");
+        return false;
+      }
     },
-
-    //删除图片
-    handleRemoveOne(file, fileList) {
-      this.form.company_image = fileList;
+    deleteVideo() {
+      this.form.video_lik = null;
+      this.form = Object.assign({}, this.form);
     },
-
     //预览图片
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
+    },
+    //删除图片
+    handleRemoveOne(file, fileList) {
+      this.form.video_image = [];
     },
     //保存内容
     onSubmit(form) {
@@ -332,12 +337,15 @@ export default {
     },
     //编辑对应项
     handleEdit(row) {
-      console.log("编辑");
       this.form = Object.assign({}, row);
       this.dialogStatus = "edit";
-      this.editId = row.company_id;
+      this.categoryStateOptions.forEach(item => {
+        if (item.value == row.classify_id) {
+          this.category = item.label;
+        }
+      });
+      this.editId = row.video_id;
       this.dialogFormVisible = true;
-      console.log(this.form);
       this.$nextTick(() => {
         this.$refs["form"].clearValidate();
       });
@@ -345,14 +353,14 @@ export default {
     //删除
     handleDelete(index, row) {
       console.log(index, row);
-      this.$confirm("此操作将永久删除该公司信息, 是否继续?", "提示", {
+      this.$confirm("此操作将永久删除该视频信息, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
           console.log(row);
-          this.deleteDynamic(row.company_id);
+          this.deleteDynamic(row.video_id);
         })
         .catch(() => {
           this.$message({
@@ -373,20 +381,25 @@ export default {
       this.dynamicList();
     },
     //以下为api操作
-    //获取案例列表
+    //获取视频列表
     dynamicList() {
       let sendData = Object.assign({}, this.listQuery);
       console.log(sendData);
-      getCompany_api(sendData).then(res => {
-        this.tableData = res.data;
+      getVideo_api(sendData).then(res => {
         if (res.status == 0) {
           this.total = res.pagination.total;
-          res.data.forEach((item, idx) => {
-            this.tableData[idx].company_image = JSON.parse(
-              item["company_image"]
+          res.data.forEach(item => {
+            item.addtime = Moment(item.addtime * 1000).format(
+              "yyyy-MM-dd HH:mm:ss"
             );
+            item.video_image = JSON.parse(item.video_image);
+            this.categoryStateOptions.forEach(itemOptions => {
+              if (itemOptions.value == item.classify_id) {
+                item.label = itemOptions.label;
+              }
+            });
           });
-          console.log(this.tableData);
+          this.tableData = res.data;
         }
       });
     },
@@ -397,19 +410,20 @@ export default {
       }
       return arr;
     },
-    //新增/编辑案例
+    //新增/编辑视频
     addDynamic() {
       let sendData = {};
       for (let key in this.form) {
-        if (key == "company_image") {
-          this.form.company_image = this.delUrlfun(this.form.company_image);
-          sendData[key] = JSON.stringify(this.form.company_image);
+        if (key == "video_image") {
+          this.form.video_image = this.delUrlfun(this.form.video_image);
+          sendData[key] = JSON.stringify(this.form.video_image);
         } else {
           sendData[key] = this.form[key];
         }
       }
+
       if (this.dialogStatus === "create") {
-        addCompany_api(sendData).then(res => {
+        addVideo_api(sendData).then(res => {
           if (res.status == 0) {
             this.dialogFormVisible = false;
             this.isloading = false;
@@ -423,7 +437,7 @@ export default {
           }
         });
       } else if (this.dialogStatus === "edit") {
-        putCompany_api(this.editId, sendData).then(res => {
+        putVideo_api(this.editId, sendData).then(res => {
           if (res.status == 0) {
             this.dialogFormVisible = false;
             this.isloading = false;
@@ -438,9 +452,9 @@ export default {
         });
       }
     },
-    //删除公司
+    //删除视频
     deleteDynamic(id) {
-      deleteCompany_api(id).then(res => {
+      deleteVideo_api(id).then(res => {
         if (res.status == 0) {
           this.$notify({
             title: "成功",
@@ -452,24 +466,10 @@ export default {
         }
       });
     },
-    beforeUploadVideo(file) {
-      if (
-        [
-          "video/mp4",
-          "video/ogg",
-          "video/flv",
-          "video/avi",
-          "video/wmv",
-          "video/rmvb"
-        ].indexOf(file.type) == -1
-      ) {
-        this.$message.error("请上传正确的视频格式");
-        return false;
-      }
-    },
-    deleteVideo() {
-      this.form.company_view = null;
-      this.form = Object.assign({}, this.form);
+    handleSelect(e) {
+      console.log("列表状态");
+      console.log(e);
+      this.form.classify_id = e;
     }
   }
 };

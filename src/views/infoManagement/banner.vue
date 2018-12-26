@@ -58,7 +58,7 @@
           </el-upload>
         </el-form-item>
         <el-form-item label="排序序号" prop="banner_order">
-          <el-input v-model="form.banner_order" placeholder="请输入排序序号"></el-input>
+          <el-input v-model="form.banner_order" placeholder="请输入排序序号0为最前，以此类推"></el-input>
         </el-form-item>
         <el-form-item label="跳转类型">
           <el-select v-model="category" placeholder="请选择" @change="handleSelect">

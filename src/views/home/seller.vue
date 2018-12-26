@@ -21,23 +21,11 @@
 </style>
 <template>
   <div class="page-bagColor">
-    <el-dialog
-      :title="noticeInfo.affiche_title"
-      :visible.sync="centerDialogVisible"
-      width="50%"
-      center
-    >
-      <div class="notice-time">{{noticeInfo.add_time}}</div>
-      <div class="notice-content">{{noticeInfo.affiche_content}}</div>
-      <div slot="footer" class="dialog-footer">
-        <!-- <el-button @click="centerDialogVisible = false">取 消</el-button> -->
-        <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
-      </div>
-    </el-dialog>
+
     <el-row :gutter="20" style="margin:20px;">
       <el-col :span="6">
         <div class="box">
-          <img src="/static/img/icon_zuoridingdan.png" alt>
+          <img src="static/img/icon_zuoridingdan.png" alt>
           <div>昨日订单量
             <div class="box-num">{{Yorder}}</div>
           </div>
@@ -45,7 +33,7 @@
       </el-col>
       <el-col :span="6">
         <div class="box">
-          <img src="/static/img/icon_zuorijine.png" alt>
+          <img src="static/img/icon_zuorijine.png" alt>
           <div>昨日订单额
             <div class="box-num">{{YorderMoney}}</div>
           </div>
@@ -53,7 +41,7 @@
       </el-col>
       <el-col :span="6">
         <div class="box">
-          <img src="/static/img/icon_zongdingdan.png" alt>
+          <img src="static/img/icon_zongdingdan.png" alt>
           <div>总订单数
             <div class="box-num">{{Aorder}}</div>
           </div>
@@ -61,7 +49,7 @@
       </el-col>
       <el-col :span="6">
         <div class="box">
-          <img src="/static/img/icon_zongjine.png" alt>
+          <img src="static/img/icon_zongjine.png" alt>
           <div>总订单额
             <div class="box-num">{{AorderMoney}}</div>
           </div>
@@ -88,7 +76,7 @@
 </template>
 
 <script>
-import { getHomeData_api,getNotice_api} from "@/api/seller";
+import { getHomeData_api} from "@/api/seller";
 import Chart from "@/components/Charts/lineMarker";
 import Moment from "@/utils/moment";
 export default {
@@ -142,7 +130,6 @@ export default {
       YorderMoney: "",
       Aorder: "",
       AorderMoney: "",
-      centerDialogVisible: false,
       noticeInfo: ""
     };
   },
@@ -159,7 +146,6 @@ export default {
     this.getData();
     this.getYesterdayData();
     this.getAllData();
-    this.getNotice();
   },
   methods: {
     async getData() {
@@ -199,16 +185,6 @@ export default {
       });
       this.chartFlag = true;
     },
-    async getNotice() {
-      await getNotice_api().then(response => {
-        if (response && response.status == 0) {
-          this.centerDialogVisible = true;
-          this.noticeInfo = response.data[0];
-        }
-        console.log(response);
-      });
-    },
-
     async getHomeDate() {
       let startTime = Moment(new Date(this.daterange[0]).getTime()).format(
         "yyyy-MM-dd"

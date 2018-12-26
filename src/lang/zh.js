@@ -23,6 +23,7 @@ export default {
     statistics:'分销统计',
     rReturn:'售后订单',
     feedBack: '评价管理',
+    videos: '视频列表',
     
     // --------------------
     //卖家
