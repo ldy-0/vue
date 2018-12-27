@@ -24,7 +24,8 @@ export default {
     rReturn:'售后订单',
     feedBack: '评价管理',
     videos: '视频列表',
-    
+    groupBuying: '团购管理',
+    coupon: '优惠券管理',
     // --------------------
     //卖家
     commodityManagement:'商品管理',
@@ -32,7 +33,6 @@ export default {
     rOrder:'实物订单',
     vOrder:'虚拟订单',
     appointment:'预约',
-    coupon:'优惠券',
 
     server:'运营',
     serverBanner:'首页轮播图',
