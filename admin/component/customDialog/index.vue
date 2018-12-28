@@ -11,7 +11,11 @@
 
     <el-form :label-width="config.labelWidth || '100px'" :disabled='config.isDisabled' :model='detail' ref='ruleForm' :rules='config.rules' v-else>
 
-      <el-form-item :label="item.key"  v-for='(item, index) in list || config.classList' :key='index' v-if='!item.isHide && detail[item.value]' :prop='item.value'>
+      <el-form-item :label="item.key"  
+                    v-for='(item, index) in list || config.classList' 
+                    :key='index' 
+                    v-if='!item.isHide && !(config.isDisabled && !detail[item.value])' 
+                    :prop='item.value'>
 
         <!-- input -->
         <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isText'></el-input>
@@ -22,16 +26,31 @@
         <!-- textarea -->
         <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='true' v-if='item.isTexts'></el-input>
 
-        <!-- dateRage -->
-        <el-date-picker style="width:400px" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" 
+        <!-- date
+              dateType: datetime | datetimerange
+         -->
+        <el-date-picker style="width:400px" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" 
+                          :type="item.dateType"
                           v-model="detail[item.value]"
-                          v-if='item.isDateRange'>
+                          v-if='item.dateType'>
         </el-date-picker>
 
         <!-- imgs -->
-        <img class='detail_imgs' :src='v' v-for='(v, i) in detail[item.value]' :key='i' v-if='item.isImgs' />
+        <img class='detail_imgs' :src='v.url || v' v-for='(v, i) in detail[item.value]' :key='i' v-if='item.isImgs' />
 
-        
+        <!-- img -->
+        <el-upload action=''
+            list-type="picture-card"
+            :auto-upload="false"
+            :limit='item.limit'
+            :file-list='detail[item.value]' 
+            :on-remove='changeImgs'
+            :on-change="changeImgs"
+            v-if='item.isImg'>
+
+            <i class="el-icon-plus"></i>
+
+        </el-upload>
 
         <!-- <div v-if='item.isCreateQrcode'>
           <el-button type='primary' size='mini' @click='getQrcode'>生成二维码</el-button>
@@ -41,32 +60,17 @@
           <el-button type='primary' size='mini'><a :href='detail[item.value]'>下载</a></el-button>
         </div> -->
 
-        <!-- img -->
-        <el-upload action=''
-            list-type="picture-card"
-            :auto-upload="false"
-            :limit='3'
-            :file-list='detail[item.value]' 
-            :on-remove='removeImg'
-            :on-change="changeImgs"
-            v-if='item.isImg'>
-
-            <i class="el-icon-plus"></i>
-
-        </el-upload>
-
-
         <!-- radio -->
         <el-radio-group v-model='detail[item.value]' v-if='item.isRadio'>
-          <el-radio label=1>是</el-radio>
-          <el-radio label=0>否</el-radio>
+          <el-radio :label='1'>是</el-radio>
+          <el-radio :label='0'>否</el-radio>
         </el-radio-group>
 
         <!-- select -->
         <el-select v-model="detail[item.value]" :placeholder="item.placeholder" v-if='item.isSelect' @change='selectChange(item.value, $event)'>
           <el-option v-for="option in item.list" :key="option[item.id]" :label="option[item.name]" :value="option[item.id]"></el-option>
         </el-select>
-        <div v-if='item.isSelect && item.isShowDetail'>
+        <!-- <div v-if='item.isSelect && item.isShowDetail'>
           <div class='course_detail' v-for='(detail, index) in item.detailList' :key='index'>
             <span class='interval'>教师：{{detail.teacher_name}}</span>
             <span class='interval'>教学点: {{detail.address_name}}</span>
@@ -75,7 +79,7 @@
               <ul><li v-for='(time, i) in detail.time' :key='i'>{{time.join()}}</li></ul>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <el-select v-model="detail[item.value]" multiple :placeholder="item.placeholder" v-if='item.isMultiSelect'>
           <el-option v-for="option in item.list" :key="option[item.id]" :label="option[item.name]" :value="option[item.id]"></el-option>
@@ -100,7 +104,7 @@
 
         <!-- detail -->
         <div v-if='item.isDetail'>
-          <el-button @click="addDetail(item.value)" v-text='item.title'></el-button>
+          <el-button @click="addDetail(item.value)" v-text='item.title' v-if='item.title'></el-button>
           <slot></slot>
         </div>
 
@@ -117,10 +121,6 @@
 
         </el-upload>
 
-        <!-- slot -->
-        <!-- <div v-if='item.isCustom'>
-          <slot :name='detail[item.value]' :k='item.value'></slot> 
-        </div> -->
 
       </el-form-item>
       
@@ -141,6 +141,8 @@
 </template>
 
 <script>
+import upLoadFile from '@/utils/aahbs.js'
+
 export default {
   name: 'dialog',
 
@@ -194,20 +196,23 @@ export default {
       if(!res) return ;
 
       if(!this.canSubmit)return ;
-console.warn(this.detail, this.timekey);
+// console.error(this.detail, this.error);
       if(this.detail[this.timeKey] && !this.detail[this.timeKey].length)return this.$message({ message: '请添加日期' });
 
-      if(this.error.length)return this.$message(this.error[0]);
+      if(this.error.length)return this.$message.error(this.error[0]);
 
-      console.log('submit dialog --', this.detail);
-      this.$emit('submit', this.goodsImgs, this.imgs);
+      // format img url
+      let uploadList = this.imgs.filter(v => v.raw),
+          imgs = [];
+
+      // console.warn('upload list: ', uploadList);
+      if(uploadList.length) imgs = await upLoadFile(uploadList.map(v => v.raw));
+
+      this.$emit('submit', this.imgs.filter(v => !v.raw).map(v => v.url).concat(imgs), this.goodsImgs);
     },
 
     // select
-    selectChange(key, id){
-      console.log('select change: ', key, id);
-      this.$emit(`${key}Change`, id);
-    },
+    selectChange(key, id){ this.$emit(`${key}Change`, id, key); },
 
     getQrcode(){
       // this.detail.qrcode = [ { url: 'http://admin-1256953590.cos.ap-shanghai.myqcloud.com/1539331723928tab_fenxiangzhuan%402x.png'}];  
@@ -217,12 +222,8 @@ console.warn(this.detail, this.timekey);
     },
 
     changeImgs(e, list){
-      console.log('change img--', list)
       this.imgs = list;
-    },
-    removeImg(file, list){
-      console.log('remove', list)
-      this.imgs = list;
+      console.log(`change img : `, this.imgs)
     },
 
     changeGoodsImgs(file, files){
@@ -265,14 +266,14 @@ console.warn(this.detail, this.timekey);
       let v = this.detail[item.value],
           phonePattern = /^((13[0-9])|(14[5|7|9])|(15([0-3]|[5-9]))|(17[0,1,3,5,6,7,8])|(18[0-9]))\d{8}$/;
 
-      console.log('input --', item, v)
+      console.warn('input --', item, v)
       if(isNaN(Number(v)))return ;
 
-      if(item.isNumber && v <= 0)return this.$message(this.error.push({ prop: item.value, message: '值必须大于零' }));
+      if(item.isNumber && v <= 0)return this.error.push({ prop: item.value, message: '值必须大于零' });
 
-      if(item.isInteger && v % 1 !== 0)return this.$message( this.error.push({ prop: item.value, message: '值必须为整数' }) );
+      if(item.isInteger && v % 1 !== 0)return this.error.push({ prop: item.value, message: '值必须为整数' });
 
-      if(item.isPhone && !phonePattern.test(v)) return this.$message( this.error.push({ prop: item.value, message: '手机号不合法!' }) );
+      if(item.isPhone && !phonePattern.test(v)) return this.error.push({ prop: item.value, message: '手机号不合法!', duration: 1500 });
 
       this.error = this.error.filter(v => v.prop !== item.value); // clear error
       this.detail[item.value] = item.isPhone ? v : Number(v);

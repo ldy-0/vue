@@ -2,7 +2,7 @@
 
       <el-form :inline="true" class="form">
 
-        <el-form-item v-if='config.showAdd'>
+        <el-form-item v-if='config.title'>
           <el-button type="primary" icon="el-icon-edit-outline" @click="showForm">{{config.title}}</el-button>
         </el-form-item>
 
@@ -18,7 +18,7 @@
         </el-form-item>
 
         <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
-          <el-select placeholder="请选择" v-model='orderState' @change='changeStatus'> <!-- multiple  -->
+          <el-select placeholder="请选择" v-model='status' @change='changeStatus'> <!-- multiple  -->
             <el-option v-for="item in config.categories" :key="item.id" :label="item.title" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
@@ -62,7 +62,7 @@ export default {
     return {
       keyword: '',
       date: '',
-      orderState: '',
+      status: '',
     }
   },
   
@@ -71,10 +71,8 @@ export default {
       console.log('emit add');
       this.$emit('add');
     },
-    searchByKeyWord() {
-      console.log('search keyword:', this.keyword);
-      this.$emit('searchByKeyWord', this.keyword);
-    },
+    searchByKeyWord() { this.$emit('search', this.keyword); },
+    changeStatus() { this.$emit('searchByStatus', this.status) },
     searchByDate(){
       console.log('search date:', this.date);
       let date = {
@@ -83,10 +81,6 @@ export default {
       };
 
       this.$emit('searchByDate', date);
-    },
-    changeStatus() {
-      console.log('change state', this.orderState)
-      this.$emit('changeState', this.orderState)
     },
     async exportFile() {
       let loading = this.$loading({ fullscreen: true })
