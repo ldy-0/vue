@@ -17,6 +17,12 @@
         append-to-body
       >
         <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules">
+          <el-form-item label="规格" :label-width="formLabelWidth">
+            <!-- <el-select v-model="alertValue" placeholder="请选择规格" @change="handele_select" >
+							<el-option v-for="item in goodsDetail.spec_value"  :key="item" :label="item" :value="item">
+							</el-option>
+						</el-select> -->
+          </el-form-item>
           <el-form-item label="团购价" :label-width="formLabelWidth" prop="tprice">
             <el-input v-model.number="QformForNotive.tprice" auto-complete="off"></el-input>
           </el-form-item>
@@ -49,7 +55,7 @@
         </span>
       </el-dialog>
       <el-container class="notice">
-        <el-header class="header">
+        <!-- <el-header class="header">
           <el-form :inline="true" :model="formInline" class="form">
             <el-form-item>
               <el-input style="width: 340px;" placeholder="请输入商品名称、编码" v-model="listQuery2.search"></el-input>
@@ -68,7 +74,7 @@
               </el-select>
             </el-form-item>
           </el-form>
-        </el-header>
+        </el-header>-->
         <el-container>
           <el-main>
             <el-table
@@ -86,22 +92,10 @@
                 </template>
               </el-table-column>
               <el-table-column label="商品名" prop="goodsName"></el-table-column>
-              <el-table-column label="类型" prop="is_virtualTXT"></el-table-column>
-              <el-table-column label="编号" prop="goodsNum"></el-table-column>
-              <!-- <el-table-column
-                  label="状态" 
-                  prop="goodsState"
-                  >
-              </el-table-column>-->
               <el-table-column label="价格" prop="goodsPrice"></el-table-column>
               <!-- <el-table-column
                   label="库存" 
                   prop="goodsTotal"
-                  >
-              </el-table-column>-->
-              <!-- <el-table-column
-                  label="销量" 
-                  prop="goodsSell"
                   >
               </el-table-column>-->
               <el-table-column label="操作" min-width="300px">
@@ -160,12 +154,18 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="ID" prop="id"></el-table-column>
+          <el-table-column label="团购商品ID" prop="id"></el-table-column>
           <el-table-column label="商品名" prop="name"></el-table-column>
-          <el-table-column label="价格" prop="price"></el-table-column>
+          <el-table-column label="商品价格" prop="goodsprice"></el-table-column>
+          <el-table-column label="团购价格" prop="gurouprice"></el-table-column>
+          <el-table-column label="团购商品状态">
+            <template slot-scope="scope">
+              <el-tag size="medium">{{ scope.row.tstate }}</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="操作" min-width="300px">
             <template slot-scope="scope">
-              <!-- <el-button size="mini"  @click="HeditItem(scope.$index, scope.row)">编辑</el-button> -->
+              <el-button size="mini" type="success" @click="HeditItem(scope.$index, scope.row)">编辑</el-button>
               <el-button size="mini" type="danger" @click="deleteItem(scope.$index, scope.row)">取消团购</el-button>
             </template>
           </el-table-column>
@@ -187,22 +187,18 @@
   </div>
 </template>
 <script>
-// getList 接口 获取
-// addNotice 接口 添加
-import // getGoodsList_api,
-// getAllBuyList_api,
-// addAllBuy_api,
-// getEntryList_api,
-// editAllBuy_api,
-// deleteAllBuy_api
-"@/api/seller";
+import {
+  getGoodsList_api,
+  getgroupbuy_api,
+  addgroupbuy_api,
+  deletegroupbuy_api,
+  getGoods_api,
+} from "@/api/seller";
 const QformForNotive = {};
 
 export default {
   data() {
     return {
-      // out Q
-      // out
       QrulesChild: {},
       QisAddItem: false,
       QwaitAddNotice: false,
@@ -340,11 +336,13 @@ export default {
         search: "",
         time: ""
       },
-      total: 1
+      total: 1,
+      goodsDetail: null,
+      alertValue: "",
     };
   },
   async created() {
-    await this.getindustryList(); //自定义分类
+    // await this.getindustryList(); //自定义分类
     this.getList();
   },
   methods: {
@@ -380,7 +378,7 @@ export default {
         pintuan_limit_hour: this.QformForNotive.thours,
         pintuan_limit_quantity: this.QformForNotive.tlimit
       };
-      editAllBuy_api(sendData)
+      addgroupbuy_api(sendData)
         .then(data => {
           this.QwaitAddNotice = false;
           this.QaddNewShow = false;
@@ -404,7 +402,7 @@ export default {
         .catch(e => {
           this.QwaitAddNotice = false;
           this.QaddNewShow = false;
-          console.error("manageShop:editAllBuy_api 接口错误");
+          console.error("manageShop:addgroupbuy_api 接口错误");
         });
     },
     QdeleteAA(index) {
@@ -641,16 +639,6 @@ export default {
                 temp_fileList2.push({ url: aData.id_card_behind });
               }
               // goodstotal 库存 前后端不一致 需要特殊处理
-              let goodsTotal = 0;
-              if (aData.spec_name === "one") {
-                goodsTotal = aData.goods_storage;
-              } else {
-                goodsTotal = aData.goods_storage;
-              }
-              //对  mutil类型的表单 处理
-
-              // ！！！！！这里暂停工作 因为暂时没有接口
-
               tempTableData.push({
                 //后端生成
                 id: aData.goods_commonid,
@@ -684,7 +672,7 @@ export default {
         goods_commonid: id,
         pin_token: "join"
       };
-      addAllBuy_api(sendData)
+      addgroupbuy_api(sendData)
         .then(res => {
           if (res && res.status === 0) {
             this.$notify({
@@ -702,13 +690,17 @@ export default {
           }
         })
         .catch(err => {
-          console.error("addAllBuy_api");
+          console.error("addgroupbuy_api");
         });
     },
 
     editItem(index, row) {
       //点击选择商品
       let id = row.id;
+      this.alertValue = "";
+      getGoods_api(id).then(res => {
+        this.goodsDetail = res.data
+      })
       this.HeditItem(id); //弹出表单
     },
     deleteNewNotice(id) {
@@ -716,7 +708,7 @@ export default {
         goods_commonid: id,
         pin_token: "wipe"
       };
-      deleteAllBuy_api(sendData)
+      deletegroupbuy_api(sendData)
         .then(res => {
           if (res && res.status === 0) {
             this.$notify({
@@ -795,7 +787,7 @@ export default {
     getList() {
       this.listLoading = true;
       let sendData = Object.assign({}, this.listQuery);
-      getAllBuyList_api(sendData)
+      getgroupbuy_api(sendData)
         .then(response => {
           // 这里由于结构做了调整，导致编辑页面需要的数据无法从列表获取，这里只需要给tableData额外传一个id
           if (response && response.status == 0) {
@@ -804,22 +796,17 @@ export default {
             result.forEach(aData => {
               tempTableData.push({
                 //后端生成
-                id: aData.goods_commonid,
-                image: aData.goods_image,
-                name: aData.goods_name,
-                price: aData.goods_price,
-                tprice: aData.goods_pintuan_price
-                  ? aData.goods_pintuan_price
-                  : "",
-                tpeople: aData.pintuan_limit_hour
-                  ? aData.pintuan_limit_hour
-                  : "",
-                thours: aData.pintuan_limit_hour
-                  ? aData.pintuan_limit_hour
-                  : "",
-                tlimit: aData.pintuan_limit_quantity
-                  ? aData.pintuan_limit_quantity
-                  : ""
+                id: aData.goods_id,
+                image: aData.goods.goods_image,
+                name: aData.goods.goods_name,
+                goodsprice: aData.goods.goods_price,
+                gurouprice: aData.goods_price,
+                tpeople: aData.group_num ? aData.group_num : "",
+                thours: aData.limit_time ? aData.limit_time : "",
+                tstate:
+                  new Date().getTime() < new Date(aData.end_time).getTime()
+                    ? "团购中"
+                    : "已下架"
               });
             });
             this.tableData = tempTableData;
@@ -829,13 +816,16 @@ export default {
                 : 0;
           } else {
           }
-          console.log("getAllBuyList_api", response);
+          console.log("getgroupbuy_api", response);
           // this.list = response
           this.listLoading = false;
         })
         .catch(e => {
           this.listLoading = false;
         });
+    },
+    handele_select(val){
+      console.log(val);
     }
   }
 };

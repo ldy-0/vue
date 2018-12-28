@@ -30,12 +30,12 @@
         <el-form-item label="发行数量" :label-width="formLabelWidth" prop="total">
           <el-input v-model.number="formForNotive.total" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="个人获取限制" :label-width="formLabelWidth" prop="getTotal">
+        <!-- <el-form-item label="个人获取限制" :label-width="formLabelWidth" prop="getTotal">
           <el-input v-model.number="formForNotive.getTotal" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="使用次数限制" :label-width="formLabelWidth" prop="useTotal">
           <el-input v-model.number="formForNotive.useTotal" auto-complete="off"></el-input>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addNewShow = false">取 消</el-button>
@@ -58,14 +58,6 @@
         <el-form-item label="优惠券面值" :label-width="formLabelWidth">
           <p class="hbs-no-margin-p">{{detailForm.vouchertemplate_price}}</p>
         </el-form-item>
-        <!-- <el-form-item label="满减" :label-width="formLabelWidth">
-        <p class="hbs-no-margin-p">
-          {{detailForm.vouchertemplate_limit}}
-        </p>
-        </el-form-item>-->
-        <el-form-item label="创建人ID" :label-width="formLabelWidth">
-          <p class="hbs-no-margin-p">{{detailForm.vouchertemplate_creator_id}}</p>
-        </el-form-item>
         <el-form-item label="优惠券状态" :label-width="formLabelWidth">
           <p class="hbs-no-margin-p">{{detailForm.vouchertemplate_state_text}}</p>
         </el-form-item>
@@ -84,25 +76,12 @@
         <el-form-item label="领取限制数量" :label-width="formLabelWidth">
           <p class="hbs-no-margin-p">{{detailForm.vouchertemplate_eachlimit}}</p>
         </el-form-item>
-        <el-form-item label="使用数量限制" :label-width="formLabelWidth">
-          <p class="hbs-no-margin-p">{{detailForm.vouchertemplate_eachrestricted}}</p>
-        </el-form-item>
         <el-form-item label="生效时间范围" :label-width="formLabelWidth">
           <p class="hbs-no-margin-p">{{detailForm.vouchertemplate_aging}}</p>
         </el-form-item>
         <el-form-item label="使用范围" :label-width="formLabelWidth">
           <p class="hbs-no-margin-p">{{detailForm.vouchertemplate_usable_range}}</p>
         </el-form-item>
-        <!-- <el-form-item label="开始生效时间" :label-width="formLabelWidth">
-        <p class="hbs-no-margin-p">
-          {{detailForm.vouchertemplate_startdate}}
-        </p>
-      </el-form-item>
-      <el-form-item label="生效结束时间" :label-width="formLabelWidth">
-        <p class="hbs-no-margin-p">
-          {{detailForm.vouchertemplate_enddate}}
-        </p>
-        </el-form-item>-->
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="detailShow = false">返 回</el-button>
@@ -150,14 +129,10 @@
   </div>
 </template>
 <script>
-import // getCouponList_api,
-// addCoupon_api,
-// getGoodsList_api,
-// deleteCoupon_api
-"@/api/seller";
+import { getCoupon_api, addCoupon_api, deleteCoupon_api } from "@/api/seller";
 const formForNotive = {
   //此页面 静态数据
-  name: "优惠券名字", // 优惠券名字
+  name: "", // 优惠券名字
   // now:"", //优惠券 发行时间
   // getType:"", //优惠券 领取方式
   // useRange:"", //优惠券 使用范围
@@ -165,10 +140,8 @@ const formForNotive = {
   // startTime:"", //优惠券  起始时间
   // endTime:"", //优惠券  起始时间
   dateRange: "",
-  value: 10, //优惠券 面值
-  total: 100, //优惠券 数量
-  getTotal: 10, //优惠券 获取限制数量
-  useTotal: 5 //优惠券 使用限制
+  value: '', //优惠券 面值
+  total: '', //优惠券 数量
 };
 export default {
   created() {
@@ -260,16 +233,12 @@ export default {
   methods: {
     // out
     async addNewNotice() {
-      //添加新公告
       let res = await new Promise((res, rej) => {
         this.$refs["ruleForm"].validate(valid => {
           if (valid) {
-            // alert('submit!');
             res(true);
           } else {
             res(false);
-            // console.log('error submit!!');
-            // return false;
           }
         });
       });
@@ -283,19 +252,6 @@ export default {
         .toString()
         .slice(0, 10);
       tempNow = Number(tempNow);
-      // 商品id goods_commonid
-      let goodsId = await getGoodsList_api()
-        .then(response => {
-          if (response && response.status == 0) {
-            let result = response.data;
-            return result[0].goods_commonid;
-          }
-        })
-        .catch(e => {});
-      if (!goodsId) {
-        this.waitAddNotice = false;
-        return console.log("goodsId 不存在");
-      }
       // 优惠券生效范围时间戳 两个字段
       let dateStart = Number(
         this.formForNotive.dateRange[0]
@@ -314,12 +270,8 @@ export default {
         vouchertemplate_title: this.formForNotive.name,
         // 发行时间戳
         vouchertemplate_adddate: tempNow,
-        // 领取方式
-        vouchertemplate_payment: 3,
         // 使用范围
         vouchertemplate_usable_range: "全店铺",
-        // 名称
-        vouchertemplate_goods_id: 2,
         // 优惠券开始生效时间戳
         vouchertemplate_startdate: dateStart,
         // 优惠券结束生效时间戳
@@ -328,12 +280,10 @@ export default {
         vouchertemplate_price: this.formForNotive.value,
         // 优惠券 发行数量
         vouchertemplate_total: this.formForNotive.total,
-        // 优惠券 领取限制数量
-        vouchertemplate_eachlimit: this.formForNotive.getTotal,
-        // 优惠券 使用数量限制
-        vouchertemplate_eachrestricted: this.formForNotive.useTotal
-        // 描述
-        // vouchertemplate_desc:this.formForNotive.name,
+        // // 优惠券 领取限制数量
+        // vouchertemplate_eachlimit: this.formForNotive.getTotal,
+        // // 优惠券 使用数量限制
+        // vouchertemplate_eachrestricted: this.formForNotive.useTotal
       };
       addCoupon_api(sendData)
         .then(() => {
@@ -341,8 +291,8 @@ export default {
           this.formForNotive = {};
           this.addNewShow = false;
           this.$notify({
-            title: "发送成功",
-            message: "已新增一条公告",
+            title: "消息",
+            message: "新增成功",
             type: "success"
           });
           this.getList();
@@ -364,7 +314,7 @@ export default {
     getList() {
       this.listLoading = true;
       let sendData = Object.assign({}, this.listQuery);
-      getCouponList_api(sendData)
+      getCoupon_api(sendData)
         .then(response => {
           this.listLoading = false;
           if (response && response.status == 0) {
@@ -483,22 +433,6 @@ export default {
       this.listQuery_detail.page = val;
       this.getList_detail();
     },
-
-    //body
-    editItem() {
-      this.addNewShow = true;
-      //获取数据 填充form
-      this.formForNotive = {
-        title: "当前优惠券名称",
-        username: "当前优惠券名称",
-        phone: "当前优惠券名称",
-        account: "当前优惠券名称",
-        name: "当前优惠券名称",
-        industry: "餐饮",
-        city: ["杭州", "西湖"]
-      };
-    },
-
     searchByDate() {
       if (
         !this.dataRange ||

@@ -481,3 +481,53 @@ export function putVideo_api(id, data) {
     data
   });
 }
+//团购
+export function addgroupbuy_api(data) {
+  return request({
+    url: "/api/v2/seller/groupbuy",
+    method: "post",
+    data
+  });
+}
+export function getgroupbuy_api(data) {
+  return request({
+    url: "/api/v2/seller/groupbuy",
+    method: "get",
+    params: data
+  });
+}
+export function deletegroupbuy_api(id) {
+  return request({
+    url: "/api/v2/seller/groupbuy/" + id,
+    method: "delete"
+  });
+}
+export function putgroupbuy_api(id, data) {
+  return request({
+    url: `/api/v2/seller/groupbuy/${id}`,
+    method: "PUT",
+    data
+  });
+}
+//优惠券
+export function addCoupon_api(data) {
+  return request({
+    url: "/api/v2/seller/coupon",
+    method: "post",
+    data
+  });
+}
+export function getCoupon_api(data) {
+  return request({
+    url: "/api/v2/seller/coupon",
+    method: "get",
+    params: data
+  });
+}
+export function deleteCoupon_api(id) {
+  return request({
+    url: "/api/v2/seller/coupon/" + id,
+    method: "delete"
+  });
+}
+
