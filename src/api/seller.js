@@ -496,10 +496,11 @@ export function getgroupbuy_api(data) {
     params: data
   });
 }
-export function deletegroupbuy_api(id) {
+export function deletegroupbuy_api(data) {
   return request({
-    url: "/api/v2/seller/groupbuy/" + id,
-    method: "delete"
+    url: "/api/v2/seller/groupbuy/" + data.goods_id,
+    method: "delete",
+    data
   });
 }
 export function putgroupbuy_api(id, data) {
@@ -507,6 +508,12 @@ export function putgroupbuy_api(id, data) {
     url: `/api/v2/seller/groupbuy/${id}`,
     method: "PUT",
     data
+  });
+}
+export function getgroupGoods_api(id) {
+  return request({
+    url: `/api/v2/seller/groupbuy/${id}`,
+    method: "get"
   });
 }
 //优惠券
