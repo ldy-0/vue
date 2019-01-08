@@ -166,60 +166,27 @@
         </el-form-item>
         <el-form-item label="规格" label-width="140px">
           <!-- size 和 size2xxx 都是单独的属性 -->
-          <el-tabs v-model="form.size" style="margin-top:-3px;margin-left:10px">
-            <el-tab-pane label="统一规格" name="one" :disabled="!isAddItem&&form.size!=='one'">
-              <el-form
-                :model="formForNotiveChild1"
-                :inline="true"
-                ref="ruleFormChild1"
-                :rules="rulesChild1"
-                class="margin-btm20"
-              >
-                <el-form-item label="现价" prop="price">
-                  <el-input v-model.number="formForNotiveChild1.price" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="原价" prop="marketprice">
-                  <el-input v-model.number="formForNotiveChild1.marketprice" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="库存" prop="count">
-                  <el-input v-model.number="formForNotiveChild1.count" auto-complete="off"></el-input>
-                </el-form-item>
-              </el-form>
-            </el-tab-pane>
-            <el-tab-pane label="多规格" name="mutil" :disabled="!isAddItem&&form.size!=='mutil'">
-              <div
-                v-for="(formItem,index) of formForNotiveChild2List"
-                :key="index"
-                class="margin-btm20"
-              >
-                <el-form :inline="true" :model="formItem" ref="ruleFormChild2" :rules="rulesChild2">
-                  <el-form-item label="名称" prop="name">
-                    <el-input v-model="formItem.name" auto-complete="off"></el-input>
-                  </el-form-item>
-                  <el-form-item label="现价" prop="price">
-                    <el-input v-model.number="formItem.price" auto-complete="off"></el-input>
-                  </el-form-item>
-                  <el-form-item label="原价" prop="marketprice">
-                    <el-input v-model.number="formItem.marketprice" auto-complete="off"></el-input>
-                  </el-form-item>
-                  <el-form-item label="库存" prop="count">
-                    <el-input v-model.number="formItem.count" auto-complete="off"></el-input>
-                  </el-form-item>
-                  <el-button @click="deleteSize_out(index)">删除</el-button>
-                </el-form>
-              </div>
-              <div style="margin-top:10px;margin-left:10px">
-                <el-button @click="addSize_out">添加规格</el-button>
-              </div>
-            </el-tab-pane>
-          </el-tabs>
+          <el-form
+            :model="formForNotiveChild1"
+            :inline="true"
+            ref="ruleFormChild1"
+            :rules="rulesChild1"
+            class="margin-btm20"
+          >
+            <el-form-item label="现价" prop="price">
+              <el-input v-model.number="formForNotiveChild1.price" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="原价" prop="marketprice">
+              <el-input v-model.number="formForNotiveChild1.marketprice" auto-complete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="库存" prop="count">
+              <el-input v-model.number="formForNotiveChild1.count" auto-complete="off"></el-input>
+            </el-form-item>
+          </el-form>
         </el-form-item>
 
         <el-form-item label="商品运费" prop="goods_freight" label-width="140px">
           <el-input type="number" v-model="form.goods_freight"></el-input>
-        </el-form-item>
-        <el-form-item label="基础销量" prop="goods_faker_salenum" label-width="140px">
-          <el-input type="number" v-model="form.goods_faker_salenum"></el-input>
         </el-form-item>
         <el-form-item label="商品详情" label-width="140px">
           <editor
@@ -227,8 +194,27 @@
             :menubar="editorConfig.menu"
             :height="editorConfig.height"
             v-model="form.goods_body"
+            v-if="dialogFormVisible"
           />
         </el-form-item>
+        <el-form-item label="活动时间" prop="goods_freight" label-width="140px">
+          <el-radio-group v-model="radio" @change="choiceRadio">
+            <el-radio :label="0">不限</el-radio>
+            <el-radio :label="1">日期选择</el-radio>
+          </el-radio-group>
+          <div>
+            <el-date-picker
+              v-if="radio==1"
+              style="width:400px"
+              v-model="QformForNotive.dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+            ></el-date-picker>
+          </div>
+        </el-form-item>
+
         <el-form-item>
           <el-button
             type="primary"
@@ -267,6 +253,9 @@
           <el-table-column label="商品名" prop="name"></el-table-column>
           <el-table-column label="商品价格" prop="goodsprice"></el-table-column>
           <el-table-column label="团购价格" prop="gurouprice"></el-table-column>
+          <el-table-column label="团购人数" prop="group_num"></el-table-column>
+          <el-table-column label="团购时限（小时）" width="150" prop="limit_time"></el-table-column>
+          <el-table-column label="活动时间" prop="active_time" width="200"></el-table-column>
           <el-table-column label="团购商品状态">
             <template slot-scope="scope">
               <el-tag size="medium">{{ scope.row.tstate }}</el-tag>
@@ -303,12 +292,14 @@ import {
   deletegroupbuy_api,
   getGoods_api,
   getgroupGoods_api,
-  getIndustryList_api
+  getIndustryList_api,
+  putgroupbuy_api
 } from "@/api/seller";
 import Moment from "@/utils/moment";
+import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 const QformForNotive = {
-  dateRange: ""
+  dateRange: []
 };
 //初始化常量
 const form = {
@@ -318,16 +309,8 @@ const form = {
   goods_advword: "",
   goods_image: [],
   goods_body: "",
-  formObjRepeat: [
-    {
-      Repeat_images: [],
-      Repeat_title: ""
-    }
-  ],
   goods_freight: "",
-  goods_faker_salenum: "",
-  goods_marketprice: "",
-  size: "one"
+  goods_marketprice: ""
 };
 const formForNotiveChild1 = {
   price: "",
@@ -468,6 +451,7 @@ export default {
           goodsPrice: ""
         }
       ],
+      rule_id: null,
       // footer
       listQuery: {
         page: 1,
@@ -490,7 +474,7 @@ export default {
       value_top: "",
       //弹框选择的分类
       alertValue: "",
-       //正在上传图片
+      //正在上传图片
       isUpimg: false,
       isloading: false,
       //表单验证规则
@@ -663,19 +647,16 @@ export default {
           }
         }
       }
-      //console.log("过滤的")
-      //console.log(value)
+
       return value;
     }
   },
   methods: {
-    // Q
     HeditItem(id) {
       this.QformForNotive = Object.assign({ id });
       this.QaddNewShow = true;
     },
-    // out Q
-    // out
+
     async QaddOne() {
       this.QeditOne();
     },
@@ -693,12 +674,14 @@ export default {
         return;
       }
       this.QwaitAddNotice = true;
-      let dateStart = "2018-12-31 00:00:00";
-      let dateEnd = "2048-12-31 00:00:00";
+      let dateStart = Moment(new Date().getTime()).format(
+        "yyyy-MM-dd HH:mm:ss"
+      );
+      let dateEnd = "2038-01-19 11:14:07";
 
       if (this.radio == 0) {
-        dateStart = "2018-12-31 00:00:00";
-        dateEnd = "2048-12-31 00:00:00";
+        dateStart = dateStart;
+        dateEnd = dateEnd;
       } else {
         dateStart = Moment(this.QformForNotive.dateRange[0]).format(
           "yyyy-MM-dd HH:mm:ss"
@@ -747,115 +730,6 @@ export default {
           this.QaddNewShow = false;
           console.error("manageShop:addgroupbuy_api 接口错误");
         });
-    },
-    QdeleteAA(index) {
-      this.QformForNotiveChildList.splice(index, 1);
-    },
-    QaddAA() {
-      this.QformForNotiveChildList.push({});
-    },
-    // head
-    QaddItem() {
-      //显示 弹框
-      this.QisAddItem = true;
-      this.QaddNewShow = true;
-      this.QformForNotive = Object.assign({}, QformForNotive);
-    },
-    // body
-
-    QgetList() {
-      this.QlistLoading = true;
-      let sendData = Object.assign({}, this.QlistQuery);
-      sendData.id = this.Q_Aid;
-      getQList_api(sendData)
-        .then(response => {
-          if (response && response.status == "success") {
-            let result = response.result;
-            let tempTableData = [];
-            result.forEach(aData => {
-              tempTableData.push({
-                id: aData.examinationId, //试卷id
-                QID: aData.id, //题目id
-                title: aData.title, //问题
-                order: aData.order, //序号
-                answer: aData.answer //答案
-              });
-            });
-            this.QtableData = tempTableData;
-          }
-          // this.list = response
-          this.Qtotal =
-            response.paging && response.paging.total
-              ? response.paging.total
-              : 0;
-          this.QlistLoading = false;
-        })
-        .catch(e => {
-          console.error(e);
-          this.QlistLoading = false;
-        });
-    },
-    QeditItem(index, rowData) {
-      // this.editLoading = true
-      this.QformForNotive = Object.assign({}, rowData);
-      let answerList = JSON.parse(rowData.answer);
-      this.QformForNotiveChildList = Object.assign([], answerList);
-      this.QisAddItem = false;
-      this.QaddNewShow = true;
-    },
-    QdeleteNewNotice(id, QID) {
-      let sendData = {
-        examinationId: id,
-        questionId: QID // 父亲(外层)id
-      };
-      deleteQOne_api(sendData)
-        .then(res => {
-          if (res && res.status === "success") {
-            this.$notify({
-              title: "成功",
-              message: "操作成功",
-              type: "success"
-            });
-            this.QgetList();
-          } else {
-            this.$notify({
-              title: "错误",
-              message: "操作失败",
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
-          console.error("deleteAdmin_api");
-        });
-    },
-    QdeleteItem(index, row) {
-      let QID = row.QID;
-      let id = row.id;
-      this.$confirm(`此操作将删除该条目, 是否继续?`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
-        .then(() => {
-          this.QdeleteNewNotice(id, QID);
-        })
-        .catch(() => {
-          this.$notify.info({
-            title: "消息",
-            message: "已取消"
-          });
-        });
-    },
-    Qsave() {},
-    // foot
-    QhandleSizeChange(val) {
-      this.QlistQuery.limit = val;
-      this.getList();
-    },
-    QhandleCurrentChange(val) {
-      this.QlistQuery.page = val;
-      this.getList();
     },
 
     search2() {
@@ -1010,32 +884,6 @@ export default {
         });
     },
     //body
-    editNewNotice(id) {
-      let sendData = {
-        goods_commonid: id,
-        pin_token: "join"
-      };
-      addgroupbuy_api(sendData)
-        .then(res => {
-          if (res && res.status === 0) {
-            this.$notify({
-              title: "成功",
-              message: "操作成功",
-              type: "success"
-            });
-            this.getList();
-          } else {
-            this.$notify({
-              title: "错误",
-              message: "操作失败",
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
-          console.error("addgroupbuy_api");
-        });
-    },
 
     editItem(index, row) {
       this.goodsDetail = null;
@@ -1150,6 +998,12 @@ export default {
                 name: aData.goods.goods_name,
                 goodsprice: aData.goods.goods_price,
                 gurouprice: aData.goods_price,
+                group_num: aData.group_num,
+                limit_time: aData.limit_time,
+                active_time:
+                  aData.end_time == "2038-01-19 11:14:07"
+                    ? "不限"
+                    : aData.start_time.replace("00:00:00","") + "至" + aData.end_time.replace("00:00:00",""),
                 tpeople: aData.group_num ? aData.group_num : "",
                 thours: aData.limit_time ? aData.limit_time : "",
                 tstate:
@@ -1181,67 +1035,6 @@ export default {
       this.radio = e;
       console.log(e);
     },
-    //编辑商品
-    handleEdit(index, row) {
-      this.form = Object.assign({}, form);
-      console.log(row);
-      getgroupGoods_api(row.id).then(res => {
-        console.log(res);
-        let resObj = res.data.goods;
-        this.form = res.data.goods;
-        let arr = res.data.goodsimagesList;
-        this.form.goods_image = [];
-        for (let i = 0; i < arr.length; i++) {
-          this.form.goods_image.push(arr[i].goodsimage_url);
-        }
-        this.form.formObjRepeat =
-          resObj.goods_body[0] === "[" ? JSON.parse(resObj.goods_body) : null;
-        this.form.goods_storage = resObj.SKUList[0].goods_storage;
-        this.form.size = resObj.spec_value ? "mutil" : "one";
-
-        console.log(this.form.size);
-        // 此时需要 判断 规格 单或多
-        let tempForm2 = {}; //单规格 零时变量
-        let tempForm3 = []; //多规格 零时变量
-        if (this.form.size === "mutil") {
-          for (let i = 0, len = resObj.SKUList.length; i < len; i++) {
-            tempForm3.push({
-              price: Number(resObj.SKUList[i].goods_price),
-              marketprice: Number(resObj.SKUList[i].goods_marketprice),
-              name: resObj.SKUList[i].goods_spec,
-              count: Number(resObj.SKUList[i].goods_storage)
-            });
-          }
-          this.formForNotiveChild2List = tempForm3;
-        } else {
-          tempForm2 = {
-            price: Number(resObj.goods_price),
-            marketprice: Number(resObj.goods_marketprice),
-            count: Number(resObj.SKUList[0].goods_storage)
-          };
-          this.formForNotiveChild1 = tempForm2;
-        }
-        console.log("分类");
-        console.log(this.options);
-
-        this.selectedOptions_alert = this.options;
-        let storegc_id = this.options.filter(e => {
-          return e.label == resObj.gc_name;
-        });
-        console.log(storegc_id);
-        if (storegc_id.length == 0) {
-          this.form.storegc_id = "";
-          this.alertValue = "";
-        } else {
-          this.form.storegc_id = storegc_id[0].value;
-          this.alertValue = this.form.storegc_id;
-        }
-        console.log("填充的form图文详情");
-        console.log(this.form.formObjRepeat);
-        this.dialogFormVisible = true;
-        this.dialogStatus = "edit";
-      });
-    },
     //获取商品分类总信息
     getGoodsClass() {
       getIndustryList_api().then(res => {
@@ -1263,19 +1056,17 @@ export default {
       this.isUpimg = false;
       console.log(this.form);
       this.form.goods_image.push({ url: imgurl[0] });
-      console.log("goods_image");
-      console.log(this.form.goods_image);
     },
     //弹框分类选择
     handele_select2(val) {
       console.log("选择后得分类");
-   
+
       let arr = this.selectedOptions_alert.filter((e, idx) => {
         return this.selectedOptions_alert[idx].value == val;
       });
       this.form.gc_id = val;
       this.alertValue = this.form.gc_id;
-  
+
       this.form.gc_name = arr[0].label;
       console.log(this.form);
     },
@@ -1301,6 +1092,153 @@ export default {
     getIndex(index) {
       this.moddele_idx = index;
     },
+    //保存内容
+    async onSubmit(form) {
+      //如果 size是统一 仅对统一表单进行验证
+      let resChild1 = await new Promise((res, rej) => {
+        this.$refs["ruleFormChild1"].validate(valid => {
+          if (valid) {
+            // alert('submit!');
+            res(true);
+          } else {
+            res(false);
+            // console.log('error submit!!');
+            // return false;
+          }
+        });
+      });
+      if (!resChild1) {
+        return;
+      }
+      console.log(this.form);
+      //商品价格
+
+      // 类型转换
+      this.formForNotiveChild1.price = this.formForNotiveChild1.price
+        ? Number(this.formForNotiveChild1.price)
+        : 0;
+      this.form.goods_price = this.formForNotiveChild1.price;
+      this.form.goods_marketprice = this.formForNotiveChild1.marketprice;
+
+      //单规格
+
+      this.form.goods_storage = this.formForNotiveChild1.count;
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.isloading = true;
+          this.editGoods();
+        } else {
+          return false;
+        }
+      });
+    },
+    delUrlfun(e) {
+      console.log("去除");
+      console.log(e);
+      let arr = [];
+      for (let i = 0; i < e.length; i++) {
+        arr.push(e[i].url);
+      }
+      return arr;
+    },
+    //编辑
+    handleEdit(index, row) {
+      this.isloading = false;
+      this.form = Object.assign({}, form);
+      getgroupGoods_api(row.id).then(res => {
+        let resObj = res.data.goods;
+        this.form = res.data.goods;
+        this.form.goods_image = res.data.images;
+        this.form.goods_body = res.data.goods_body;
+        this.rule_id = res.data.rule_id;
+        // 此时需要 判断 规格 单或多
+        let tempForm2 = {}; //单规格 变量
+        tempForm2 = {
+          price: Number(resObj.goods_price),
+          marketprice: Number(resObj.goods_marketprice),
+          count: Number(resObj.goods_storage)
+        };
+        this.formForNotiveChild1 = tempForm2;
+        this.selectedOptions_alert = this.options;
+        let storegc_id = this.options.filter(e => {
+          return e.label == resObj.gc_name;
+        });
+
+        if (storegc_id.length == 0) {
+          this.form.storegc_id = "";
+          this.alertValue = "";
+        } else {
+          this.form.storegc_id = storegc_id[0].value;
+          this.alertValue = this.form.storegc_id;
+        }
+        this.QformForNotive = Object.assign({}, QformForNotive);
+        if (res.data.end_time == "2038-01-19 11:14:07") {
+          this.radio = Object.assign({}, this.radio);
+          this.radio = 0;
+        } else {
+          this.radio = Object.assign({}, this.radio);
+          this.radio = 1;
+          this.QformForNotive.dateRange[0] = res.data.start_time;
+          this.QformForNotive.dateRange[1] = res.data.end_time;
+        }
+
+        console.log(this.form);
+        this.dialogFormVisible = true;
+      });
+    },
+    //编辑商品
+    editGoods() {
+      let obj = Object.assign({}, this.form);
+      let delUrl_goods_image = this.delUrlfun(obj.goods_image);
+      obj.goods_image = delUrl_goods_image;
+      let sendData = {
+        goods: null,
+        images: [],
+        goods_body: "",
+        start_time: "",
+        end_time: ""
+      };
+      sendData.images = obj.goods_image;
+      sendData.goods_body = obj.goods_body;
+      let dateStart = "";
+      let dateEnd = "";
+      if (this.radio == 0) {
+        dateStart = Moment(new Date().getTime()).format("yyyy-MM-dd HH:mm:ss");
+        dateEnd = "2038-01-19 11:14:07";
+      } else {
+        dateStart = Moment(this.QformForNotive.dateRange[0]).format(
+          "yyyy-MM-dd HH:mm:ss"
+        );
+        dateEnd = Moment(this.QformForNotive.dateRange[1]).format(
+          "yyyy-MM-dd HH:mm:ss"
+        );
+      }
+      sendData.start_time = dateStart;
+      sendData.end_time = dateEnd;
+      delete obj.goods_image;
+      delete obj.goods_body;
+      sendData.goods = obj;
+      putgroupbuy_api(this.rule_id, sendData)
+        .then(data => {
+          console.log("上传返回的结果");
+          console.log(data);
+          if (data.status == 0) {
+            this.dialogFormVisible = false;
+            this.isloading = false;
+            this.$notify({
+              title: "成功",
+              message: "保存成功",
+              type: "success",
+              duration: 2000
+            });
+            this.getList();
+          }
+          this.isloading = false;
+        })
+        .catch(e => {
+          console.error("addGoods_api 接口错误");
+        });
+    }
   }
 };
 </script>
