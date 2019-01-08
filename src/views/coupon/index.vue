@@ -30,14 +30,14 @@
         <el-form-item label="发行数量" :label-width="formLabelWidth" prop="total">
           <el-input v-model.number="formForNotive.total" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="类型" :label-width="formLabelWidth" prop="vouchertemplate_gettype">
+        <!-- <el-form-item label="类型" :label-width="formLabelWidth" prop="vouchertemplate_gettype">
           <el-select v-model='formForNotive.vouchertemplate_gettype' placeholder="请选择类型">
             <el-option :label='v.value' :value='v.value' v-for='(v, i) in couponCategories' :key='i'></el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="有效天数" :label-width="formLabelWidth" prop="expires_days">
+        </el-form-item> -->
+        <!-- <el-form-item label="有效天数" :label-width="formLabelWidth" prop="expires_days">
           <el-input v-model.number="formForNotive.expires_days" auto-complete="off"></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <!-- <el-form-item label="个人获取限制" :label-width="formLabelWidth" prop="getTotal">
           <el-input v-model.number="formForNotive.getTotal" auto-complete="off"></el-input>
         </el-form-item>
@@ -294,7 +294,7 @@ export default {
         // 优惠券 发行数量
         vouchertemplate_total: this.formForNotive.total,
         // 类别
-        vouchertemplate_gettype: this.getCategoryId(),
+        vouchertemplate_gettype: 3,
         // // 优惠券 领取限制数量
         // vouchertemplate_eachlimit: this.formForNotive.getTotal,
         // // 优惠券 使用数量限制
