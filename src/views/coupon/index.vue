@@ -30,6 +30,14 @@
         <el-form-item label="发行数量" :label-width="formLabelWidth" prop="total">
           <el-input v-model.number="formForNotive.total" auto-complete="off"></el-input>
         </el-form-item>
+        <el-form-item label="类型" :label-width="formLabelWidth" prop="vouchertemplate_gettype">
+          <el-select v-model='formForNotive.vouchertemplate_gettype' placeholder="请选择类型">
+            <el-option :label='v.value' :value='v.value' v-for='(v, i) in couponCategories' :key='i'></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="有效天数" :label-width="formLabelWidth" prop="expires_days">
+          <el-input v-model.number="formForNotive.expires_days" auto-complete="off"></el-input>
+        </el-form-item>
         <!-- <el-form-item label="个人获取限制" :label-width="formLabelWidth" prop="getTotal">
           <el-input v-model.number="formForNotive.getTotal" auto-complete="off"></el-input>
         </el-form-item>
@@ -130,6 +138,7 @@
 </template>
 <script>
 import { getCoupon_api, addCoupon_api, deleteCoupon_api } from "@/api/seller";
+import api from '@/api/coupon';
 const formForNotive = {
   //此页面 静态数据
   name: "", // 优惠券名字
@@ -206,7 +215,8 @@ export default {
             min: 1,
             type: "integer"
           }
-        ]
+        ],
+        vouchertemplate_gettype: [ { required: true, message: '请选择优惠券类别' } ]
       },
       // head
       waitAddNotice: false,
@@ -226,8 +236,9 @@ export default {
 
       //header
       industry: "",
-      formInline: {}
+      formInline: {},
       // body
+      couponCategories: null
     };
   },
   methods: {
@@ -253,23 +264,25 @@ export default {
         .slice(0, 10);
       tempNow = Number(tempNow);
       // 优惠券生效范围时间戳 两个字段
-      let dateStart = Number(
-        this.formForNotive.dateRange[0]
-          .getTime()
-          .toString()
-          .slice(0, 10)
-      );
-      let dateEnd = Number(
-        this.formForNotive.dateRange[1]
-          .getTime()
-          .toString()
-          .slice(0, 10)
-      );
+      let dateStart = this.getTime(this.formForNotive.dateRange[0]);
+      let dateEnd = this.getTime(this.formForNotive.dateRange[1]);
+      // let dateStart = Number(
+      //   this.formForNotive.dateRange[0]
+      //     .getTime()
+      //     .toString()
+      //     .slice(0, 10)
+      // );
+      // let dateEnd = Number(
+      //   this.formForNotive.dateRange[1]
+      //     .getTime()
+      //     .toString()
+      //     .slice(0, 10)
+      // );
       let sendData = {
         // 名称
         vouchertemplate_title: this.formForNotive.name,
         // 发行时间戳
-        vouchertemplate_adddate: tempNow,
+        // vouchertemplate_adddate: tempNow,
         // 使用范围
         vouchertemplate_usable_range: "全店铺",
         // 优惠券开始生效时间戳
@@ -280,11 +293,23 @@ export default {
         vouchertemplate_price: this.formForNotive.value,
         // 优惠券 发行数量
         vouchertemplate_total: this.formForNotive.total,
+        // 类别
+        vouchertemplate_gettype: this.getCategoryId(),
         // // 优惠券 领取限制数量
         // vouchertemplate_eachlimit: this.formForNotive.getTotal,
         // // 优惠券 使用数量限制
         // vouchertemplate_eachrestricted: this.formForNotive.useTotal
       };
+      // 有效时间(仅新人券)
+      if(sendData.vouchertemplate_gettype == '4'){
+        sendData.expires_days = this.formForNotive.expires_days;
+
+        if(sendData.expires_days < 1 || sendData.expires_days % 1 !== 0){
+          this.waitAddNotice = false;
+          return this.$message.error({ message: '优惠券有效时间必须为正整数', duration: 1200 });
+        } 
+      }
+
       addCoupon_api(sendData)
         .then(() => {
           this.waitAddNotice = false;
@@ -306,6 +331,8 @@ export default {
     addItem() {
       //显示 弹框
       // this.editLoading = false
+      this.getCoupon();
+
       this.isAddItem = true;
       this.addNewShow = true;
       this.formForNotive = Object.assign({}, formForNotive);
@@ -470,6 +497,22 @@ export default {
     handleCurrentChange(val) {
       this.listQuery.page = val;
       this.getList();
+    },
+    async getCoupon(){
+      let arr = [],
+          res = await api.getCoupon();
+      
+      for(let key in res){
+        arr.push({ label: key, value: res[key] }); 
+      }    
+      this.couponCategories = arr;
+    },
+    getCategoryId(id){
+      this.couponCategories.some(v => v.value === this.formForNotive.vouchertemplate_gettype ? id = v.label : false );
+      return parseInt(id);
+    },
+    getTime(v){
+      return `${v.getFullYear()}/${v.getMonth() + 1}/${v.getDate()} 00:00:00`;
     }
   }
 };

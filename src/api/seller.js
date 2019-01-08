@@ -531,10 +531,11 @@ export function getCoupon_api(data) {
     params: data
   });
 }
-export function deleteCoupon_api(id) {
+export function deleteCoupon_api(data) {
   return request({
-    url: "/api/v2/seller/coupon/" + id,
-    method: "delete"
+    url: "/api/v2/seller/coupon/" + data.vouchertemplate_id,
+    method: "delete",
+    data
   });
 }
 
