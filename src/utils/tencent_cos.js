@@ -1,6 +1,6 @@
 import {upFileToken_api} from '@/api/common' 
 const COS = window.COS
-const Bucket = 'wxclassroom-1253114089';
+const Bucket = 'enshinongbo-1258024306';
 const Region = 'ap-shanghai';
 let CDN = 0 // 1开启 0关闭 
 //只接受 文件数组 非类数组！！如果你想对类数组处理可以在下面进行转换
