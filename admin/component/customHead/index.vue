@@ -6,8 +6,8 @@
           <el-button type="primary" icon="el-icon-edit-outline" @click="showForm">{{config.title}}</el-button>
         </el-form-item>
 
-        <el-form-item v-if='config.showKeywordSearch'>
-            <el-input :style="{ width: config.width }" :placeholder="config.placeHolder" v-model="keyword"></el-input>
+        <el-form-item v-if='config.showKeywordSearch || config.placeHolder'>
+            <el-input :style="{ width: config.width || '300px' }" :placeholder="config.placeHolder" v-model="keyword"></el-input>
             <el-button type="primary" icon="el-icon-search" @click="searchByKeyWord">查询</el-button>
         </el-form-item>
 

@@ -30,16 +30,21 @@
 
       <el-table-column label="操作" v-if='config.showOperate'>
         <template slot-scope="scope">
-          <!-- <el-button size="mini" type="text" @click="showDialog(scope.$index, scope.row)" v-if='showEdit'>编辑</el-button> -->
+          
           <el-button size="mini" type="text"
                     @click="changeState(scope.$index, scope.row)" 
                     v-if="config.showDeliver && scope.row.order_state === '已支付'">{{scope.row.payment_name === '在线付款' ? '发货' : '结算'}}</el-button>
           <el-button size="mini" type="text" @click="showDetail(scope.$index, scope.row)" v-if='config.showDetail'>详情</el-button>
           <el-button size="mini" type="text" @click="showUpdate(scope.$index, scope.row)" v-if='config.updateTitle' v-text='config.updateTitle'></el-button>
-          <el-button size="mini" type="text" @click="showLook(scope.$index, scope.row)" v-if='config.showLook' v-text='config.lookTitle'></el-button>
+          <el-button size="mini" type="text" @click="showLook(scope.$index, scope.row)" v-if='config.lookTitle' v-text='config.lookTitle'></el-button>
           <el-button size="mini" type="text" @click="showAuth(scope.$index, scope.row, 1)" v-if='config.showAuth'>同意</el-button>
           <el-button size="mini" type="text" @click="showAuth(scope.$index, scope.row, 0)" v-if='config.showAuth'>拒绝</el-button>
-          <el-button size="mini" type="text" @click="showCustom(scope.$index, scope.row)" v-if='config.custom' v-text='config.custom'></el-button>
+
+          <el-button size="mini" type="text" @click="showCustom(scope.$index, scope.row)" v-if="config.custom && typeof config.custom === 'string'" 
+                    v-text='config.custom'></el-button>
+          
+          <el-button size="mini" type="text" @click="showJudge(scope.$index, scope.row)" v-if="config.judge" 
+                    v-text='scope.row[config.judge[0]] ? config.judge[1] : config.judge[2]'></el-button>
 
           <el-button size="mini" type="text" @click="showAuthUpdate(scope.$index, scope.row)" v-if='config.showAuthUpdate'>{{scope.row.canUpdate ? '取消修改权限' : '授权修改'}}</el-button>
           <el-button size="mini" type="text" @click="showAuthShow(scope.$index, scope.row)" v-if='config.showAuthShow'>{{scope.row.canShow ? '取消查看权限' : '授权查看'}}</el-button>
@@ -56,7 +61,12 @@
 
     </el-table>
 
-    <el-pagination background @size-change="changeSize" @current-change="changePage" :current-page="query.page" :page-sizes="[10, 20, 30, 50]" :page-size="query.limit" layout="total, sizes, prev, pager, next" :total="total">
+    <el-pagination background :page-sizes="[10, 20, 30, 50]"
+                  :current-page="query.page"
+                  :page-size="query.limit"
+                  :total="total"
+                  @size-change="changeSize" 
+                  @current-change="changePage" layout="total, sizes, prev, pager, next" >
     </el-pagination>
     
   </div>
@@ -70,7 +80,9 @@ export default {
     config: {
       type: Object,
       default: function() {
-        return {}
+        return {
+          // {String|Array} custom 1. [judge conditional, TrueText, FalseText] 
+        }
       }
     },
     data: {
@@ -103,6 +115,7 @@ export default {
     showLook(index, row) { this.$emit('look', row); },
     showAuth(index, row, state) { this.$emit('auth', row, state) },
     showCustom(index, row) { this.$emit('custom', row, 'custom') },
+    showJudge(index, row) { this.$emit('judge', row) },
     showDeleteDialog(index, row) {
       let config = {
         confirmButtonText: '确定',
@@ -151,5 +164,8 @@ export default {
 </script>
 
 <style scoped>
-
+.thumb_img{
+  width: 100px;
+  height: 100px;
+}
 </style>

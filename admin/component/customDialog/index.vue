@@ -1,10 +1,6 @@
 <template>
  <el-dialog :visible='visible' :before-close='cancel' :width="config.width || '80%'">
 
-    <!-- <div v-if='config.isTable'>
-      <slot></slot>
-    </div> -->
-
     <div v-if='config.isCustom'>
       <slot></slot>
     </div>
@@ -19,7 +15,7 @@
 
         <!-- input -->
         <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isText'></el-input>
-        <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isNumber' @input='input(item)'></el-input>
+        <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isNumber' @input='validateNumber(item)'></el-input>
         <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isInteger' @input='input(item)'></el-input>
         <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isPhone' @input='input(item)'></el-input>
 
@@ -52,14 +48,6 @@
 
         </el-upload>
 
-        <!-- <div v-if='item.isCreateQrcode'>
-          <el-button type='primary' size='mini' @click='getQrcode'>生成二维码</el-button>
-
-          <img class='detail_img' :src='detail[item.value]' />
-
-          <el-button type='primary' size='mini'><a :href='detail[item.value]'>下载</a></el-button>
-        </div> -->
-
         <!-- radio -->
         <el-radio-group v-model='detail[item.value]' v-if='item.isRadio'>
           <el-radio :label='1'>是</el-radio>
@@ -81,7 +69,8 @@
           </div>
         </div> -->
 
-        <el-select v-model="detail[item.value]" multiple :placeholder="item.placeholder" v-if='item.isMultiSelect'>
+        <!-- multiSelect -->
+        <el-select :style="{ width: item.width || '400px' }" v-model="detail[item.value]" multiple :placeholder="item.placeholder" v-if='item.isMultiSelect'>
           <el-option v-for="option in item.list" :key="option[item.id]" :label="option[item.name]" :value="option[item.id]"></el-option>
         </el-select>
 
@@ -195,11 +184,12 @@ export default {
       let res = await this.$refs['ruleForm'].validate().catch(e => e);
       if(!res) return ;
 
-      if(!this.canSubmit)return ;
-// console.error(this.detail, this.error);
+      if(!this.canSubmit) return ;
+
       if(this.detail[this.timeKey] && !this.detail[this.timeKey].length)return this.$message({ message: '请添加日期' });
 
-      if(this.error.length)return this.$message.error(this.error[0]);
+      // NOTE: $message.error()传对象会修改对象，出现提示无法消失问题
+      if(this.error.length) return this.$message.error(this.error[0].message);
 
       // format img url
       let uploadList = this.imgs.filter(v => v.raw),
@@ -208,18 +198,12 @@ export default {
       // console.warn('upload list: ', uploadList);
       if(uploadList.length) imgs = await upLoadFile(uploadList.map(v => v.raw));
 
-      this.$emit('submit', this.imgs.filter(v => !v.raw).map(v => v.url).concat(imgs), this.goodsImgs);
+      this.$emit('submit', this.imgs.filter(v => !v.raw).concat(imgs.map(v => { return { url: v }; })), this.goodsImgs);
     },
 
     // select
-    selectChange(key, id){ this.$emit(`${key}Change`, id, key); },
+    selectChange(v, id){ this.$emit(`change${v}`, id, v); },
 
-    getQrcode(){
-      // this.detail.qrcode = [ { url: 'http://admin-1256953590.cos.ap-shanghai.myqcloud.com/1539331723928tab_fenxiangzhuan%402x.png'}];  
-      // this.detail.qrcode = 'http://admin-1256953590.cos.ap-shanghai.myqcloud.com/1539331723928tab_fenxiangzhuan%402x.png';  
-      // console.log('param --', this.detail, this.appUrl)
-      this.$emit('getQrcode')
-    },
 
     changeImgs(e, list){
       this.imgs = list;
@@ -261,6 +245,14 @@ export default {
     },
     blur(v){
       if(!v) this.$message.error({ message: '内容不能为空!' })
+    },
+
+    validateNumber(item){
+      let v = this.detail[item.value];
+
+      v >= 0
+      ? this.error = this.error.filter(v => v.name !== `${item.value}1`)
+      : this.error.push({ name: `${item.value}1`, prop: item.value, message: '请输入数字!' });
     },
     input(item){
       let v = this.detail[item.value],
