@@ -20,7 +20,7 @@
         <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isPhone' @input='input(item)'></el-input>
 
         <!-- textarea -->
-        <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='true' v-if='item.isTexts'></el-input>
+        <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='item.isDisabled' v-if='item.isTexts'></el-input>
 
         <!-- date
               dateType: datetime | datetimerange
@@ -73,6 +73,9 @@
         <el-select :style="{ width: item.width || '400px' }" v-model="detail[item.value]" multiple :placeholder="item.placeholder" v-if='item.isMultiSelect'>
           <el-option v-for="option in item.list" :key="option[item.id]" :label="option[item.name]" :value="option[item.id]"></el-option>
         </el-select>
+
+        <!-- level -->
+        <el-rate class='m_rate_center' v-model='detail[item.value]' show-score text-color='#ff9900' v-if='item.isRate'></el-rate>
 
         <!-- dates -->
         <div v-if='item.isDates'>
@@ -289,5 +292,10 @@ export default {
   width: 200px;
   left: calc(50% - 100px);
   text-align: center;
+}
+
+/* rate */
+.m_rate_center{
+  margin: 8px 0 0;
 }
 </style>

@@ -11,7 +11,7 @@
             <el-button type="primary" icon="el-icon-search" @click="searchByKeyWord">查询</el-button>
         </el-form-item>
 
-        <el-form-item label="时间" v-if='config.dateWidth'>
+        <el-form-item label="日期查询" v-if='config.dateWidth'>
             <el-date-picker :style="{ width: config.dateWidth }" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
             </el-date-picker>
             <el-button type="primary" icon="el-icon-search" @click="searchByDate">查询</el-button>
@@ -19,7 +19,7 @@
 
         <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
           <el-select placeholder="请选择" v-model='status' @change='changeStatus'> <!-- multiple  -->
-            <el-option v-for="item in config.categories" :key="item.id" :label="item.title" :value="item.id"></el-option>
+            <el-option v-for="item in config.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
 

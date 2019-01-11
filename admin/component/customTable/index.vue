@@ -110,7 +110,7 @@ export default {
   },
   
   methods: {
-    showDetail(index, row) { this.$emit('showDetail', row); },
+    showDetail(index, row) { this.$emit('show', row); },
     showUpdate(index, row) { this.$emit('update', row); },
     showLook(index, row) { this.$emit('look', row); },
     showAuth(index, row, state) { this.$emit('auth', row, state) },

@@ -80,8 +80,9 @@
           <el-tag style='margin-right: 20px;' v-for='(tag, index) in item.list' :key='index'>{{tag[item.name]}}{{tag.time ? '(' + tag.time[0].join() + ')' : ''}}</el-tag>
         </div>
 
+        <!-- rich Editor -->
+        <editor style='width: 800px;' v-model='detail[item.value]' v-if='item.isRichEditor'></editor>
         <!-- detail -->
-        <editor v-if='item.isRichEditor'></editor>
         <div v-if='item.isDetail'>
           <el-button @click="addDetail(item.value)" v-text='item.title' v-if='item.title'></el-button>
           <slot></slot>
@@ -202,7 +203,7 @@ export default {
       // console.warn('upload list: ', uploadList);
       if(uploadList.length) imgs = await upLoadFile(uploadList.map(v => v.raw));
 
-      this.$emit('submit', this.imgs.filter(v => !v.raw).map(v => v.url).concat(imgs), this.goodsImgs);
+      this.$emit('submit', this.imgs.filter(v => !v.raw).concat(imgs.map(v => { return { url: v }; })), this.goodsImgs);
     },
 
     // select
