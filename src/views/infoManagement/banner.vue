@@ -129,7 +129,7 @@
         @size-change="handleSizeChange_Goods"
         @current-change="handleCurrentChange_Goods"
         :current-page="listQuery_Goods.page"
-        :page-sizes="[10,20,30]"
+        :page-sizes="[10,20,30,50]"
         :page-size="listQuery_Goods.limit"
         layout="total, sizes, prev, pager, next"
         background

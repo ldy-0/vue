@@ -28,7 +28,7 @@
 		<!--中间表格结束 -->
 		<!-- 表格分页开始 -->
 		<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page"
-		 :page-sizes="[10,20,30]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" background :total="total">
+		 :page-sizes="[10,20,30,50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" background :total="total">
 		</el-pagination>
 		<!--表格分页结束 -->
 	</div>

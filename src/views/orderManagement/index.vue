@@ -1,46 +1,45 @@
 <style scoped>
-	.header {
-		margin-top: 20px
-	}
+.header {
+  margin-top: 20px;
+}
 
-	.tab-container {
-		margin: 30px;
-	}
+.tab-container {
+  margin: 30px;
+}
 
-	.el-tag+.el-tag {
-		margin-left: 10px;
-	}
+.el-tag + .el-tag {
+  margin-left: 10px;
+}
 
-	.button-new-tag {
-		margin-left: 10px;
-		height: 32px;
-		line-height: 30px;
-		padding-top: 0;
-		padding-bottom: 0;
-	}
+.button-new-tag {
+  margin-left: 10px;
+  height: 32px;
+  line-height: 30px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
-	.input-new-tag {
-		width: 90px;
-		margin-left: 10px;
-		vertical-align: bottom;
-	}
-	.filter-container{
-		display: flex;
-		margin-top: 20px;
-		padding-left: 20px;
-		}
-	.filter-container .filter-item {
-		margin-bottom: 0px;
-		margin-right: 40px;	
-	}
-	.search_div{
-		display: flex;
-		margin-right: 40px;
-	}
-	.search_div>button{
-		margin-left: 20px;
-	}
-
+.input-new-tag {
+  width: 90px;
+  margin-left: 10px;
+  vertical-align: bottom;
+}
+.filter-container {
+  display: flex;
+  margin-top: 20px;
+  padding-left: 20px;
+}
+.filter-container .filter-item {
+  margin-bottom: 0px;
+  margin-right: 40px;
+}
+.search_div {
+  display: flex;
+  margin-right: 40px;
+}
+.search_div > button {
+  margin-left: 20px;
+}
 </style>
 
 <template>
@@ -61,7 +60,12 @@
               :value="item.value"
             ></el-option>
           </el-select>
-          <el-button type="primary" @click="tableListSearch()" icon="el-icon-search">状态查询</el-button>
+          <el-button
+            type="primary"
+            @click="tableListSearch()"
+            icon="el-icon-search"
+            style="height: 36px;"
+          >状态查询</el-button>
         </div>
         <div class="search_div">
           <el-date-picker
@@ -75,25 +79,30 @@
             end-placeholder="结束日期"
             :picker-options="pickerOptions_time"
           ></el-date-picker>
-          <el-button type="primary" icon="el-icon-search" @click="handelTimesearch()">时间查询</el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-search"
+            @click="handelTimesearch()"
+            style="height: 36px;"
+          >时间查询</el-button>
+        </div>
+        <div class="search_div">
+          <el-form :inline="true" class="form">
+            <el-form-item>
+              <el-input style="width: 200px;" placeholder="请输入订单号查询" v-model="searchOrder_sn"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button
+                type="primary"
+                @click="tableListSearch()"
+                icon="el-icon-search"
+                style="height: 36px;"
+              >查询</el-button>
+            </el-form-item>
+          </el-form>
         </div>
       </div>
       <el-header class="header" style="height:auto !important">
-        <!-- 		<el-form :inline="true" class="form">
-					<el-form-item label="订单状态">
-						<el-select v-model="orderState" placeholder="请选择" @change="handleSelect">
-							<el-option v-for="item in orderStateOptions" :key="item.value" :label="item.label" :value="item.value">
-							</el-option>
-						</el-select>
-					</el-form-item>
-				<!-- 	<el-form-item>
-						<el-input style="width: 340px;" placeholder="请输入订单号查询" v-model="searchOrder_sn"></el-input>
-					</el-form-item> 
-				
-					<el-form-item>
-						<el-button type="primary" icon="el-icon-search" >查询</el-button>
-					</el-form-item>
-        </el-form>-->
         <el-form :inline="true" class="form">
           <el-form-item label="导出下列表格为Excel">
             <el-button
@@ -140,10 +149,10 @@
       <el-footer>
         <el-pagination
           background
-          @size-change="handleSizeChange()"
+          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="listQuery.page"
-          :page-sizes="[10,20,30]"
+          :page-sizes="[10,20,30,50]"
           :page-size="listQuery.limit"
           layout="total, sizes, prev, pager, next"
           :total="total"
@@ -181,7 +190,7 @@
                   <p class="hbs-no-margin-p">{{orderDetail.order_deposit}}</p>
                 </el-form-item>
               </div>
-            </el-col> -->
+            </el-col>-->
             <!-- 						<el-col :span="4">
 							<div class="grid-content bg-purple">
 								<el-form-item label="总价" :label-width="formLabelWidth">
@@ -210,6 +219,9 @@
               <el-form-item label="收货人电话" :label-width="formLabelWidth">
                 <p class="hbs-no-margin-p">{{orderDetail.order_reciver_info.phone}}</p>
               </el-form-item>
+              <el-form-item label="客户留言" :label-width="formLabelWidth">
+                <p class="hbs-no-margin-p">{{orderDetail.order_message}}</p>
+              </el-form-item>
             </el-form>
           </el-form-item>
           <el-form-item
@@ -235,6 +247,7 @@
               </el-table-column>
               <el-table-column label="商品名" prop="goods_name"></el-table-column>
               <el-table-column label="单价" prop="goods_price"></el-table-column>
+              <el-table-column label="数量" prop="goods_num"></el-table-column>
             </el-table>
           </el-form-item>
         </el-form>
@@ -272,368 +285,373 @@
   </div>
 </template>
 <script>
-	import {
-		getROrderList_api,
-		getROrder_api,
-		changeROrder_api,
-		rOrderState_api,
-		getWorker_api,
-	} from '@/api/seller';
-	import {
-		formatDate
-	} from '../../../static/date.js';
-	export default {
-		created() {
-			//获取订单列表
-			this.getOrderList()
-		},
-		filters: {
-			JsonObj: function (value) {
-			//	console.log("过滤器")
-			//	console.log(value)
-				  if (!value) return [];
-					let arr=[];
-			 arr.push(JSON.parse(value));
-			// console.log(arr)
-				return arr
-			},
-		    
-		},
-		data() {
-			return {
-				//中间订单列表请求loading
-				listLoading: false,
-				//请求订单列表
-				tableData: [{
-					order_sn: '',
-					order_amount: 0,
-					add_time: '',
-					order_state: '',
-					order_state_id: '',
-					tail_amount: '',
-					all_amount: ''
-				}],
-				//订单明细
-				orderDetail: {
-					order_reciver_info: {
-						address: '',
-						name: '',
-						phone: '',
-
-					},
-					msgInfo: [],
-				},
-				//宽度
-				formLabelWidth: '140px',
-				//选择工人弹框数据
-				workData: [],
-				//图片预览弹框是否打开
-				dialogVisible: false,
-				//要预览的图片
-				dialogImageUrl: '',
-				//派单弹框默认隐藏
-				dialogTableVisible: false,
-				//要派的工人
-				pushWorkList: [],
-				//要派的订单
-				pushOrderDetail:{},
-				//订单明细弹框隐藏
-				detailShow: false,
-				//正在导出订单
-				downloadLoading: false,
-				//查询订单的几种下拉状态
-				orderStateOptions: [{
-						value: '',
-						label: '全部订单'
-					},
-					{
-						value: 0,
-						label: '已取消'
-					}, {
-						value: 10,
-						label: '未付款'
-					},
-					{
-						value: 20,
-						label: '待发货'
-					}, {
-						value: 30,
-						label: '已发货'
-					}, {
-						value: 40,
-						label: '已完成'
-					}
-				],
-				//分页请求参数
-				listQuery: {
-					page: 1,
-					limit: 10,
-				},
-				//分页请求参数
-				listQuery_worker: {
-					page: 1,
-					limit: 10,
-					worker_id: '',
-					search: ''
-				},
-				
-				//固定写法
-					pickerOptions_time: {
-					shortcuts: [{
-						text: '最近一周',
-						onClick(picker) {
-							const end = new Date();
-							const start = new Date();
-							start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-							picker.$emit('pick', [start, end]);
-						}
-					}, {
-						text: '最近一个月',
-						onClick(picker) {
-							const end = new Date();
-							const start = new Date();
-							start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-							picker.$emit('pick', [start, end]);
-						}
-					}, {
-						text: '最近三个月',
-						onClick(picker) {
-							const end = new Date();
-							const start = new Date();
-							start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-							picker.$emit('pick', [start, end]);
-						}
-					}]
-				},
-				//要查询得时间
-				time_interval: '',
-				//要查询订单的状态
-				serchState:'',
-				//要查询的订单号
-				searchOrder_sn: '',
-				//总共订单条数
-				total: 0,
-				//总共工人条数
-				total_worker: 0,
-				//当前列表订单状态
-				orderState: '',
-				//正在保存
-				isloading: false,
-				 findForm: {
-					companyName: "",
-					expressNumber: "",
-					linkmanName: "",
-					linkmanPhone: "",
-				},
-				centerDialogVisible: false,
-			}
-		},
-		methods: {
-			//根据日期间隔查询某个工人订单
-			handelTimesearch(){
-				if(!this.time_interval) return
-				//console.log(this.time_interval)
-				let arr=this.time_interval
-			//	let obj={}
-					this.listQuery.starttime= formatDate(arr[0], 'yyyy-MM-dd');
-					this.listQuery.endtime= formatDate(arr[1], 'yyyy-MM-dd');
-				this.getOrderList()
-				},
-			//下拉选择订单状态
-			handleSelect(e) {
-				console.log("列表状态")
-				console.log(e)
-				this.serchState=e
-			},
-			//根据订单状态，订单号查询
-			tableListSearch() {
-				console.log("查询")
-				this.getOrderList()
-			},
-			//查看订单明细
-			lookItem(index, raw) {
-				console.log("查看明细");
-				console.log(raw)
-				this.detailShow = true
-				this.getOrderDetail(raw.order_id)
-			},
-// 			//派单之前的确认
-			selectWorker(idx,raw) {
-				console.log(raw.order_id);
-					 
-        this.$confirm('确认发货?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-			this.centerDialogVisible = true;
-			this.pushOrderDetail= raw,
-				this.findForm = {
-				companyName: "",
-				expressNumber: "",
-				linkmanName: "",
-				linkmanPhone: "",
-				}
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消发货'
-          });          
-        });
-      
-		  
-			
-			},
-			postExpressage() {
-				this.pushOrder()      
+import {
+  getROrderList_api,
+  getROrder_api,
+  changeROrder_api,
+  rOrderState_api,
+  getWorker_api
+} from "@/api/seller";
+import { formatDate } from "../../../static/date.js";
+export default {
+  created() {
+    //获取订单列表
+    this.getOrderList();
+  },
+  filters: {
+    JsonObj: function(value) {
+      //	console.log("过滤器")
+      //	console.log(value)
+      if (!value) return [];
+      let arr = [];
+      arr.push(JSON.parse(value));
+      // console.log(arr)
+      return arr;
+    }
+  },
+  data() {
+    return {
+      //中间订单列表请求loading
+      listLoading: false,
+      //请求订单列表
+      tableData: [
+        {
+          order_sn: "",
+          order_amount: 0,
+          add_time: "",
+          order_state: "",
+          order_state_id: "",
+          tail_amount: "",
+          all_amount: ""
+        }
+      ],
+      //订单明细
+      orderDetail: {
+        order_reciver_info: {
+          address: "",
+          name: "",
+          phone: ""
+        },
+        msgInfo: []
+      },
+      //宽度
+      formLabelWidth: "140px",
+      //选择工人弹框数据
+      workData: [],
+      //图片预览弹框是否打开
+      dialogVisible: false,
+      //要预览的图片
+      dialogImageUrl: "",
+      //派单弹框默认隐藏
+      dialogTableVisible: false,
+      //要派的工人
+      pushWorkList: [],
+      //要派的订单
+      pushOrderDetail: {},
+      //订单明细弹框隐藏
+      detailShow: false,
+      //正在导出订单
+      downloadLoading: false,
+      //查询订单的几种下拉状态
+      orderStateOptions: [
+        {
+          value: "",
+          label: "全部订单"
+        },
+        {
+          value: 0,
+          label: "已取消"
+        },
+        {
+          value: 10,
+          label: "未付款"
+        },
+        {
+          value: 20,
+          label: "待发货"
+        },
+        {
+          value: 30,
+          label: "已发货"
+        },
+        {
+          value: 40,
+          label: "已完成"
+        }
+      ],
+      //分页请求参数
+      listQuery: {
+        page: 1,
+        limit: 10
+      },
+      //固定写法
+      pickerOptions_time: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            }
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            }
+          }
+        ]
+      },
+      //要查询得时间
+      time_interval: "",
+      //要查询订单的状态
+      serchState: "",
+      //要查询的订单号
+      searchOrder_sn: "",
+      //总共订单条数
+      total: 0,
+      //总共工人条数
+      total_worker: 0,
+      //当前列表订单状态
+      orderState: "",
+      //正在保存
+      isloading: false,
+      findForm: {
+        companyName: "",
+        expressNumber: "",
+        linkmanName: "",
+        linkmanPhone: ""
+      },
+      centerDialogVisible: false
+    };
+  },
+  methods: {
+    //根据日期间隔查询某个工人订单
+    handelTimesearch() {
+      if (!this.time_interval) return;
+      //console.log(this.time_interval)
+      let arr = this.time_interval;
+      //	let obj={}
+      this.listQuery.starttime = formatDate(arr[0], "yyyy-MM-dd");
+      this.listQuery.endtime = formatDate(arr[1], "yyyy-MM-dd");
+      this.getOrderList();
     },
-			handleSelectionChange(val) {
-				console.log("工人选中")
-				console.log(val)
-				this.pushWorkList=val;
-			},
-			//预览图片
-			handlePictureCardPreview(file) {
-				this.dialogImageUrl = file;
-				this.dialogVisible = true;
-			},
-			//以下为分页操作
+    //下拉选择订单状态
+    handleSelect(e) {
+      console.log("列表状态");
+      console.log(e);
+      this.serchState = e;
+    },
+    //根据订单状态，订单号查询
+    tableListSearch() {
+      console.log("查询");
+      this.getOrderList();
+    },
+    //查看订单明细
+    lookItem(index, raw) {
+      console.log("查看明细");
+      console.log(raw);
+      this.detailShow = true;
+      this.getOrderDetail(raw.order_id);
+    },
+    // 			//派单之前的确认
+    selectWorker(idx, raw) {
+      console.log(raw.order_id);
 
-			//改变limit
-			handleSizeChange(val) {
-				console.log("分页操作")
-				this.listQuery.limit = val
-				this.getOrderList();
-			},
-			//当前选中的页数
-			handleCurrentChange(val) {
-				this.listQuery.page = val;
-				this.getOrderList();
-			},
-
-			//订单导出
-			async handleDownload() {
-				this.downloadLoading = true
-				//请求全部订单数据
-				let allOrder = await this.getOrderList(true);
-				if(!allOrder){
-					return this.$notify({
-          title: '警告',
-          message: '暂无数据',
-          type: 'warning'
+      this.$confirm("确认发货?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          this.centerDialogVisible = true;
+          (this.pushOrderDetail = raw),
+            (this.findForm = {
+              companyName: "",
+              expressNumber: "",
+              linkmanName: "",
+              linkmanPhone: ""
+            });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消发货"
+          });
         });
-				}
-							//console.log("数据")
-						//	console.log(allOrder)
-				import ('@/vendor/Export2Excel').then(excel => {
-					const tHeader = ['订单号', '定金','总价' , '下单时间', '下单状态', ]
-					const filterVal = ['order_sn','order_amount' ,'order_amount' , 'add_time', 'order_state', ]
-					const list = allOrder
-					const data = this.formatJson(filterVal, list)
-					excel.export_json_to_excel({
-						header: tHeader,
-						data,
-						filename: '三度云仓订单',
-						autoWidth: true
-					})
-					this.downloadLoading = false
-				})
-			},
-			formatJson(filterVal, jsonData) {
-				return jsonData.map(v => filterVal.map(j => {
-					if (j === 'timestamp') {
-						return parseTime(v[j])
-					} else {
-						return v[j]
-					}
-				}))
-			},
-			//以下为方法
-			//获取订单列表
-			async getOrderList(isall) {
-				console.log("是否请求全部")
-				console.log(isall)
-				let getData = {}
-				if (isall) {
-					getData = {}
-				} else {
-					getData = Object.assign({}, this.listQuery);
-				}
-				
-				 if(this.searchOrder_sn){
-					getData.order_sn=this.searchOrder_sn
-				}else{
-					if(this.serchState || this.serchState== '0'){
-						//下拉查询
-						getData.order_state=this.serchState
-					}
-				}
-				let allres = await getROrderList_api(getData).then(res => {
+    },
+    postExpressage() {
+      this.pushOrder();
+    },
+    handleSelectionChange(val) {
+      console.log("工人选中");
+      console.log(val);
+      this.pushWorkList = val;
+    },
+    //预览图片
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file;
+      this.dialogVisible = true;
+    },
+    //以下为分页操作
 
-					if (res.status == 0) {
-						if (isall) {
-							if(res.data){
-								return res.data
-							}else{
-								this.downloadLoading=false;
-							}
-							
-						} else {
-							this.tableData = res.data
-						//	this.tableData.all_amount=Number(this.tableData.order_amount)+Number(this.tableData.tail_amount)
-							this.total = res.pagination.total
-						}
-					}
-				})
+    //改变limit
+    handleSizeChange(val) {
+      console.log("分页操作");
+      this.listQuery.limit = val;
+      this.getOrderList();
+    },
+    //当前选中的页数
+    handleCurrentChange(val) {
+      this.listQuery.page = val;
+      this.getOrderList();
+    },
 
-				return allres
-			},
-			//获取订单详情
-			getOrderDetail(id) {
-				getROrder_api(id).then(res => {
-					console.log("详情")
-					let order = res.data
-					this.orderDetail = order[0];
-					this.orderDetail.all_amount=Number(this.orderDetail.order_amount)+Number(this.orderDetail.tail_amount)
-					//	this.orderDetail.msgInfo.push(JSON.parse(order[0].json))
-					console.log(this.orderDetail)
-				})
-			},
-			pushOrder(){
-				this.isloading=true;
-				 console.log("派单数据")
-				 
-				 console.log(this.pushOrderDetail)
-	       //return
-				 let sendData={
-					order_id : this.pushOrderDetail.order_id,
-					shipping_code : this.findForm,
-					state_type:'deliver_goods'
-				 }
-				  
-				rOrderState_api(sendData).then(res=>{
-					if(res.status==0){
-						this.dialogTableVisible = false;
-						this.isloading=false;
-						this.centerDialogVisible = false;
-						this.$notify({
-												title: '发货',
-												message: '发货成功',
-												type: 'success',
-												duration: 2000
-											})
-						this.getOrderList()
-					}else{
-						  this.$notify.error({
-                   title: '错误',
-                 message: '发货失败'
-				 });
-				 this.centerDialogVisible = false;
-								 this.dialogTableVisible = false;
-								 this.isloading=false;
-					}
-				})
-			}
-		}
-	}
+    //订单导出
+    async handleDownload() {
+      this.downloadLoading = true;
+      //请求全部订单数据
+      let allOrder = await this.getOrderList(true);
+      if (!allOrder) {
+        return this.$notify({
+          title: "警告",
+          message: "暂无数据",
+          type: "warning"
+        });
+      }
+      //console.log("数据")
+      //	console.log(allOrder)
+      import("@/vendor/Export2Excel").then(excel => {
+        const tHeader = ["订单号", "定金", "总价", "下单时间", "下单状态"];
+        const filterVal = [
+          "order_sn",
+          "order_amount",
+          "order_amount",
+          "add_time",
+          "order_state"
+        ];
+        const list = allOrder;
+        const data = this.formatJson(filterVal, list);
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: "订单",
+          autoWidth: true
+        });
+        this.downloadLoading = false;
+      });
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          if (j === "timestamp") {
+            return parseTime(v[j]);
+          } else {
+            return v[j];
+          }
+        })
+      );
+    },
+    //以下为方法
+    //获取订单列表
+    async getOrderList(isall) {
+      console.log("是否请求全部");
+      console.log(isall);
+      let getData = {};
+      if (isall) {
+        getData = {};
+      } else {
+        getData = Object.assign({}, this.listQuery);
+      }
+
+      if (this.searchOrder_sn) {
+        getData.order_sn = this.searchOrder_sn;
+      } else {
+        if (this.serchState || this.serchState == "0") {
+          //下拉查询
+          getData.order_state = this.serchState;
+        }
+      }
+      let allres = await getROrderList_api(getData).then(res => {
+        if (res.status == 0) {
+          if (isall) {
+            if (res.data) {
+              return res.data;
+            } else {
+              this.downloadLoading = false;
+            }
+          } else {
+            this.tableData = res.data;
+            //	this.tableData.all_amount=Number(this.tableData.order_amount)+Number(this.tableData.tail_amount)
+            this.total = res.pagination.total;
+          }
+        }
+      });
+
+      return allres;
+    },
+    //获取订单详情
+    getOrderDetail(id) {
+      getROrder_api(id).then(res => {
+        console.log("详情");
+        let order = res.data;
+        this.orderDetail = order[0];
+        this.orderDetail.all_amount =
+          Number(this.orderDetail.order_amount) +
+          Number(this.orderDetail.tail_amount);
+        //	this.orderDetail.msgInfo.push(JSON.parse(order[0].json))
+        console.log(this.orderDetail);
+      });
+    },
+    pushOrder() {
+      this.isloading = true;
+      console.log("派单数据");
+
+      console.log(this.pushOrderDetail);
+      //return
+      let sendData = {
+        order_id: this.pushOrderDetail.order_id,
+        shipping_code: this.findForm,
+        state_type: "deliver_goods"
+      };
+
+      rOrderState_api(sendData).then(res => {
+        if (res.status == 0) {
+          this.dialogTableVisible = false;
+          this.isloading = false;
+          this.centerDialogVisible = false;
+          this.$notify({
+            title: "发货",
+            message: "发货成功",
+            type: "success",
+            duration: 2000
+          });
+          this.getOrderList();
+        } else {
+          this.$notify.error({
+            title: "错误",
+            message: "发货失败"
+          });
+          this.centerDialogVisible = false;
+          this.dialogTableVisible = false;
+          this.isloading = false;
+        }
+      });
+    }
+  }
+};
 </script>
