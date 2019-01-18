@@ -23,6 +23,16 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item :label="config.selectLabelList && config.selectLabelList[selectIndex]" 
+                      :label-width="config.selectWidth" 
+                      v-for='(select, selectIndex) in config.selectList' :key='selectIndex' v-if='config.selectList'> 
+
+          <el-select placeholder="请选择" v-model='statusList[selectIndex]' @change='changeStatus(selectIndex)'> <!-- multiple  -->
+            <el-option v-for="item in select" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
+          </el-select>
+
+        </el-form-item>
+
         <el-form-item label="" v-if='config.showExport'>
           <el-button  type="primary" icon="document" @click="exportFile">导出Excel</el-button>
           <!-- <span class="hbs-inline-tips">导出所有数据，这个过程可能会需要花费  <span class="hbs-hot">几分钟</span> 的时间，请耐心等待</span> -->
@@ -63,6 +73,7 @@ export default {
       keyword: '',
       date: '',
       status: '',
+      statusList: [],
     }
   },
   
@@ -72,7 +83,7 @@ export default {
       this.$emit('add');
     },
     searchByKeyWord() { this.$emit('search', this.keyword); },
-    changeStatus() { this.$emit('searchByStatus', this.status) },
+    changeStatus(index) { this.$emit('searchByStatus', index === undefined ? this.status : this.statusList, index) },
     searchByDate(){
       console.log('search date:', this.date);
       let date = {
@@ -80,7 +91,7 @@ export default {
         endDate: new Date(this.date[1]).toLocaleDateString(),
       };
 
-      this.$emit('searchByDate', date);
+      this.$emit('searchByDate', date, 'date');
     },
     async exportFile() {
       let loading = this.$loading({ fullscreen: true })

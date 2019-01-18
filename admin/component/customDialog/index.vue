@@ -22,7 +22,7 @@
         <!-- textarea -->
         <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='item.isDisabled' v-if='item.isTexts'></el-input>
 
-        <!-- date
+        <!-- Date
               dateType: datetime | datetimerange
          -->
         <el-date-picker style="width:400px" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" 
@@ -30,6 +30,19 @@
                           v-model="detail[item.value]"
                           v-if='item.dateType'>
         </el-date-picker>
+
+        <!--  MutilTime -->
+        <el-button v-text='item.text' v-if='item.isMultiTime' @click='addTime(item, $event)'></el-button>
+        <div v-if='item.isMultiTime'>
+          <div class='m_multiTime' v-for='(time, timeIndex) in detail[item.value]' :key='timeIndex'>
+            <el-time-picker class='time_picker' style="width:400px" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" 
+                            v-model="detail[item.value][timeIndex]"
+                            v-if='item.isMultiTime'>
+            </el-time-picker>
+            <span class='time_close' @click='deleteTime(item, timeIndex)'>✖</span>
+          </div>
+        </div>
+        
 
         <!-- imgs -->
         <img class='detail_imgs' :src='v.url || v' v-for='(v, i) in detail[item.value]' :key='i' v-if='item.isImgs' />
@@ -77,8 +90,14 @@
         <!-- level -->
         <el-rate class='m_rate_center' v-model='detail[item.value]' show-score text-color='#ff9900' v-if='item.isRate'></el-rate>
 
+        <!--  -->
+        <div v-if='item.isAddress'>
+          <el-input v-model="detail[item.value]" auto-complete="off"></el-input>
+          <geocoder :address='detail[item.value]'></geocoder>
+        </div>
+
         <!-- dates -->
-        <div v-if='item.isDates'>
+        <!-- <div v-if='item.isDates'>
           <el-date-picker style="width:400px" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" 
                           v-model="date"
                           @change='addDate(item.value, $event)'>
@@ -87,7 +106,7 @@
             <div class='f-fs' v-text='item.start'></div>-<div class='f-fs' v-text='item.end'></div>
             <el-button style='margin-left: 20px;' @click='deleteDate(index)' type='danger' size='mini'>删除</el-button>
           </div>
-        </div>
+        </div> -->
 
         <!-- tag -->
         <div v-if='item.isTagList'>
@@ -96,8 +115,19 @@
 
         <!-- detail -->
         <div v-if='item.isDetail'>
+
           <el-button @click="addDetail(item.value)" v-text='item.title' v-if='item.title'></el-button>
+
+          <el-select :style="{ width: item.width || '400px' }" 
+                      :placeholder="item.placeholder" 
+                      v-model="detail[item.value]" multiple 
+                      v-if='item.placeholder'
+                      @change='select'>
+            <el-option v-for="option in item.list" :key="option[item.id]" :label="option[item.name]" :value="option[item.id]"></el-option>
+          </el-select>
+
           <slot></slot>
+
         </div>
 
         <!-- goods img -->
@@ -134,9 +164,14 @@
 
 <script>
 import upLoadFile from '@/utils/aahbs.js'
+import geocoder from '@/components/geoCoder'
 
 export default {
   name: 'dialog',
+
+  components: {
+    geocoder
+  },
 
   props: {
     config: {
@@ -165,6 +200,7 @@ export default {
       error: [], // 错误列表
       canSubmit: true,
       interval: null,
+      address: '',
       // rules: {
       //     'seller_name': [
       //       { required: true, message: '请输入名字', trigger: 'blur' },
@@ -178,11 +214,31 @@ export default {
   },
   
   methods: {
+    cancel() { this.$emit('cancel'); },
     auth(state) { this.$emit('auth', this.detail, state) },
-    cancel() {
-      console.log('cancel dialog --');
-      this.$emit('cancel');
+
+    // select
+    selectChange(v, id){ this.$emit(`change${v}`, id, v); },
+
+    // Detail
+    select(id_arr){ this.$emit('select', id_arr) },
+
+    changeImgs(e, list){
+      this.imgs = list;
+      console.log(`change img : `, this.imgs)
     },
+
+    addTime(item, e){
+      this.detail[item.value].push('');
+    },
+    deleteTime(item, index){
+      this.detail[item.value].splice(index, 1);
+    },
+
+    decode(v){
+      this.address = v;
+    },
+
     async submitForm(form) {
       let res = await this.$refs['ruleForm'].validate().catch(e => e);
       if(!res) return ;
@@ -204,14 +260,7 @@ export default {
       this.$emit('submit', this.imgs.filter(v => !v.raw).concat(imgs.map(v => { return { url: v }; })), this.goodsImgs);
     },
 
-    // select
-    selectChange(v, id){ this.$emit(`change${v}`, id, v); },
-
-
-    changeImgs(e, list){
-      this.imgs = list;
-      console.log(`change img : `, this.imgs)
-    },
+    
 
     changeGoodsImgs(file, files){
       this.goodsImgs = files; 
@@ -243,9 +292,9 @@ export default {
       console.log('delete date', index);
       this.detail[this.timeKey].splice(index, 1);
     },
-    addDetail(key){
-      this.$emit('addDetail');
-    },
+
+    addDetail(key){ this.$emit('addDetail'); },
+
     blur(v){
       if(!v) this.$message.error({ message: '内容不能为空!' })
     },
@@ -279,9 +328,9 @@ export default {
 </script>
 
 <style scoped>
-.course_detail{
+/* .course_detail{
   border-bottom: 1px solid gray;
-}
+} */
 
 .interval{
   margin-right: 100px;
@@ -293,6 +342,21 @@ export default {
   left: calc(50% - 100px);
   text-align: center;
 }
+
+/* MultiTime */
+.m_multiTime{
+  position: relative;
+  margin: 10px 0;
+}
+.time_close{
+  margin-left: 10px;
+  cursor: pointer;
+}
+/* .time_picker:after{
+  position: absolute;
+  right: -20px;
+  content: '✖';
+} */
 
 /* rate */
 .m_rate_center{

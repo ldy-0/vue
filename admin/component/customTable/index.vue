@@ -13,6 +13,8 @@
             <i class='el-icon-close' v-else></i>
           </div>
 
+          <el-rate disabled v-model='scope.row[item.value]' v-else-if='item.isRate'></el-rate>
+
           <!-- -->
           <el-popover trigger="hover" placement="top" v-else-if='item.isMulti'>
             <div v-for='(item, index) in scope.row[item.value]' :key='index'>
@@ -35,8 +37,11 @@
                     @click="changeState(scope.$index, scope.row)" 
                     v-if="config.showDeliver && scope.row.order_state === '已支付'">{{scope.row.payment_name === '在线付款' ? '发货' : '结算'}}</el-button>
           <el-button size="mini" type="text" @click="showDetail(scope.$index, scope.row)" v-if='config.showDetail'>详情</el-button>
+
           <el-button size="mini" type="text" @click="showUpdate(scope.$index, scope.row)" v-if='config.updateTitle' v-text='config.updateTitle'></el-button>
+
           <el-button size="mini" type="text" @click="showLook(scope.$index, scope.row)" v-if='config.lookTitle' v-text='config.lookTitle'></el-button>
+
           <el-button size="mini" type="text" @click="showAuth(scope.$index, scope.row, 1)" v-if='config.showAuth'>同意</el-button>
           <el-button size="mini" type="text" @click="showAuth(scope.$index, scope.row, 0)" v-if='config.showAuth'>拒绝</el-button>
 

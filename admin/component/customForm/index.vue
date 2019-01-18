@@ -20,7 +20,7 @@
         <el-input v-model="detail[item.value]" auto-complete="off" v-if='item.isPhone' @input='input(item)'></el-input>
 
         <!-- textarea -->
-        <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='true' v-if='item.isTexts'></el-input>
+        <el-input type='textarea' v-model="detail[item.value]" auto-complete="off" :disabled='item.isDisabled' v-if='item.isTexts'></el-input>
 
         <!-- date
               dateType: datetime | datetimerange
@@ -82,6 +82,13 @@
 
         <!-- rich Editor -->
         <editor style='width: 800px;' v-model='detail[item.value]' v-if='item.isRichEditor'></editor>
+
+        <!-- Geocoder -->
+        <div v-if='item.isAddress'>
+          <el-input v-model="detail[item.value]" auto-complete="off"></el-input>
+          <geocoder :address='detail[item.value]'></geocoder>
+        </div>
+
         <!-- detail -->
         <div v-if='item.isDetail'>
           <el-button @click="addDetail(item.value)" v-text='item.title' v-if='item.title'></el-button>
@@ -123,12 +130,14 @@
 <script>
 import upLoadFile from '@/utils/aahbs.js'
 import editor from '@/components/Tinymce'
+import geocoder from '@/components/geoCoder'
 
 export default {
   name: 'dialog',
 
   components: {
-    editor
+    editor,
+    geocoder
   },
 
   props: {
