@@ -20,6 +20,12 @@
   width: 300px;
   height: 150px;
 }
+#servershopmap {
+  width: 80%;
+  height: 400px;
+  min-width: 300px;
+  background-color: gray;
+}
 </style>
 <template>
   <div class="app-container">
@@ -95,8 +101,15 @@
         <el-form-item label="公司名称" prop="company_name">
           <el-input v-model="form.company_name" placeholder="请输入公司名称"></el-input>
         </el-form-item>
-        <el-form-item label="公司地址" prop="company_site">
-          <el-input v-model="form.company_site" placeholder="请输入公司地址"></el-input>
+
+        <el-form-item label="地址" prop="company_site">
+          <el-input v-model="form.company_site" style="width: 400px" placeholder="请输入公司地址"></el-input>
+          <el-button type="primary" @click="codeAddress(form)">搜索</el-button>
+        </el-form-item>
+        <el-form-item label="定位">
+          <div id="servershopmap"></div>
+          <br>
+          <p class>纬度：{{position.lat}},经度：{{position.lng}}</p>
         </el-form-item>
         <el-form-item label="公司联系手机" prop="company_phone">
           <el-input v-model="form.company_phone" placeholder="请输入公司手机号"></el-input>
@@ -268,7 +281,11 @@ export default {
       isloading: false,
       //正在上传图片
       isUpimg: false,
-      editId: null
+      editId: null,
+      position: {
+        lat: null,
+        lng: null
+      }
     };
   },
   methods: {
@@ -277,7 +294,8 @@ export default {
       this.dialogFormVisible = true; //打开内容弹框
       this.dialogStatus = "create";
       this.form = Object.assign({}, form);
-      this.form.company_image = []
+      this.form.company_image = [];
+      this.showMap();
     },
     //上传图片
     async handleImgChangeOne(file, fileList, index) {
@@ -471,6 +489,82 @@ export default {
     deleteVideo() {
       this.form.company_view = null;
       this.form = Object.assign({}, this.form);
+    },
+    showMap() {
+      //创建script标签
+      var script = document.createElement("script");
+      //设置标签的type属性
+      script.type = "text/javascript";
+      //设置标签的链接地址
+      script.src =
+        "https://map.qq.com/api/js?v=2.exp&key=QB5BZ-A5XW2-XCWU5-CVHRJ-EIVEF-PNFM4&callback=hbsForMap";
+      //添加标签到dom
+      document.body.appendChild(script);
+      let that = this;
+
+      //地图库加载完成的回调
+      window.hbsForMap = () => {
+        console.log("hbsForMap1---------------");
+        // Number()
+        //map对象实例
+        //动
+        let lat = this.position.lat ? this.position.lat : 39.916527;
+        let lng = this.position.lng ? this.position.lng : 116.397128;
+
+        var center = new qq.maps.LatLng(lat, lng);
+
+        var map = new qq.maps.Map(document.getElementById("servershopmap"), {
+          center: center,
+          zoom: 13
+        });
+        var marker = new qq.maps.Marker({
+          map: map,
+          position: center,
+          animation: qq.maps.MarkerAnimation.BOUNCE
+        });
+        var jump = function(event) {
+          that.position = {
+            ...event.latLng
+          };
+          marker.setPosition(event.latLng);
+        };
+
+        qq.maps.event.addListener(map, "click", jump);
+      };
+    },
+    codeAddress(form) {
+      var address = form.company_site;
+      let lat = this.position.lat ? this.position.lat : 39.916527;
+      let lng = this.position.lng ? this.position.lng : 116.397128;
+      var center = new qq.maps.LatLng(lat, lng);
+      var map = new qq.maps.Map(document.getElementById("servershopmap"), {
+        center: center,
+        zoom: 13
+      });
+
+      //调用地址解析类
+      let that = this;
+      var geocoder = new qq.maps.Geocoder({
+        complete: function(result) {
+          map.setCenter(result.detail.location);
+          var marker = new qq.maps.Marker({
+            map: map,
+            position: result.detail.location,
+            animation: qq.maps.MarkerAnimation.BOUNCE
+          });
+          that.position.lat = result.detail.location.lat;
+          that.position.lng = result.detail.location.lng;
+          var jump = function(event) {
+            that.position = {
+              ...event.latLng
+            };
+            marker.setPosition(event.latLng);
+          };
+
+          qq.maps.event.addListener(map, "click", jump);
+        }
+      });
+      geocoder.getLocation(address);
     }
   }
 };

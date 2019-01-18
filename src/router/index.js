@@ -254,16 +254,16 @@ export let asyncRouterMapSeller = [
       //     noCache: true
       //   }
       // },
-      // {
-      // 	path: 'company', //关于公司
-      // 	component: () =>
-      // 		import('@/views/infoManagement/company'),
-      // 	name: 'company',
-      // 	meta: {
-      // 		title: 'company',
-      // 		noCache: true
-      // 	}
-      // },
+      {
+      	path: 'company', //关于公司
+      	component: () =>
+      		import('@/views/infoManagement/company'),
+      	name: 'company',
+      	meta: {
+      		title: 'company',
+      		noCache: true
+      	}
+      },
       {
         path: "news", //新闻咨询
         component: () => import("@/views/infoManagement/news"),
