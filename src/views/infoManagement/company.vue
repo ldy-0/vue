@@ -295,6 +295,10 @@ export default {
       this.dialogStatus = "create";
       this.form = Object.assign({}, form);
       this.form.company_image = [];
+      this.position = {
+        lat: null,
+        lng: null
+      };
       this.showMap();
     },
     //上传图片
@@ -353,6 +357,13 @@ export default {
     handleEdit(row) {
       console.log("编辑");
       this.form = Object.assign({}, row);
+      this.position.lng = this.form.company_longitude
+        ? this.form.company_longitude
+        : 116.397128;
+      this.position.lat = this.form.company_latitude
+        ? this.form.company_latitude
+        : 39.916527;
+      this.showMap();
       this.dialogStatus = "edit";
       this.editId = row.company_id;
       this.dialogFormVisible = true;
@@ -427,6 +438,8 @@ export default {
           sendData[key] = this.form[key];
         }
       }
+      sendData.company_longitude = this.position.lng;
+      sendData.company_latitude = this.position.lat;
       if (this.dialogStatus === "create") {
         addCompany_api(sendData).then(res => {
           if (res.status == 0) {
