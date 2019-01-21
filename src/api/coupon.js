@@ -3,7 +3,7 @@ import request from "@/utils/request";
 async function getCoupon(_this) {
 
   let res = await request({
-    url: "/api/v2/common/coupon/",
+    url: "/api/v2/common/coupon",
     method: "GET",
     params: null
   });
