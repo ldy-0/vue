@@ -20,7 +20,7 @@
           >
             <el-select v-model="alertValue" placeholder="请选择规格" @change="handele_select">
               <el-option
-                v-for="(item,index) in goodsDetail.spec_value"
+                v-for="(item,index) in goodsDetail.skuClassList"
                 :key="index"
                 :label="item"
                 :value="index"
@@ -892,6 +892,9 @@ export default {
       this.alertValue = "";
       getGoods_api(id).then(res => {
         if (res.data.spec_value) {
+          // set sku classList
+          res.data.skuClassList = res.data.SKUList.map(v => (JSON.stringify(v.goods_spec)).replace(/^\{|\}$|"/g, ''));
+
           this.goodsDetail = res.data;
           console.log("多规格");
         } else {

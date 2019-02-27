@@ -188,7 +188,8 @@
               </el-form>
             </el-tab-pane>
             <el-tab-pane label="多规格" name="mutil" :disabled="!isAddItem&&form.size!=='mutil'">
-              <div
+              <multi-sku :classList='skuClassList' :skuList='skus' :limit='5' @update='updateMultiSku' v-if="form.size === 'mutil'"></multi-sku> 
+              <!-- <div
                 v-for="(formItem,index) of formForNotiveChild2List"
                 :key="index"
                 class="margin-btm20"
@@ -211,7 +212,7 @@
               </div>
               <div style="margin-top:10px;margin-left:10px">
                 <el-button @click="addSize_out">添加规格</el-button>
-              </div>
+              </div> -->
             </el-tab-pane>
           </el-tabs>
         </el-form-item>
@@ -322,6 +323,7 @@ import {
 } from "@/api/seller";
 import uploadFn from "@/utils/tencent_cos";
 import config from "./config";
+import multiSku from "@/components/multiSku";
 
 //初始化常量
 const form = {
@@ -346,7 +348,7 @@ const formForNotiveChild1 = {
   price: "",
   count: ""
 };
-const formForNotiveChild2List = [{}];
+const formForNotiveChild2List = [];
 //新增商品字段
 const sendData = {
   storegc_id: "",
@@ -612,9 +614,32 @@ export default {
             type: "number"
           }
         ]
-      }
+      },
+      skuClassList: [],
+      skus: [],
+      classList: [],
+      limit: 1,
     };
   },
+
+  computed: {
+    // skuClassList(){ 
+    //   return [];
+    //   // return [ { name: '颜色', skus: [{ name: '黑色' }, { name: '白色' } ] }, ]; 
+    // },
+    // skus(){ 
+    //   return [];
+    //   // return [
+    //   //   { name: '黑色', price: 1.00, amount: 100, },
+    //   //   { name: '白色', price: 2, amount: 2000 },
+    //   // ];
+    // },
+  },
+  
+  components: {
+    multiSku
+  },
+
   methods: {
     //规格2
 
@@ -646,6 +671,7 @@ export default {
     },
     //保存内容
     async onSubmit(form) {
+      // console.error('multiSKu', this.formForNotiveChild2List);
       if (this.form.size === "one") {
         //如果 size是统一 仅对统一表单进行验证
         let resChild1 = await new Promise((res, rej) => {
@@ -664,25 +690,43 @@ export default {
           return;
         }
       } else {
+        let err = '';
+        if(!this.formForNotiveChild2List.length) return this.$message.error(`规格类别不能空`);
+
+        this.formForNotiveChild2List.some((v, i) => {
+          if(!v.price){
+            err = '请设置正确价格';
+          }else if(v.price <= 0){
+            err = '价格必须大于零';
+          }else if(v.count < 0 && typeof v.count !== 'number'){
+            err = '请设置正确库存'; 
+          }else if(v.count < 0){
+            err = '库存数量必须大于零'; 
+          }
+
+          return err;
+        });
+
+        if(err) return this.$message.error(err);
         //如果 size是 多个 仅对 多个表单进行验证
-        let formChild2PromiseList = [];
-        for (let i = 0; i < this.formForNotiveChild2List.length; i++) {
-          console.log(this.formForNotiveChild2List.length);
-          let one = new Promise((res, rej) => {
-            this.$refs["ruleFormChild2"][i].validate(valid => {
-              if (valid) {
-                res(true);
-              } else {
-                rej(false);
-              }
-            });
-          });
-          formChild2PromiseList.push(one);
-        }
-        let resChild2 = await Promise.all(formChild2PromiseList);
-        if (!resChild2) {
-          return;
-        }
+        // let formChild2PromiseList = [];
+        // for (let i = 0; i < this.formForNotiveChild2List.length; i++) {
+        //   console.log(this.formForNotiveChild2List.length);
+        //   let one = new Promise((res, rej) => {
+        //     this.$refs["ruleFormChild2"][i].validate(valid => {
+        //       if (valid) {
+        //         res(true);
+        //       } else {
+        //         rej(false);
+        //       }
+        //     });
+        //   });
+        //   formChild2PromiseList.push(one);
+        // }
+        // let resChild2 = await Promise.all(formChild2PromiseList);
+        // if (!resChild2) {
+        //   return;
+        // }
       }
       console.log("form最后1");
       console.log(this.form);
@@ -721,14 +765,28 @@ export default {
           tempMutil.push({
             price: this.formForNotiveChild2List[i].price,
             marketprice: this.formForNotiveChild2List[i].marketprice,
-            sp_value: this.formForNotiveChild2List[i].name,
-            stock: this.formForNotiveChild2List[i].count
+            sp_value: this.formatName(this.formForNotiveChild2List[i].name),
+            spec_attr: this.formForNotiveChild2List[i].index.join('_'),
+            stock: this.formForNotiveChild2List[i].count,
           });
-          tempSepc_value.push(this.formForNotiveChild2List[i].name);
+          // tempSepc_value.push(this.formForNotiveChild2List[i].name);
+          // console.error(tempMutil);
         }
-        this.form.spec_value = tempSepc_value;
+
+        let spec_name = {}, spec_value = {};
+        this.classList.forEach((v, i) => {
+          let o = {};
+          v.skus.forEach((sku, skuIndex) => o[skuIndex] = sku.name);// tempSepc_value;
+          spec_value[i] = o;
+        });
+        this.classList.forEach((v, i) => spec_name[i] = v.name);
+
+        this.form.spec_value = spec_value;
+        this.form.spec_name = spec_name;
+
         this.form.goods_storage = "";
         this.form.spec = tempMutil;
+        // return console.error('---', this.form.spec_name, this.form.spec_value);
       }
       this.sendData = Object.assign({}, sendData);
 
@@ -829,6 +887,11 @@ export default {
       console.log(this.form);
       this.form.goods_image = [];
       this.form.formObjRepeat = null;
+
+      // multi sku
+      this.skuClassList = [];
+      this.skus = [];
+
       // this.form.formObjRepeat = [
       //   {
       //     Repeat_images: [],
@@ -962,11 +1025,27 @@ export default {
             tempForm3.push({
               price: Number(resObj.SKUList[i].goods_price),
               marketprice: Number(resObj.SKUList[i].goods_marketprice),
-              name: resObj.SKUList[i].goods_spec,
+              // name: resObj.SKUList[i].goods_spec,
               count: Number(resObj.SKUList[i].goods_storage)
             });
           }
-          this.formForNotiveChild2List = tempForm3;
+
+          // format sku classList
+          let spec_name = resObj.spec_name;
+          if(spec_name){
+
+            this.skuClassList = spec_name.map((v, i) => { 
+              let skus = resObj.spec_value[i].map(sku => { return { name: sku }; }); 
+              return { name: v, skus };
+            });
+
+            this.skus = tempForm3;
+          }else{
+            this.skuClassList = [];
+            this.skus = [];
+          }
+          // console.error(this.skuClassList, this.skus);
+          // this.formForNotiveChild2List = tempForm3;
         } else {
           tempForm2 = {
             price: Number(resObj.goods_price),
@@ -1218,7 +1297,22 @@ export default {
           });
         }
       });
+    },
+
+    // Update multi sku goods
+    updateMultiSku(classList, skus){
+      // console.error('update', classList, skus);
+      this.classList = classList;
+      this.formForNotiveChild2List = skus;
+    },
+    formatName(name){
+      let o = {};
+
+      name.replace(/;$/, '').split(';').forEach((v, i) => o[this.classList[i].name] = v);
+
+      return o;
     }
+
   }
 };
 </script>
