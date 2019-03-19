@@ -538,4 +538,32 @@ export function deleteCoupon_api(data) {
     data
   });
 }
+//seckill->秒杀
+export function addSecKill_api(data) {
+  return request({
+    url: "/api/v2/seller/seckill",
+    method: "post",
+    data
+  });
+}
+export function putSecKill_api(data) {
+  return request({
+    url: "/api/v2/seller/seckill/setting",
+    method: "put",
+    data
+  });
+}
+export function getSecKill_api(data) {
+  return request({
+    url: "/api/v2/seller/seckill",
+    method: "get",
+    params: data
+  });
+}
+export function deleteSeckill_api(id) {
+  return request({
+    url: "/api/v2/seller/seckill/" + id,
+    method: "delete",
+  });
+}
 

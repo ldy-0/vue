@@ -109,7 +109,7 @@ export let asyncRouterMapSeller = [
       path: 'index',
       component: () => import('@/views/coupon/index'),
       name: 'coupon',
-      meta: { title: 'coupon', icon: 'goods', noCache: true }
+      meta: { title: 'coupon', icon: 'money', noCache: true }
     }]
   },
   {
@@ -118,7 +118,7 @@ export let asyncRouterMapSeller = [
     redirect: "/groupBuying/groupBuying",
     meta: {
       title: "groupBuying",
-      icon: 'goods',
+      icon: 'shoppingCard',
       roles: "groupBuying"
     },
     children: [
@@ -128,7 +128,29 @@ export let asyncRouterMapSeller = [
         name: "groupBuying",
         meta: {
           title: "groupBuying",
-          icon: 'goods',
+          icon: 'shoppingCard',
+          noCache: true
+        }
+      }
+    ]
+  },
+  {
+    path: "/killPrice", //砍价管理
+    component: Layout,
+    redirect: "/killPrice/index",
+    meta: {
+      title: "killPrice",
+      icon: 'zip',
+      roles: "killPrice"
+    },
+    children: [
+      {
+        path: "killPrice",
+        component: () => import("@/views/killPrice/index"),
+        name: "killPrice",
+        meta: {
+          title: "killPrice",
+          icon: 'zip',
           noCache: true
         }
       }
@@ -161,7 +183,7 @@ export let asyncRouterMapSeller = [
     redirect: "/memberList/index",
     meta: {
       title: "memberList",
-      icon: "member",
+      icon: "user",
       roles: "memberList"
     },
     children: [
@@ -172,7 +194,7 @@ export let asyncRouterMapSeller = [
         meta: {
           title: "memberList",
           noCache: true,
-          icon: "worker"
+          icon: "user"
         }
       }
     ]
@@ -204,7 +226,7 @@ export let asyncRouterMapSeller = [
     redirect: "/infoManagement/spec",
     meta: {
       title: "infoManagement",
-      icon: "infoM",
+      icon: "guide",
       roles: "infoManagement"
     },
     children: [

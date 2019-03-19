@@ -12,19 +12,9 @@
     <el-dialog title="添加团购商品" :visible.sync="addNewShow" width="80%">
       <el-dialog title="新增团购" :visible.sync="QaddNewShow" width="50%" append-to-body>
         <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules">
-          <el-form-item
-            label="规格"
-            :label-width="formLabelWidth"
-            v-if="goodsDetail"
-            prop="choiceGoodsId"
-          >
+          <el-form-item label="规格" :label-width="formLabelWidth" v-if="goodsDetail" prop="choiceGoodsId">
             <el-select v-model="alertValue" placeholder="请选择规格" @change="handele_select">
-              <el-option
-                v-for="(item,index) in goodsDetail.skuClassList"
-                :key="index"
-                :label="item"
-                :value="index"
-              ></el-option>
+              <el-option v-for="(item,index) in goodsDetail.skuClassList" :key="index" :label="item" :value="index"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="团购价" :label-width="formLabelWidth" prop="tprice">
@@ -41,25 +31,12 @@
               <el-radio :label="0">不限</el-radio>
               <el-radio :label="1">日期选择</el-radio>
             </el-radio-group>
-            <el-date-picker
-              v-if="radio==1"
-              style="width:400px"
-              v-model="QformForNotive.dateRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
+            <el-date-picker v-if="radio==1" style="width:400px" v-model="QformForNotive.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="QaddNewShow=false">取消</el-button>
-          <el-button
-            type="primary"
-            @click="QaddOne('ruleForm')"
-            :disabled="QwaitAddNotice"
-            :loading="QwaitAddNotice"
-          >确 定</el-button>
+          <el-button type="primary" @click="QaddOne('ruleForm')" :disabled="QwaitAddNotice" :loading="QwaitAddNotice">确 定</el-button>
         </span>
       </el-dialog>
       <el-container class="notice">
@@ -85,13 +62,7 @@
         </el-header>-->
         <el-container>
           <el-main>
-            <el-table
-              :data="tableData2"
-              stripe
-              v-loading="listLoading"
-              element-loading-text="给我一点时间"
-              style="width: 100%"
-            >
+            <el-table :data="tableData2" stripe v-loading="listLoading" element-loading-text="给我一点时间" style="width: 100%">
               <el-table-column label="商品图片">
                 <template slot-scope="scope">
                   <div style="width:100px;height:100px;align-items:center;display:flex;">
@@ -103,27 +74,14 @@
               <el-table-column label="价格" prop="goodsPrice"></el-table-column>
               <el-table-column label="操作" min-width="300px">
                 <template slot-scope="scope">
-                  <el-button
-                    size="mini"
-                    type="primary"
-                    @click="editItem(scope.$index, scope.row)"
-                  >选择</el-button>
+                  <el-button size="mini" type="primary" @click="editItem(scope.$index, scope.row)">选择</el-button>
                 </template>
               </el-table-column>
             </el-table>
           </el-main>
         </el-container>
         <el-footer>
-          <el-pagination
-            background
-            @size-change="handleSizeChange2"
-            @current-change="handleCurrentChange2"
-            :current-page="listQuery2.page"
-            :page-sizes="[10,20,30,50]"
-            :page-size="listQuery2.limit"
-            layout="total, sizes, prev, pager, next"
-            :total="total2"
-          ></el-pagination>
+          <el-pagination background @size-change="handleSizeChange2" @current-change="handleCurrentChange2" :current-page="listQuery2.page" :page-sizes="[10,20,30,50]" :page-size="listQuery2.limit" layout="total, sizes, prev, pager, next" :total="total2"></el-pagination>
         </el-footer>
       </el-container>
     </el-dialog>
@@ -133,27 +91,12 @@
         <el-form-item label="商品分类" label-width="140px">
           <template>
             <el-select v-model="alertValue" placeholder="请选择分类" @change="handele_select2">
-              <el-option
-                v-for="item in selectedOptions_alert"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
+              <el-option v-for="item in selectedOptions_alert" :key="item.value" :label="item.label" :value="item.value"></el-option>
             </el-select>
           </template>
         </el-form-item>
         <el-form-item label="商品轮播图(1-10张)" prop="goods_image" label-width="140px">
-          <el-upload
-            action
-            list-type="picture-card"
-            accept="image/*"
-            :limit="10"
-            :auto-upload="false"
-            :on-change="handleImgChange_image"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove_goods_image"
-            :file-list="form.goods_image | filterUrl"
-          >
+          <el-upload action list-type="picture-card" accept="image/*" :limit="10" :auto-upload="false" :on-change="handleImgChange_image" :on-preview="handlePictureCardPreview" :on-remove="handleRemove_goods_image" :file-list="form.goods_image | filterUrl">
             <i class="el-icon-plus"></i>
           </el-upload>
         </el-form-item>
@@ -166,13 +109,7 @@
         </el-form-item>
         <el-form-item label="规格" label-width="140px">
           <!-- size 和 size2xxx 都是单独的属性 -->
-          <el-form
-            :model="formForNotiveChild1"
-            :inline="true"
-            ref="ruleFormChild1"
-            :rules="rulesChild1"
-            class="margin-btm20"
-          >
+          <el-form :model="formForNotiveChild1" :inline="true" ref="ruleFormChild1" :rules="rulesChild1" class="margin-btm20">
             <el-form-item label="现价" prop="price">
               <el-input v-model.number="formForNotiveChild1.price" auto-complete="off"></el-input>
             </el-form-item>
@@ -189,13 +126,7 @@
           <el-input type="number" v-model="form.goods_freight"></el-input>
         </el-form-item>
         <el-form-item label="商品详情" label-width="140px">
-          <editor
-            style="width: 800px; height: 300px;"
-            :menubar="editorConfig.menu"
-            :height="editorConfig.height"
-            v-model="form.goods_body"
-            v-if="dialogFormVisible"
-          />
+          <editor style="width: 800px; height: 300px;" :menubar="editorConfig.menu" :height="editorConfig.height" v-model="form.goods_body" v-if="dialogFormVisible" />
         </el-form-item>
         <el-form-item label="活动时间" prop="goods_freight" label-width="140px">
           <el-radio-group v-model="radio" @change="choiceRadio">
@@ -203,25 +134,12 @@
             <el-radio :label="1">日期选择</el-radio>
           </el-radio-group>
           <div>
-            <el-date-picker
-              v-if="radio==1"
-              style="width:400px"
-              v-model="QformForNotive.dateRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
+            <el-date-picker v-if="radio==1" style="width:400px" v-model="QformForNotive.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
           </div>
         </el-form-item>
 
         <el-form-item>
-          <el-button
-            type="primary"
-            :disabled="isUpimg"
-            @click="onSubmit(form)"
-            :loading="isloading"
-          >保存</el-button>
+          <el-button type="primary" :disabled="isUpimg" @click="onSubmit(form)" :loading="isloading">保存</el-button>
           <el-button @click="dialogFormVisible = false">取消</el-button>
         </el-form-item>
       </el-form>
@@ -235,13 +153,7 @@
         </el-form>
       </el-header>
       <el-main>
-        <el-table
-          :data="tableData"
-          stripe
-          v-loading="listLoading"
-          element-loading-text="给我一点时间"
-          style="width: 100%"
-        >
+        <el-table :data="tableData" stripe v-loading="listLoading" element-loading-text="给我一点时间" style="width: 100%">
           <el-table-column label="商品图片">
             <template slot-scope="scope">
               <div style="width:100px;height:100px;align-items:center;display:flex;">
@@ -270,16 +182,7 @@
         </el-table>
       </el-main>
       <el-footer>
-        <el-pagination
-          background
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="listQuery.page"
-          :page-sizes="[10,20,30,50]"
-          :page-size="listQuery.limit"
-          layout="total, sizes, prev, pager, next"
-          :total="total"
-        ></el-pagination>
+        <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,20,30,50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total"></el-pagination>
       </el-footer>
     </el-container>
   </div>
@@ -892,11 +795,11 @@ export default {
       this.alertValue = "";
       getGoods_api(id).then(res => {
         if (res.data.spec_value) {
-          // set sku classList
-          res.data.skuClassList = res.data.SKUList.map(v => (JSON.stringify(v.goods_spec)).replace(/^\{|\}$|"/g, ''));
-
+          //多规格选择options
+          res.data.skuClassList = res.data.SKUList.map(v =>
+            JSON.stringify(v.goods_spec).replace(/^\{|\}$|"/g, "")
+          );
           this.goodsDetail = res.data;
-          console.log("多规格");
         } else {
           this.choiceGoodsId = res.data.SKUList[0].goods_id;
         }
@@ -1006,7 +909,9 @@ export default {
                 active_time:
                   aData.end_time == "2038-01-19 11:14:07"
                     ? "不限"
-                    : aData.start_time.replace("00:00:00","") + "至" + aData.end_time.replace("00:00:00",""),
+                    : aData.start_time.replace("00:00:00", "") +
+                      "至" +
+                      aData.end_time.replace("00:00:00", ""),
                 tpeople: aData.group_num ? aData.group_num : "",
                 thours: aData.limit_time ? aData.limit_time : "",
                 tstate:

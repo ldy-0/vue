@@ -26,6 +26,7 @@ export default {
     videos: '视频列表',
     groupBuying: '团购管理',
     coupon: '优惠券管理',
+    killPrice:'秒杀管理',
     // --------------------
     //卖家
     commodityManagement:'商品管理',
