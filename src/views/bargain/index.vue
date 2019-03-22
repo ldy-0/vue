@@ -21,35 +21,39 @@
             </el-select>
           </el-form-item>
           <el-form-item label="封面图" prop="fileList" :label-width="formLabelWidth">
-            <el-upload action list-type="picture-card" accept="image/*" :limit="1" 
-              :auto-upload="false" :on-change="handleImgChange_image" 
-              :on-preview="handlePictureCardPreview" 
-              :on-remove="handleRemove_goods_image" 
-              :file-list="QformForNotive.fileList">
+            <el-upload action list-type="picture-card" accept="image/*" :limit="1" :auto-upload="false" :on-change="handleImgChange_image" :on-preview="handlePictureCardPreview" :on-remove="handleRemove_goods_image" :file-list="QformForNotive.fileList">
               <i class="el-icon-plus"></i>
             </el-upload>
           </el-form-item>
           <p class="hbs-margin-left140">图片建议尺寸：宽750*高750;限传一张;</p>
-          <el-form-item label="活动名称" :label-width="formLabelWidth" prop="rule_name">
-            <el-input v-model.number="QformForNotive.rule_name" auto-complete="off"></el-input>
-          </el-form-item>
           <el-form-item label="活动时间" :label-width="formLabelWidth" prop="dateRange">
-            <el-date-picker style="width:400px" v-model="QformForNotive.dateRange" 
-              type="datetimerange" range-separator="至" start-placeholder="开始日期" 
-              end-placeholder="结束日期" value-format="yyyy-MM-dd HH:mm:ss">
+            <el-date-picker style="width:400px" v-model="QformForNotive.dateRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
+          </el-form-item>
+          <el-form-item label="每次砍价时限" :label-width="formLabelWidth" prop="dateRange">
+            <el-input type="number" min="0" v-model="QformForNotive.tprice2" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="团购类型" :label-width="formLabelWidth">
+            <el-radio-group v-model="QformForNotive.radio">
+              <el-radio :label="1">固定砍</el-radio>
+              <el-radio :label="2">随机砍</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item v-if="QformForNotive.radio==1" label="固定砍价金额" :label-width="formLabelWidth" prop="tprice2">
+            <el-input type="number" v-model="QformForNotive.tprice2" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item v-if="QformForNotive.radio==2" label="随机砍价区间" :label-width="formLabelWidth" prop="tpeople2">
+            <el-input type="number" style="width:100px;" v-model="QformForNotive.tpeople2" auto-complete="off"></el-input>
+            <el-input type="number" style="width:100px;" v-model="QformForNotive.tpeople2" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="现价" :label-width="formLabelWidth">
             <el-input disabled v-model="goodsDetail.price" auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="秒杀价" :label-width="formLabelWidth" prop="goods_price">
+          <el-form-item label="底价" :label-width="formLabelWidth" prop="goods_price">
             <el-input v-model.number="QformForNotive.goods_price" auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="实际秒杀数量" :label-width="formLabelWidth" prop="limit_num">
+          <el-form-item label="库存" :label-width="formLabelWidth" prop="limit_num">
             <el-input v-model.number="QformForNotive.limit_num" auto-complete="off"></el-input>
-          </el-form-item>
-          <el-form-item label="每人限购" :label-width="formLabelWidth" prop="limit_buy">
-            <el-input v-model.number="QformForNotive.limit_buy" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="运费" :label-width="formLabelWidth" prop="goods_freight">
             <el-input v-model.number="QformForNotive.goods_freight" auto-complete="off"></el-input>
@@ -113,10 +117,13 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="秒杀商品ID" prop="id"></el-table-column>
           <el-table-column label="商品名" prop="name"></el-table-column>
-          <el-table-column label="商品价格（￥）" prop="goodsprice"></el-table-column>
-          <el-table-column label="秒杀价格（￥）" prop="killPrice"></el-table-column>
+          <el-table-column label="商品价格（￥）" prop="goodsprice">
+            <template slot-scope="scope">
+              {{scope.row.goods.goods_price}}
+            </template>
+          </el-table-column>
+          <el-table-column label="秒杀价格（￥）" prop="goods_price"></el-table-column>
           <el-table-column label="秒杀数量" prop="limit_num"></el-table-column>
           <el-table-column label="秒杀限购" prop="limit_buy"></el-table-column>
           <el-table-column label="活动时间" prop="active_time" width="200"></el-table-column>
@@ -144,19 +151,20 @@
 import {
   getGoodsList_api,
   getGoods_api,
-  addSecKill_api,
-  putSecKill_api,
-  getSecKill_api,
-  deleteSeckill_api
+  addCutprice_api,
+  putCutprice_api,
+  getCutprice_api,
+  deleteCutprice_api
 } from "@/api/seller";
 import Moment from "@/utils/moment";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 const QformForNotive = {
   dateRange: [],
-  limit_buy:1,
-  goods_freight:0,
-  fileList:[]
+  limit_buy: 1,
+  goods_freight: 0,
+  fileList: [],
+  radio:1
 };
 export default {
   mixins: [config],
@@ -187,11 +195,11 @@ export default {
             trigger: "change"
           }
         ],
-        goods_price: [{required: true,message: "必填项",trigger: "blur"}],
-        limit_num: [{required: true,message: "必填项",trigger: "blur"}],
-        limit_buy: [{required: true,message: "必填项",trigger: "blur"}],
-        goods_freight: [{required: true,message: "必填项",trigger: "blur"}],
-        rule_name: [{required: true,message: "必填项",trigger: "blur"}],
+        goods_price: [{ required: true, message: "必填项", trigger: "blur" }],
+        limit_num: [{ required: true, message: "必填项", trigger: "blur" }],
+        limit_buy: [{ required: true, message: "必填项", trigger: "blur" }],
+        goods_freight: [{ required: true, message: "必填项", trigger: "blur" }],
+        rule_name: [{ required: true, message: "必填项", trigger: "blur" }]
       },
       formLabelWidth: "120px",
       //
@@ -216,7 +224,7 @@ export default {
       tableData: [],
       listQuery: {
         page: 1,
-        limit: 10,
+        limit: 10
       },
       total: 1
     };
@@ -251,33 +259,21 @@ export default {
     getList() {
       this.listLoading = true;
       let sendData = Object.assign({}, this.listQuery);
-      getSecKill_api(sendData)
+      getCutprice_api(sendData)
         .then(response => {
           // 这里由于结构做了调整，导致编辑页面需要的数据无法从列表获取，这里只需要给tableData额外传一个id
           if (response && response.status == 0) {
             let result = response.data;
-            let tempTableData = [];
             result.forEach(aData => {
-              tempTableData.push({
-                //后端生成
-                id: aData.rule_id,
-                image: aData.goods.goods_image,
-                name: aData.goods.goods_name,
-                goodsprice: aData.goods.goods_price,
-                killPrice: aData.goods_price,
-                limit_num: aData.limit_num,
-                limit_buy: aData.limit_buy,
-                active_time:
+                aData.active_time=
                   aData.end_time == "2038-01-19 11:14:07"
                     ? "不限"
                     : aData.start_time.replace("00:00:00", "") +
                       "至" +
-                      aData.end_time.replace("00:00:00", ""),
-                rule_status:aData.rule_status
-              });
+                      aData.end_time.replace("00:00:00", "");
             });
-            this.tableData = tempTableData;
-            this.total =response.pagination.total;
+            this.tableData = result;
+            this.total = response.pagination.total;
           } else {
           }
           this.listLoading = false;
@@ -320,7 +316,8 @@ export default {
                 is_virtualTXT: aData.is_virtual ? "虚拟" : "实体", //显示补充，实际无用
                 goodsName: aData.goods_name, //显示
                 goodsPrice: aData.goods_price, //显示
-                goodsNum: aData.goods_serial //显示
+                goodsNum: aData.goods_serial, //显示
+                goods_freight:aData.goods_freight
               });
             });
             this.tableData2 = tempTableData;
@@ -343,10 +340,11 @@ export default {
       this.addNewShow = true;
       this.getList2();
     },
-    choiceThis(index, row) {
-      this.goodsDetail = {price:0};
+    choiceThis(index,row) {
+      this.goodsDetail = { price: 0 };
       let id = row.id;
       this.alertValue = "";
+      this.QformForNotive.goods_freight = row.goods_freight;
       getGoods_api(id).then(res => {
         if (res.data.spec_value) {
           //多规格-规格列选
@@ -357,7 +355,7 @@ export default {
           this.goodsDetail.price = 0;
         } else {
           this.choiceGoodsId = res.data.SKUList[0].goods_id;
-          this.goodsDetail.price =res.data.goods_price;
+          this.goodsDetail.price = res.data.goods_price;
         }
       });
       this.QaddNewShow = true;
@@ -377,61 +375,61 @@ export default {
         });
       });
       if (!res) return;
-      if(!this.choiceGoodsId) return;
+      if (!this.choiceGoodsId) return;
       this.QwaitAddNotice = true;
       let send = {
-        goods_id:this.choiceGoodsId,
-        goods_price:this.QformForNotive.goods_price,
-        start_time:this.QformForNotive.dateRange[0],
-        end_time:this.QformForNotive.dateRange[1],
-        limit_num:this.QformForNotive.limit_num,
-        limit_buy:this.QformForNotive.limit_buy,
-        images:[this.QformForNotive.fileList[0].url],
-        goods_freight:this.QformForNotive.goods_freight,
-        rule_name:this.QformForNotive.rule_name
-      }
-      addSecKill_api(send).then(res=>{
+        goods_id: this.choiceGoodsId,
+        goods_price: this.QformForNotive.goods_price,
+        start_time: this.QformForNotive.dateRange[0],
+        end_time: this.QformForNotive.dateRange[1],
+        limit_num: this.QformForNotive.limit_num,
+        limit_buy: this.QformForNotive.limit_buy,
+        images: [this.QformForNotive.fileList[0].url],
+        goods_freight: this.QformForNotive.goods_freight,
+        rule_name: this.QformForNotive.rule_name
+      };
+      addCutprice_api(send).then(res => {
         this.QwaitAddNotice = false;
         this.addNewShow = false;
         this.QaddNewShow = false;
-          if (res && res.status === 0) {
-            this.$notify({
-              title: "成功",
-              message: "操作成功",
-              type: "success"
-            });
-            this.getList();
-          } else {
-            this.$notify({
-              title: "操作失败",
-              message:res.error,
-              type: "error"
-            });
-          }
-      })
+        if (res && res.status === 0) {
+          this.$notify({
+            title: "成功",
+            message: "操作成功",
+            type: "success"
+          });
+          this.getList();
+        } else {
+          this.$notify({
+            title: "操作失败",
+            message: res.error,
+            type: "error"
+          });
+        }
+      });
     },
     //上下架==============================================
-    changeStatus(index, row,state) {
+    changeStatus(index, row, state) {
       let send = {
-        rule_id:[row.id],
-        rule_status:state
-      }
-      putSecKill_api(send).then(res=>{
-        if(res.status == 0){
+        rule_id: [row.id],
+        rule_status: state
+      };
+      putCutprice_api(send).then(res => {
+        if (res.status == 0) {
           this.$notify({
-            title:'操作成功',
-            type:'success',
-            message:'改变状态成功'
-          })
+            title: "操作成功",
+            type: "success",
+            message: "改变状态成功"
+          });
           this.getList();
-        }else{
+        } else {
           this.$notify({
-            title:'操作失败',
-            type:'error',
-            message:res.error
-          })
+            title: "操作失败",
+            type: "error",
+            message: res.error
+          });
         }
-      })
+      });
     },
     //delete=============================================
     deleteItem(index, row) {
@@ -452,7 +450,7 @@ export default {
         });
     },
     deleteNewNotice(id) {
-      deleteSeckill_api(id)
+      deleteCutprice_api(id)
         .then(res => {
           if (res && res.status === 0) {
             this.$notify({
@@ -464,7 +462,7 @@ export default {
           } else {
             this.$notify({
               title: "操作失败",
-              message:res.error,
+              message: res.error,
               type: "error"
             });
           }

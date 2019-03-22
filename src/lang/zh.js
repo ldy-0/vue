@@ -27,10 +27,15 @@ export default {
     groupBuying: '团购管理',
     coupon: '优惠券管理',
     killPrice:'秒杀管理',
+    groupBuyOrder:'团购订单',
+    bargainOrder:'砍价订单',
+    seckillOrder:'秒杀订单',
     // --------------------
     //卖家
     commodityManagement:'商品管理',
     orderManagement:'订单管理',
+    bargain:'砍价管理',
+    order:'普通订单',
     rOrder:'实物订单',
     vOrder:'虚拟订单',
     appointment:'预约',

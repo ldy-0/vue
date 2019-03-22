@@ -9,7 +9,7 @@
 <template>
   <div>
     <!-- 添加-->
-    <el-dialog title="添加团购商品" :visible.sync="addNewShow" width="80%">
+    <el-dialog title="添加团购商品" :visible.sync="addNewShow" width="50%">
       <el-dialog title="新增团购" :visible.sync="QaddNewShow" width="50%" append-to-body>
         <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules">
           <el-form-item label="规格" :label-width="formLabelWidth" v-if="goodsDetail" prop="choiceGoodsId">
@@ -72,7 +72,7 @@
               </el-table-column>
               <el-table-column label="商品名" prop="goodsName"></el-table-column>
               <el-table-column label="价格" prop="goodsPrice"></el-table-column>
-              <el-table-column label="操作" min-width="300px">
+              <el-table-column label="操作" min-width="100px">
                 <template slot-scope="scope">
                   <el-button size="mini" type="primary" @click="editItem(scope.$index, scope.row)">选择</el-button>
                 </template>

@@ -91,13 +91,39 @@ export let asyncRouterMapSeller = [
       {
         path: "index",
         component: () => import("@/views/orderManagement/index"),
-        name: "orderManagement",
+        name: "order",
         meta: {
-          title: "orderManagement",
+          title: "order",
           noCache: true,
-          icon: "orderlist"
         }
-      }
+      },
+      {
+        path: "groupBuyOrder",
+        component: () => import("@/views/orderManagement/groupBuyOrder"),
+        name: "groupBuyOrder",
+        meta: {
+          title: "groupBuyOrder",
+          noCache: true,
+        }
+      },
+      {
+        path: "bargainOrder",
+        component: () => import("@/views/orderManagement/bargainOrder"),
+        name: "bargainOrder",
+        meta: {
+          title: "bargainOrder",
+          noCache: true,
+        }
+      },
+      {
+        path: "seckillOrder",
+        component: () => import("@/views/orderManagement/seckillOrder"),
+        name: "seckillOrder",
+        meta: {
+          title: "seckillOrder",
+          noCache: true,
+        }
+      },
     ]
   },
   {
@@ -112,50 +138,7 @@ export let asyncRouterMapSeller = [
       meta: { title: 'coupon', icon: 'money', noCache: true }
     }]
   },
-  {
-    path: "/groupBuying", //团购管理
-    component: Layout,
-    redirect: "/groupBuying/groupBuying",
-    meta: {
-      title: "groupBuying",
-      icon: 'shoppingCard',
-      roles: "groupBuying"
-    },
-    children: [
-      {
-        path: "groupBuying",
-        component: () => import("@/views/groupBuying/groupBuying"),
-        name: "groupBuying",
-        meta: {
-          title: "groupBuying",
-          icon: 'shoppingCard',
-          noCache: true
-        }
-      }
-    ]
-  },
-  {
-    path: "/killPrice", //砍价管理
-    component: Layout,
-    redirect: "/killPrice/index",
-    meta: {
-      title: "killPrice",
-      icon: 'zip',
-      roles: "killPrice"
-    },
-    children: [
-      {
-        path: "killPrice",
-        component: () => import("@/views/killPrice/index"),
-        name: "killPrice",
-        meta: {
-          title: "killPrice",
-          icon: 'zip',
-          noCache: true
-        }
-      }
-    ]
-  },
+
 
   {
     path: "/refundModule", //退货退款模块
@@ -230,6 +213,33 @@ export let asyncRouterMapSeller = [
       roles: "infoManagement"
     },
     children: [
+          {
+            path: "groupBuying",
+            component: () => import("@/views/groupBuying/groupBuying"),
+            name: "groupBuying",
+            meta: {
+              title: "groupBuying",
+              noCache: true
+            }
+          },
+          {
+            path: "killPrice",
+            component: () => import("@/views/killPrice/index"),
+            name: "killPrice",
+            meta: {
+              title: "killPrice",
+              noCache: true
+            }
+          },
+          {
+            path: "bargain",
+            component: () => import("@/views/bargain/index"),
+            name: "bargain",
+            meta: {
+              title: "bargain",
+              noCache: true
+            }
+          },
       {
         path: "type", //分类信息
         component: () => import("@/views/infoManagement/type"),

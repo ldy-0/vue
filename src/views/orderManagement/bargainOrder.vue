@@ -586,7 +586,7 @@ export default {
           getData.order_state = this.serchState;
         }
       }
-      getData.order_type = 1;
+      getData.order_type = 9;
       let allres = await getROrderList_api(getData).then(res => {
         if (res.status == 0) {
           if (isall) {

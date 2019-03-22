@@ -566,4 +566,32 @@ export function deleteSeckill_api(id) {
     method: "delete",
   });
 }
+//bargin->砍价
+export function addCutprice_api(data) {
+  return request({
+    url: "/api/v2/seller/cutprice",
+    method: "post",
+    data
+  });
+}
+export function putCutprice_api(data) {
+  return request({
+    url: "/api/v2/seller/cutprice/setting",
+    method: "put",
+    data
+  });
+}
+export function getCutprice_api(data) {
+  return request({
+    url: "/api/v2/seller/cutprice",
+    method: "get",
+    params: data
+  });
+}
+export function deleteCutprice_api(id) {
+  return request({
+    url: "/api/v2/seller/cutprice/" + id,
+    method: "delete",
+  });
+}
 
