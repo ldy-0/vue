@@ -117,7 +117,7 @@
       <el-header class="header">
         <el-form :inline="true" :model="formInline" class="form">
           <el-form-item>
-            <el-button type="primary" icon="el-icon-edit-outline" @click="addItem">添加秒杀商品</el-button>
+            <el-button type="primary" icon="el-icon-edit-outline" @click="addItem">添加砍价商品</el-button>
           </el-form-item>
         </el-form>
       </el-header>
@@ -152,7 +152,7 @@
               <el-button size="mini" type="primary" icon="el-icon-edit" @click="lookItem(scope.$index, scope.row)">详情</el-button>
               <el-button size="mini" v-if="scope.row.cutprice_commend == 0" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'recommend')">首页推荐</el-button>
               <el-button size="mini" v-if="scope.row.cutprice_commend == 1" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'notrecommend')">取消推荐</el-button>
-              <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteItem(scope.$index, scope.row)">删除秒杀</el-button>
+              <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteItem(scope.$index, scope.row)">删除砍价</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -229,7 +229,7 @@ export default {
       //图片预览
       dialogImageUrl: "",
       dialogVisible: false,
-      //秒杀列表参数
+      //砍价列表参数
       industry: "",
       industryList: [],
       listLoading: false,
