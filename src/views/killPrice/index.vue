@@ -127,6 +127,8 @@
           </el-table-column>
           <el-table-column label="操作" min-width="200px">
             <template slot-scope="scope">
+              <el-button size="mini" v-if="scope.row.rule_commend == 0" type="success" icon="el-icon-sort-up" @click="changeRecommend(scope.$index, scope.row,'1')">首页推荐</el-button>
+              <el-button size="mini" v-if="scope.row.rule_commend == 1" type="warning" icon="el-icon-sort-down" @click="changeRecommend(scope.$index, scope.row,'0')">取消推荐</el-button>
               <el-button size="mini" v-if="scope.row.rule_status==2?true:false" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'1')">上架</el-button>
               <el-button size="mini" v-if="scope.row.rule_status==1?true:false" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'2')">下架</el-button>
               <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteItem(scope.$index, scope.row)">删除秒杀</el-button>
@@ -273,7 +275,8 @@ export default {
                     : aData.start_time.replace("00:00:00", "") +
                       "至" +
                       aData.end_time.replace("00:00:00", ""),
-                rule_status:aData.rule_status
+                rule_status:aData.rule_status,
+                rule_commend:aData.rule_commend
               });
             });
             this.tableData = tempTableData;
@@ -432,6 +435,28 @@ export default {
           })
         }
       })
+    },
+    changeRecommend(index, row, state) {
+      let send = {
+        rule_id:[row.id],
+        rule_commend: state
+      };
+      putSecKill_api(send).then(res => {
+        if (res.status == 0) {
+          this.$notify({
+            title: "操作成功",
+            type: "success",
+            message: "改变状态成功"
+          });
+          this.getList();
+        } else {
+          this.$notify({
+            title: "操作失败",
+            type: "error",
+            message: res.error
+          });
+        }
+      });
     },
     //delete=============================================
     deleteItem(index, row) {
