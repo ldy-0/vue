@@ -17,7 +17,7 @@
 
 <script>
 export default {
-  name: 'img',
+  name: 'customImg',
 
   props: {
     obj: {

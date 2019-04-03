@@ -7,7 +7,7 @@
 
 <script>
 export default {
-  name: 'img',
+  name: 'integer',
 
   props: {
     obj: {
@@ -30,15 +30,15 @@ export default {
 
       if(o.preventValidate) return ;
 
-      o.alert = o.value ? null : `请输入${o.title}`;
+      if(!o.value) return o.alert = `请输入${o.title}`;
 
-      o.alert = isNaN(Number(o.value)) ? `${o.title}必须为数字` : null;
+      if(isNaN(Number(o.value))) return o.alert = `${o.title}必须为数字`;
 
-      o.alert = o.value > 0 ? null : `${o.title}必须大于零`;
+      if(o.value <= 0) return o.alert = `${o.title}必须大于零`;
 
-      o.alert = o.value % 1 === 0 ? null : `${o.title}必须为整数`;
+      if(o.value % 1 !== 0) return o.alert = `${o.title}必须为整数`;
       // console.error('custom input obj : ', v);
-
+      o.alert = null;
     },
   }
 }
