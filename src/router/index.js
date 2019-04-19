@@ -59,72 +59,104 @@ export default new Router({
 //isAdmin为false时，商家路由
 export let asyncRouterMapSeller = [
   {
-    path: "/commodityManagement", //商品管理
+    path: "/goods", // 商品管理
     component: Layout,
-    redirect: "/commodityManagement/index",
-    meta: {
-      roles: "commodityManagement"
-    },
+    redirect: "/goods/index",
+    meta: { roles: "goods" },
     children: [
       {
         path: "index",
-        component: () => import("@/views/commodityManagement/index"),
-        name: "commodityManagement",
-        meta: {
-          title: "commodityManagement",
-          icon: "goods",
-          noCache: true
-        }
+        component: () => import("@/views/goods/index"),
+        name: "goods",
+        meta: { title: "goods", icon: "goods", noCache: true }
       }
     ]
   },
   {
-    path: "/orderManagement", //订单管理
+    path: "/order", // 订单
     component: Layout,
-    redirect: "/orderManagement/index",
-    meta: {
-      title: "orderManagement",
-      icon: "orderlist",
-      roles: "orderManagement"
-    },
+    redirect: "/order/index",
+    meta: { roles: "order" },
     children: [
       {
         path: "index",
-        component: () => import("@/views/orderManagement/index"),
+        component: () => import("@/views/order/index"),
         name: "order",
-        meta: {
-          title: "order",
-          noCache: true,
-        }
-      },
-      {
-        path: "groupBuyOrder",
-        component: () => import("@/views/orderManagement/groupBuyOrder"),
-        name: "groupBuyOrder",
-        meta: {
-          title: "groupBuyOrder",
-          noCache: true,
-        }
-      },
-      {
-        path: "bargainOrder",
-        component: () => import("@/views/orderManagement/bargainOrder"),
-        name: "bargainOrder",
-        meta: {
-          title: "bargainOrder",
-          noCache: true,
-        }
-      },
-      {
-        path: "seckillOrder",
-        component: () => import("@/views/orderManagement/seckillOrder"),
-        name: "seckillOrder",
-        meta: {
-          title: "seckillOrder",
-          noCache: true,
-        }
-      },
+        meta: { title: "订单列表", icon: "order", noCache: true }
+      }
     ]
+  },
+  {
+    path: '/afterSale', // 售后 
+    component: Layout,
+    meta: { roles: 'afterSale' },
+    redirect: '/afterSale/index',
+    children: [{
+      path: 'index',
+      component: () => import('@/views/afterSale/index'),
+      name: 'afterSale',
+      meta: { title: '售后列表', icon: 'orderlist', noCache: true }
+    }]
+  },
+  {
+    path: '/comment', // 评论 
+    component: Layout,
+    meta: { roles: 'comment' },
+    redirect: '/comment/index',
+    children: [{
+      path: 'index',
+      component: () => import('@/views/comment/index'),
+      name: 'comment',
+      meta: { title: '评论列表', icon: 'commint', noCache: true }
+    }]
+  },
+  {
+    path: '/distribution', // 分销 
+    component: Layout,
+    meta: { roles: 'distribution' },
+    redirect: '/distribution/index',
+    children: [{
+      path: 'index',
+      component: () => import('@/views/distribution/index'),
+      name: 'distribution',
+      meta: { title: '分销列表', icon: 'fenxiao', noCache: true }
+    }]
+  },
+  {
+    path: '/withDraw', // 提现 
+    component: Layout,
+    meta: { roles: 'withDraw' },
+    redirect: '/withDraw/index',
+    children: [{
+      path: 'index',
+      component: () => import('@/views/withDraw/index'),
+      name: 'withDraw',
+      meta: { title: '提现列表', icon: 'withdraw', noCache: true }
+    }]
+  },
+  {
+    path: '/news', // 资讯 
+    component: Layout,
+    meta: { roles: 'news' },
+    redirect: '/news/index',
+    children: [{
+      path: 'index',
+      component: () => import('@/views/news/index'),
+      name: 'news',
+      meta: { title: '资讯列表', icon: 'message', noCache: true }
+    }]
+  },
+  {
+    path: '/case', // 案例
+    component: Layout,
+    meta: { roles: 'case' },
+    redirect: '/case/index',
+    children: [{
+      path: 'index',
+      component: () => import('@/views/case/index'),
+      name: 'case',
+      meta: { title: '案例列表', icon: 'notice', noCache: true }
+    }]
   },
   {
     path: '/coupon',//优惠券
@@ -138,48 +170,105 @@ export let asyncRouterMapSeller = [
       meta: { title: 'coupon', icon: 'money', noCache: true }
     }]
   },
-
-
   {
-    path: "/refundModule", //退货退款模块
+    path: "/memberList", //会员列表
     component: Layout,
-    redirect: "/refundModule/rReturn",
-    meta: { title: "退款管理", icon: "orderlist", roles: "refundModule" },
+    meta: { title: "memberList", icon: "user", roles: "memberList" },
     children: [
       {
-        path: "rReturn",
-        component: () => import("@/views/refundModule/rReturn"),
-        name: "rReturn",
-        meta: { title: "rReturn", icon: "orderlist", noCache: true }
+        path: "list",
+        component: () => import("@/views/member/list/index"),
+        name: "memberList",
+        meta: { title: "会员列表", noCache: true, icon: "user" }
       }
-      // , {
-      //   path: 'vReturn',
-      //   component: () => import('@/views/refundModule/vReturn'),
-      //   name: 'vReturn',
-      //   meta: { title: 'vReturn', noCache: true }
-      // }
     ]
   },
   {
-    path: "/memberList", //人员列表
+    path: "/memberAuth", //会员审核列表
     component: Layout,
-    redirect: "/memberList/index",
+    meta: { title: "memberAuth", icon: "user", roles: "memberAuth" },
+    children: [
+      {
+        path: "auth",
+        component: () => import("@/views/member/auth/index"),
+        name: "memberAuth",
+        meta: { title: "会员审核列表", noCache: true, icon: "application" }
+      }
+    ]
+  },
+  {
+    path: "/infoManagement", //运营
+    component: Layout,
     meta: {
-      title: "memberList",
-      icon: "user",
-      roles: "memberList"
+      title: "infoManagement",
+      icon: "guide",
+      roles: "infoManagement"
     },
     children: [
       {
-        path: "memberList",
-        component: () => import("@/views/memberList/index"),
-        name: "memberList",
+        path: "classify", //分类信息
+        component: () => import("@/views/operate/classify/index"),
+        name: "classify",
+        meta: { title: "分类", noCache: true }
+      },
+      {
+        path: "groupBuying",
+        component: () => import("@/views/groupBuying/groupBuying"),
+        name: "groupBuying",
         meta: {
-          title: "memberList",
-          noCache: true,
-          icon: "user"
+          title: "groupBuying",
+          noCache: true
         }
-      }
+      },
+      {
+        path: "killPrice",
+        component: () => import("@/views/killPrice/index"),
+        name: "killPrice",
+        meta: {
+          title: "killPrice",
+          noCache: true
+        }
+      },
+      {
+        path: "bargain",
+        component: () => import("@/views/bargain/index"),
+        name: "bargain",
+        meta: {
+          title: "bargain",
+          noCache: true
+        }
+      },
+      
+      {
+        path: "recommended", //精品推荐
+        component: () => import("@/views/infoManagement/recommended"),
+        name: "recommended",
+        meta: {
+          title: "recommended",
+          noCache: true
+        }
+      },
+      {
+        path: "banner", //首页轮播
+        component: () => import("@/views/infoManagement/banner"),
+        name: "benner",
+        meta: {
+          title: "banner",
+          noCache: true
+        }
+      },
+      {
+      	path: 'attractMain', // 招商
+      	component: () => import('@/views/operate/attractMain/index'),
+      	name: 'attractMain',
+      	meta: { title: '招商', noCache: true }
+      },
+      {
+      	path: 'about', //关于公司
+      	component: () => import('@/views/operate/about/index'),
+      	name: 'about',
+      	meta: { title: '关于健德', noCache: true }
+      },
     ]
   },
 
@@ -203,117 +292,4 @@ export let asyncRouterMapSeller = [
       }
     ]
   },
-  {
-    path: "/infoManagement", //运营
-    component: Layout,
-    redirect: "/infoManagement/spec",
-    meta: {
-      title: "infoManagement",
-      icon: "guide",
-      roles: "infoManagement"
-    },
-    children: [
-          {
-            path: "groupBuying",
-            component: () => import("@/views/groupBuying/groupBuying"),
-            name: "groupBuying",
-            meta: {
-              title: "groupBuying",
-              noCache: true
-            }
-          },
-          {
-            path: "killPrice",
-            component: () => import("@/views/killPrice/index"),
-            name: "killPrice",
-            meta: {
-              title: "killPrice",
-              noCache: true
-            }
-          },
-          {
-            path: "bargain",
-            component: () => import("@/views/bargain/index"),
-            name: "bargain",
-            meta: {
-              title: "bargain",
-              noCache: true
-            }
-          },
-      {
-        path: "type", //分类信息
-        component: () => import("@/views/infoManagement/type"),
-        name: "type",
-        meta: {
-          title: "type",
-          noCache: true
-        }
-      },
-      {
-        path: "recommended", //精品推荐
-        component: () => import("@/views/infoManagement/recommended"),
-        name: "recommended",
-        meta: {
-          title: "recommended",
-          noCache: true
-        }
-      },
-      {
-        path: "banner", //首页轮播
-        component: () => import("@/views/infoManagement/banner"),
-        name: "benner",
-        meta: {
-          title: "banner",
-          noCache: true
-        }
-      },
-      {
-        path: "feedBack", //首页轮播
-        component: () => import("@/views/infoManagement/feedBack"),
-        name: "feedBack",
-        meta: {
-          title: "feedBack",
-          noCache: true
-        }
-      },
-      // {
-      //   path: 'caseShow', //案例推广
-      //   component: () =>
-      //     import('@/views/infoManagement/caseShow'),
-      //   name: 'caseShow',
-      //   meta: {
-      //     title: 'caseShow',
-      //     noCache: true
-      //   }
-      // },
-      {
-      	path: 'company', //关于公司
-      	component: () =>
-      		import('@/views/infoManagement/company'),
-      	name: 'company',
-      	meta: {
-      		title: 'company',
-      		noCache: true
-      	}
-      },
-      {
-        path: "news", //新闻咨询
-        component: () => import("@/views/infoManagement/news"),
-        name: "news",
-        meta: {
-          title: "news",
-          noCache: true
-        }
-      },
-      {
-        path: "videos", //视频列表
-        component: () => import("@/views/infoManagement/videos"),
-        name: "videos",
-        meta: {
-          title: "videos",
-          noCache: true
-        }
-      }
-    ]
-  }
 ];

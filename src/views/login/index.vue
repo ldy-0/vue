@@ -231,7 +231,7 @@ export default {
           }
 
           loginPromise
-            .then(() => {
+            .then((e) => {
               this.loading = false;
               this.$router.push({ path: "/" });
             })
@@ -303,9 +303,6 @@ $light_gray: #eee;
     border-radius: 5px;
     color: #454545;
   }
-}
-.v-modal {
-  width: 0 !important;
 }
 .codebox {
   display: flex;

@@ -6,16 +6,11 @@ import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
-  // withCredentials:true,
-  //baseURL: 'http://203.195.203.67', // api的base_url
   baseURL:process.env.BASE_API,
-  //baseURL:'https://microapp.yetgyg.com',
-  timeout: 20000 // request timeout
+  timeout: 20000
 })
 // request interceptor
 service.interceptors.request.use(config => {
-  console.log(process.env.BASE_API)
-  // console.log('store.getters.token',store.getters.token)
    config.headers['Content-Type'] = 'application/json'
   if (getToken()) {
     // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
@@ -23,7 +18,6 @@ service.interceptors.request.use(config => {
   }
   return config
 }, error => {
-  // Do something with request error
   console.log(error) // for debug
   Promise.reject(error)
 })
@@ -58,9 +52,9 @@ service.interceptors.response.use(
           type: 'error',
           duration: 5 * 1000
         })
-        store.dispatch('FedLogOut').then(() => {
-          location.reload() 
-        })
+        // store.dispatch('FedLogOut').then(() => {
+        //   location.reload() 
+        // })
     }else  {
       return response.data
     }

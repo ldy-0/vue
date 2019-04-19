@@ -77,6 +77,11 @@ export default {
         { key: '价格(元)', value: 'price' },
         { key: '标价(元)', value: 'marketprice' },
         { key: '库存', value: 'count' },
+        { key: '平台利润', value: 'profit' },
+        { key: 'VIP1佣金', value: 'vip1_commission' },
+        { key: 'VIP2佣金', value: 'vip2_commission' },
+        { key: 'VIP3佣金', value: 'vip3_commission' },
+        { key: 'VIP4佣金', value: 'vip4_commission' },
       ],
       rulesChild2: {
         name: [
@@ -88,12 +93,15 @@ export default {
         // marketprice: [
         //   { required: true, message: "请输入参考价格,不少于0", trigger: "blur", min: 0, type: "number" }
         // ],
-        count: [
-          { required: true, message: "请输入商品库存,不少于0", trigger: "blur", min: 0, type: "number" }
-        ]
       }
     };
   },
+
+  // watch: {
+  //   skuList(v1, v2){
+  //     console.error('watch: ', v1, v2);
+  //   }
+  // },
 
   computed: {
     skusTitle(){
@@ -188,6 +196,11 @@ export default {
           sku.price = match.price;
           sku.marketprice = match.marketprice;
           sku.count = match.count;
+          sku.profit = match.profit;
+          sku.vip1_commission = match.vip1_commission;
+          sku.vip2_commission = match.vip2_commission;
+          sku.vip3_commission = match.vip3_commission;
+          sku.vip4_commission = match.vip4_commission;
           // this.classList[i].items[skuIndex].isNull = matchArr.every(goodsIndex => this.skus[goodsIndex].count <= this.skus[goodsIndex].secureAmount);
         }
 
@@ -196,6 +209,11 @@ export default {
           sku.price = skus[i].price;
           sku.marketprice = skus[i].marketprice;
           sku.count = skus[i].count;
+          sku.profit = skus[i].profit;
+          sku.vip1_commission = skus[i].vip1_commission;
+          sku.vip2_commission = skus[i].vip2_commission;
+          sku.vip3_commission = skus[i].vip3_commission;
+          sku.vip4_commission = skus[i].vip4_commission;
         }
 
         skuList[i] = sku;

@@ -503,6 +503,13 @@ export function deletegroupbuy_api(data) {
     data
   });
 }
+export function changegroupGoods_api(data) {
+  return request({
+    url: "/api/v2/seller/groupbuy/setting",
+    method: "put",
+    data
+  });
+}
 export function putgroupbuy_api(id, data) {
   return request({
     url: `/api/v2/seller/groupbuy/${id}`,

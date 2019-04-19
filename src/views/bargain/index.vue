@@ -12,7 +12,7 @@
       <img width="100%" :src="dialogImageUrl" alt>
     </el-dialog>
     <!-- 添加-->
-    <el-dialog :title="QisAddItem?'新增砍价':'查看砍价'" :visible.sync="QaddNewShow" width="50%" append-to-body>
+    <el-dialog :title="QisAddItem?'新增砍价':'查看砍价'" :visible.sync="QaddNewShow" width="60%" append-to-body>
       <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules">
         <el-table :data="goods_info" stripe v-loading="listLoading" element-loading-text="给我一点时间" style="width: 100%;margin-bottom:20px;">
           <el-table-column label="商品图片">
@@ -35,7 +35,7 @@
         </el-form-item>
         <p class="hbs-margin-left140">图片建议尺寸：宽750*高750;限传一张;</p>
         <el-form-item label="活动时间" :label-width="formLabelWidth" prop="dateRange">
-          <el-date-picker style="width:400px" v-model="QformForNotive.dateRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp">
+          <el-date-picker style="width:400px" :picker-options="pickerOptions" v-model="QformForNotive.dateRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="砍价时限" :label-width="formLabelWidth" prop="outime">
@@ -76,7 +76,7 @@
         <el-button v-if="QisAddItem" type="primary" @click="addKillGoods('ruleForm')" :disabled="QwaitAddNotice" :loading="QwaitAddNotice">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="选择商品" :visible.sync="addNewShow" width="50%">
+    <el-dialog title="选择商品" :visible.sync="addNewShow" width="60%">
       <el-container class="notice">
         <el-header class="header">
           <el-form :inline="true" :model="formInline" class="form">
@@ -86,6 +86,7 @@
             <el-form-item>
               <el-button type="primary" icon="el-icon-search" @click="search2">查询</el-button>
             </el-form-item>
+            <multiSelect :obj='multiSelect' @load='loadClass2' @search="searchByclass"></multiSelect>
           </el-form>
         </el-header>
         <el-container>
@@ -118,6 +119,12 @@
         <el-form :inline="true" :model="formInline" class="form">
           <el-form-item>
             <el-button type="primary" icon="el-icon-edit-outline" @click="addItem">添加砍价商品</el-button>
+          </el-form-item>
+                    <el-form-item>
+              <el-input style="width: 340px;" placeholder="请输入商品名称" v-model="listQuery.search"></el-input>
+          </el-form-item>
+          <el-form-item>
+              <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
           </el-form-item>
         </el-form>
       </el-header>
@@ -175,6 +182,8 @@ import {
 import Moment from "@/utils/moment";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
+import multiSelect from '@/components/multiSelect';
+import classAPI from '@/api/classify';
 const QformForNotive = {
   dateRange: [],
   cutprice_type: 1,
@@ -183,14 +192,23 @@ const QformForNotive = {
 };
 export default {
   mixins: [config],
+  components:{
+    multiSelect
+  },
   data() {
     return {
       //本页参数
+      multiSelect:{ title: '分类', source: [], value: [], alert: null, search:true},
       goods_info: [],
       choiceGoodsId: 0, //规格对应goods_id
       alertValue: "", //规格select的值
       goodsDetail: {}, //商品详情
       //弹框参数
+      pickerOptions:{
+        disabledDate(time) {
+          return time.getTime() < Date.now()-86400000;
+        }
+      },
       addNewShow: false,
       QisAddItem: false,
       QwaitAddNotice: false,
@@ -204,6 +222,7 @@ export default {
             trigger: "change"
           }
         ],
+        choiceGoodsId:[{required:true,message:'选择规格',trigger:'change'}],
         goods_price: [{ required: true, message: "必填项", trigger: "blur" }],
         goods_storage: [{ required: true, message: "必填项", trigger: "blur" }],
         goods_freight: [{ required: true, message: "必填项", trigger: "blur" }],
@@ -244,6 +263,13 @@ export default {
   async created() {
     //获取自定义商品分类
     this.getList();
+    let classRes = await classAPI.getClassList({ parent_id: 0 });
+    classRes.data.forEach(v => {
+        v.label = v.storegc_name;
+        v.value = v.storegc_id;
+        v.children = [];
+      });
+    this.multiSelect.source = classRes.data;
   },
   filters: {
     filterUrl: function(value) {
@@ -289,6 +315,7 @@ export default {
       this.listLoading2 = true;
       let sendData = Object.assign({}, this.listQuery2);
       sendData.goods_state = 1;
+      sendData.is_vip=0;
       sendData.is_pintuan = 0;
       getGoodsList_api(sendData)
         .then(response => {
@@ -324,6 +351,7 @@ export default {
     addItem() {
       this.isAddItem = true;
       this.addNewShow = true;
+      this.QformForNotive = Object.assign({},QformForNotive);
       this.getList2();
     },
     choiceThis(index, row) {
@@ -357,6 +385,7 @@ export default {
       this.QisAddItem = true;
     },
     handele_select(e) {
+      this.QformForNotive.choiceGoodsId = this.goodsDetail.SKUList[e].goods_id;
       this.choiceGoodsId = this.goodsDetail.SKUList[e].goods_id;
       this.goodsDetail.price = this.goodsDetail.SKUList[e].goods_price;
       this.QformForNotive.goods_storage = this.goodsDetail.SKUList[
@@ -501,6 +530,10 @@ export default {
       }
     },
     //search=============================================
+    search() {
+      this.listQuery.page = 1;
+      this.getList();
+    },
     search2() {
       this.listQuery2.page = 1;
       this.getList2();
@@ -520,7 +553,30 @@ export default {
     handleCurrentChange(val) {
       this.listQuery.page = val;
       this.getList();
-    }
+    },
+        async loadClass2(val){
+      let param,
+          selClass,
+          source = this.multiSelect.source;
+
+      selClass = source.find(v => v.value == val[0]);
+      if(val[1]) selClass = selClass.children.find(v => v.value == val[1]);
+
+      let res = await classAPI.getClassList({ parent_id: val[1] || val[0] });
+
+      res.data.forEach(v => {
+        v.label = v.storegc_name;
+        v.value = v.storegc_id;
+        if(!val[1]) v.children = [];
+      });
+
+      selClass.children = res.data;
+    },
+    searchByclass(param){
+      this.listQuery2.page =1;
+      this.listQuery2.gc_id = param[2];
+      this.getList2();
+    },
   }
 };
 </script>

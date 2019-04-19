@@ -1,8 +1,4 @@
 <style lang="stylus">
-.v-modal {
-  width: 0 !important;
-}
-
 .dashboard-hbs {
   margin-left: 0 !important;
 }

@@ -12,23 +12,17 @@
       <img width="100%" :src="dialogImageUrl" alt>
     </el-dialog>
     <!-- 添加-->
-    <el-dialog title="添加秒杀商品" :visible.sync="addNewShow" width="50%">
+    <el-dialog title="添加秒杀商品" :visible.sync="addNewShow" width="60%">
       <el-dialog title="新增秒杀" :visible.sync="QaddNewShow" width="50%" append-to-body>
-        <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules">
+        <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules" label-width='120px'>
           <el-form-item label="规格" :label-width="formLabelWidth" v-if="goodsDetail.skuClassList" prop="choiceGoodsId">
             <el-select v-model="alertValue" placeholder="请选择规格" @change="handele_select">
               <el-option v-for="(item,index) in goodsDetail.skuClassList" :key="index" :label="item" :value="index"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="封面图" prop="fileList" :label-width="formLabelWidth">
-            <el-upload action list-type="picture-card" accept="image/*" :limit="1" 
-              :auto-upload="false" :on-change="handleImgChange_image" 
-              :on-preview="handlePictureCardPreview" 
-              :on-remove="handleRemove_goods_image" 
-              :file-list="QformForNotive.fileList">
-              <i class="el-icon-plus"></i>
-            </el-upload>
-          </el-form-item>
+
+          <custom-img :obj='img'></custom-img>
+
           <p class="hbs-margin-left140">图片建议尺寸：宽750*高750;限传一张;</p>
           <el-form-item label="活动名称" :label-width="formLabelWidth" prop="rule_name">
             <el-input v-model.number="QformForNotive.rule_name" auto-complete="off"></el-input>
@@ -36,7 +30,7 @@
           <el-form-item label="活动时间" :label-width="formLabelWidth" prop="dateRange">
             <el-date-picker style="width:400px" v-model="QformForNotive.dateRange" 
               type="datetimerange" range-separator="至" start-placeholder="开始日期" 
-              end-placeholder="结束日期" value-format="yyyy-MM-dd HH:mm:ss">
+              end-placeholder="结束日期" :picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
           </el-form-item>
           <el-form-item label="现价" :label-width="formLabelWidth">
@@ -69,6 +63,7 @@
             <el-form-item>
               <el-button type="primary" icon="el-icon-search" @click="search2">查询</el-button>
             </el-form-item>
+            <multiSelect :obj='multiSelect' @load='loadClass2' @search="searchByclass"></multiSelect>
           </el-form>
         </el-header>
         <el-container>
@@ -102,6 +97,12 @@
           <el-form-item>
             <el-button type="primary" icon="el-icon-edit-outline" @click="addItem">添加秒杀商品</el-button>
           </el-form-item>
+        <el-form-item>
+              <el-input style="width: 340px;" placeholder="请输入商品名称" v-model="listQuery.search"></el-input>
+          </el-form-item>
+          <el-form-item>
+              <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
+          </el-form-item>
         </el-form>
       </el-header>
       <el-main>
@@ -129,8 +130,8 @@
             <template slot-scope="scope">
               <el-button size="mini" v-if="scope.row.rule_commend == 0" type="success" icon="el-icon-sort-up" @click="changeRecommend(scope.$index, scope.row,'1')">首页推荐</el-button>
               <el-button size="mini" v-if="scope.row.rule_commend == 1" type="warning" icon="el-icon-sort-down" @click="changeRecommend(scope.$index, scope.row,'0')">取消推荐</el-button>
-              <el-button size="mini" v-if="scope.row.rule_status==2?true:false" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'1')">上架</el-button>
-              <el-button size="mini" v-if="scope.row.rule_status==1?true:false" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'2')">下架</el-button>
+              <!-- <el-button size="mini" v-if="scope.row.rule_status==2?true:false" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'1')">上架</el-button>
+              <el-button size="mini" v-if="scope.row.rule_status==1?true:false" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'2')">下架</el-button> -->
               <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteItem(scope.$index, scope.row)">删除秒杀</el-button>
             </template>
           </el-table-column>
@@ -154,6 +155,10 @@ import {
 import Moment from "@/utils/moment";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
+import customImg from '@/components/img';
+import commonReq from '@/api/common' ;
+import multiSelect from '@/components/multiSelect';
+import classAPI from '@/api/classify';
 const QformForNotive = {
   dateRange: [],
   limit_buy:1,
@@ -162,13 +167,24 @@ const QformForNotive = {
 };
 export default {
   mixins: [config],
+  components:{
+    customImg,
+    multiSelect
+  },
   data() {
     return {
+      multiSelect:{ title: '分类', source: [], value: [], alert: null, search:true},
+      img: { title: '封面图', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
       //本页参数
       choiceGoodsId: 0, //规格对应goods_id
       alertValue: "", //规格select的值
       goodsDetail: {}, //商品详情
       //弹框参数
+      pickerOptions:{
+        disabledDate(time) {
+          return time.getTime() < Date.now()-86400000;
+        }
+      },
       addNewShow: false,
       QisAddItem: false,
       QwaitAddNotice: false,
@@ -226,6 +242,14 @@ export default {
   async created() {
     //获取自定义商品分类
     this.getList();
+    this.getUploadToken();
+    let classRes = await classAPI.getClassList({ parent_id: 0 });
+    classRes.data.forEach(v => {
+        v.label = v.storegc_name;
+        v.value = v.storegc_id;
+        v.children = [];
+      });
+    this.multiSelect.source = classRes.data;
   },
   filters: {
     filterUrl: function(value) {
@@ -293,6 +317,7 @@ export default {
       this.listLoading2 = true;
       let sendData = Object.assign({}, this.listQuery2);
       sendData.goods_state = 1;
+      sendData.is_vip=0;
       sendData.is_pintuan = 0;
       getGoodsList_api(sendData)
         .then(response => {
@@ -382,6 +407,9 @@ export default {
       if (!res) return;
       if(!this.choiceGoodsId) return;
       this.QwaitAddNotice = true;
+      let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
+      if(!img[0]) return console.error('img value :', img);
+
       let send = {
         goods_id:this.choiceGoodsId,
         goods_price:this.QformForNotive.goods_price,
@@ -389,7 +417,7 @@ export default {
         end_time:this.QformForNotive.dateRange[1],
         limit_num:this.QformForNotive.limit_num,
         limit_buy:this.QformForNotive.limit_buy,
-        images:[this.QformForNotive.fileList[0].url],
+        images:img,
         goods_freight:this.QformForNotive.goods_freight,
         rule_name:this.QformForNotive.rule_name
       }
@@ -499,6 +527,10 @@ export default {
         });
     },
     //search=============================================
+    search() {
+      this.listQuery.page = 1;
+      this.getList();
+    },
     search2() {
       this.listQuery2.page = 1;
       this.getList2();
@@ -531,7 +563,37 @@ export default {
     },
     handleRemove_goods_image(file, fileList) {
       this.QformForNotive.fileList = fileList;
-    }
+    },
+    async getUploadToken(){
+      let res = await commonReq.getUploadToken();
+      if(res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+      this.img.body.token= res.data;
+      this.img.body.config= "{ useCdnDomain: true }";
+    },
+    async loadClass2(val){
+      let param,
+          selClass,
+          source = this.multiSelect.source;
+
+      selClass = source.find(v => v.value == val[0]);
+      if(val[1]) selClass = selClass.children.find(v => v.value == val[1]);
+
+      let res = await classAPI.getClassList({ parent_id: val[1] || val[0] });
+
+      res.data.forEach(v => {
+        v.label = v.storegc_name;
+        v.value = v.storegc_id;
+        if(!val[1]) v.children = [];
+      });
+
+      selClass.children = res.data;
+    },
+    searchByclass(param){
+            this.listQuery2.page =1;
+
+      this.listQuery2.gc_id = param[2];
+      this.getList2();
+    },
   }
 };
 </script>

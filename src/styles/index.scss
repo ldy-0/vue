@@ -200,3 +200,8 @@ input::-webkit-inner-spin-button {
     appearance: none; 
     margin: 0; 
 }
+
+.el-button + .el-button {
+  margin-left: 0px;
+  margin-top: 5px;
+}

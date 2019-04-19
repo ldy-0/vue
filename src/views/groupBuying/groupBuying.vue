@@ -9,7 +9,7 @@
 <template>
   <div>
     <!-- 添加-->
-    <el-dialog title="添加团购商品" :visible.sync="addNewShow" width="50%">
+    <el-dialog title="添加团购商品" :visible.sync="addNewShow" width="70%">
       <el-dialog title="新增团购" :visible.sync="QaddNewShow" width="50%" append-to-body>
         <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules">
           <el-form-item label="规格" :label-width="formLabelWidth" v-if="goodsDetail" prop="choiceGoodsId">
@@ -26,12 +26,12 @@
           <el-form-item label="团购时限" :label-width="formLabelWidth" prop="thours">
             <el-input v-model.number="QformForNotive.thours" auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="活动时间" :label-width="formLabelWidth">
+          <el-form-item label="活动时间" :label-width="formLabelWidth" prop="dateRange">
             <el-radio-group v-model="radio" @change="choiceRadio">
               <el-radio :label="0">不限</el-radio>
               <el-radio :label="1">日期选择</el-radio>
             </el-radio-group>
-            <el-date-picker v-if="radio==1" style="width:400px" v-model="QformForNotive.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+            <el-date-picker v-if="radio==1" :picker-options="pickerOptions" style="width:400px" v-model="QformForNotive.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -40,26 +40,17 @@
         </span>
       </el-dialog>
       <el-container class="notice">
-        <!-- <el-header class="header">
+        <el-header class="header">
           <el-form :inline="true" :model="formInline" class="form">
             <el-form-item>
-              <el-input style="width: 340px;" placeholder="请输入商品名称、编码" v-model="listQuery2.search"></el-input>
+              <el-input style="width: 340px;" placeholder="请输入商品名称" v-model="listQuery2.search"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" icon="el-icon-search" @click="search2">查询</el-button>
             </el-form-item>
-            <el-form-item label="分类" :label-width="formLabelWidth">
-              <el-select v-model="listQuery2.storegc_id" placeholder="请选择">
-                <el-option
-                  v-for="item in industryList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-form-item>
+            <multiSelect :obj='multiSelect' @load='loadClass2' @search="searchByclass"></multiSelect>
           </el-form>
-        </el-header>-->
+        </el-header>
         <el-container>
           <el-main>
             <el-table :data="tableData2" stripe v-loading="listLoading" element-loading-text="给我一点时间" style="width: 100%">
@@ -134,7 +125,7 @@
             <el-radio :label="1">日期选择</el-radio>
           </el-radio-group>
           <div>
-            <el-date-picker v-if="radio==1" style="width:400px" v-model="QformForNotive.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+            <el-date-picker v-if="radio==1" :picker-options="pickerOptions" style="width:400px" v-model="QformForNotive.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
           </div>
         </el-form-item>
 
@@ -149,6 +140,12 @@
         <el-form :inline="true" :model="formInline" class="form">
           <el-form-item>
             <el-button type="primary" icon="el-icon-edit-outline" @click="addItem">添加团购商品</el-button>
+          </el-form-item>
+          <el-form-item>
+              <el-input style="width: 340px;" placeholder="请输入商品名称" v-model="listQuery.search"></el-input>
+          </el-form-item>
+          <el-form-item>
+              <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
           </el-form-item>
         </el-form>
       </el-header>
@@ -175,9 +172,10 @@
           </el-table-column>
           <el-table-column label="操作" min-width="300px">
             <template slot-scope="scope">
-              <el-button size="mini" type="success" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+              <!-- <el-button size="mini" type="success" @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
               <el-button size="mini" type="danger" @click="deleteItem(scope.$index, scope.row)">取消团购</el-button>
-            </template>
+              <el-button size="mini" v-if="scope.row.rule_commend == 0" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'1')">首页推荐</el-button>
+              <el-button size="mini" v-if="scope.row.rule_commend == 1" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'0')">取消推荐</el-button>            </template>
           </el-table-column>
         </el-table>
       </el-main>
@@ -196,11 +194,14 @@ import {
   getGoods_api,
   getgroupGoods_api,
   getIndustryList_api,
-  putgroupbuy_api
+  putgroupbuy_api,
+  changegroupGoods_api
 } from "@/api/seller";
 import Moment from "@/utils/moment";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
+import multiSelect from '@/components/multiSelect';
+import classAPI from '@/api/classify';
 const QformForNotive = {
   dateRange: []
 };
@@ -222,14 +223,24 @@ const formForNotiveChild1 = {
 const formForNotiveChild2List = [{}];
 export default {
   mixins: [config],
+  components:{
+    multiSelect
+  },
   data() {
     return {
+      multiSelect:{ title: '分类', source: [], value: [], alert: null, search:true},
       QrulesChild: {},
       QisAddItem: false,
       QwaitAddNotice: false,
       QaddNewShow: false,
       QformForNotive: Object.assign({}, QformForNotive),
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now() - 86400000;
+        }
+      },
       Qrules: {
+        dateRange: [{ required: true, message: "选择时间", trigger: "change" }],
         tprice: [
           {
             required: true,
@@ -244,7 +255,6 @@ export default {
             required: true,
             message: "请输入团购人数",
             trigger: "blur",
-            min: 2,
             type: "integer"
           }
         ],
@@ -366,7 +376,7 @@ export default {
       goodsDetail: null,
       alertValue: "",
       choiceGoodsId: null,
-      radio: 0,
+      radio: 1,
       dialogFormVisible: false,
       formForNotiveChild1: Object.assign({}, formForNotiveChild1),
       formForNotiveChild2List: Object.assign([], formForNotiveChild2List),
@@ -529,6 +539,13 @@ export default {
     //获取自定义商品分类
     this.getGoodsClass();
     this.getList();
+    let classRes = await classAPI.getClassList({ parent_id: 0 });
+    classRes.data.forEach(v => {
+        v.label = v.storegc_name;
+        v.value = v.storegc_id;
+        v.children = [];
+      });
+      this.multiSelect.source = classRes.data;
   },
   filters: {
     //这里进行加入url到Ui框架
@@ -635,6 +652,33 @@ export default {
         });
     },
 
+    //上下架==============================================
+    changeStatus(index, row, state) {
+      let send = {
+        rule_id: [row.id],
+        rule_commend: Number(state)
+      };
+      changegroupGoods_api(send).then(res => {
+        if (res.status == 0) {
+          this.$notify({
+            title: "操作成功",
+            type: "success",
+            message: "改变状态成功"
+          });
+          this.getList();
+        } else {
+          this.$notify({
+            title: "操作失败",
+            type: "error",
+            message: res.error
+          });
+        }
+      });
+    },
+    search(){
+      this.listQuery.page =1;
+      this.getList();
+    },
     search2() {
       this.listQuery2.page = 1;
       this.getList2();
@@ -739,6 +783,7 @@ export default {
       this.listLoading2 = true;
       let sendData = Object.assign({}, this.listQuery2);
       sendData.goods_state = 1;
+      sendData.is_vip=0;
       sendData.is_pintuan = 0;
       getGoodsList_api(sendData)
         .then(response => {
@@ -793,6 +838,7 @@ export default {
       //点击选择商品
       let id = row.id;
       this.alertValue = "";
+      this.radio = 1;
       getGoods_api(id).then(res => {
         if (res.data.spec_value) {
           //多规格选择options
@@ -905,6 +951,7 @@ export default {
                 goodsprice: aData.goods.goods_price,
                 gurouprice: aData.goods_price,
                 group_num: aData.group_num,
+                rule_commend: aData.rule_commend,
                 limit_time: aData.limit_time,
                 active_time:
                   aData.end_time == "2038-01-19 11:14:07"
@@ -941,7 +988,15 @@ export default {
     },
     choiceRadio(e) {
       this.radio = e;
+      if(e == '0'){
+        let dateStart = Moment(new Date().getTime()).format(
+          "yyyy-MM-dd HH:mm:ss"
+        );
+        let dateEnd = "2038-01-19 11:14:07";
+          this.QformForNotive.dateRange = [dateStart,dateEnd];
+        }
       console.log(e);
+      console.log(this.QformForNotive.dataRange);
     },
     //获取商品分类总信息
     getGoodsClass() {
@@ -1146,7 +1201,31 @@ export default {
         .catch(e => {
           console.error("addGoods_api 接口错误");
         });
-    }
+    },
+    async loadClass2(val){
+      let param,
+          selClass,
+          source = this.multiSelect.source;
+
+      selClass = source.find(v => v.value == val[0]);
+      if(val[1]) selClass = selClass.children.find(v => v.value == val[1]);
+
+      let res = await classAPI.getClassList({ parent_id: val[1] || val[0] });
+
+      res.data.forEach(v => {
+        v.label = v.storegc_name;
+        v.value = v.storegc_id;
+        if(!val[1]) v.children = [];
+      });
+
+      selClass.children = res.data;
+    },
+    searchByclass(param){
+            this.listQuery2.page =1;
+
+      this.listQuery2.gc_id = param[2];
+      this.getList2();
+    },
   }
 };
 </script>

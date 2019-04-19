@@ -24,7 +24,7 @@
           <img
             @click="handlePictureCardPreview(scope.row)"
             :src="scope.row.banner_pic"
-            style="width:100px"
+            style="width:100px;height:100px;"
           >
         </template>
       </el-table-column>
@@ -42,21 +42,7 @@
     <!--内容弹框开始 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form :rules="rules" ref="form" :model="form" label-width="120px">
-        <el-form-item label="图片" prop="banner_pic">
-          <el-upload
-            action
-            list-type="picture-card"
-            accept="image/*"
-            :limit="1"
-            :auto-upload="false"
-            :file-list="form.banner_pic | filterUrl"
-            :on-change="handleImgChange"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove"
-          >
-            <i class="el-icon-plus"></i>
-          </el-upload>
-        </el-form-item>
+          <custom-img :obj="img"></custom-img>
         <el-form-item label="排序序号" prop="banner_order">
           <el-input v-model="form.banner_order" placeholder="请输入排序序号0为最前，以此类推"></el-input>
         </el-form-item>
@@ -70,21 +56,9 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="跳转图片" prop="banner_url" v-if="form.banner_type == 1 ">
-          <el-upload
-            action
-            list-type="picture-card"
-            accept="image/*"
-            :limit="1"
-            :auto-upload="false"
-            :file-list="form.banner_url | filterUrl"
-            :on-change="handleImgChangeTwo"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemoveTwo"
-          >
-            <i class="el-icon-plus"></i>
-          </el-upload>
-        </el-form-item>
+
+        <custom-img :obj='detailImg' v-if="form.banner_type == 1 "></custom-img>
+
         <el-form-item label="跳转商品" prop="banner_url" v-if="form.banner_type == 2 ">
           <div>跳转商品ID：{{form.banner_url}}</div>
           <el-button type="primary" @click="chooseGoods">选择商品</el-button>
@@ -148,6 +122,8 @@ import {
   getGoodsList_api
 } from "@/api/seller";
 import uploadFn from "@/utils/tencent_cos";
+import commonReq from '@/api/common' 
+import customImg from '@/components/img'
 
 //初始化常量
 const form = {
@@ -158,9 +134,13 @@ const form = {
   banner_order: ""
 };
 export default {
+  components:{
+    customImg
+  },
   created() {
     //获取首页列表
     this.getBannerList();
+    this.getUploadToken();
   },
   filters: {
     //这里进行加入url到Ui框架
@@ -188,6 +168,8 @@ export default {
   },
   data() {
     return {
+      img: { title: '图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
+      detailImg: { title: '跳转图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
       //案例列表
       tableData: [],
       //判断弹框是新增还是编辑
@@ -257,8 +239,9 @@ export default {
     //新增
     CreateItem() {
       this.category = "";
-      (this.form = Object.assign({}, form)), (this.form.banner_pic = []);
-      this.form.banner_url = "";
+      this.form = Object.assign({}, form);
+      this.img.value = [];
+      this.detailImg.value = [];
       this.dialogFormVisible = true; //打开内容弹框
       this.dialogStatus = "create";
     },
@@ -325,9 +308,11 @@ export default {
       this.form = Object.assign({}, row); // copy obj
       this.dialogStatus = "edit";
       this.dialogFormVisible = true;
+      this.img.value = [{url:row.banner_pic}] ||[];
       this.categoryStateOptions.forEach(item => {
         if (item.value == row.banner_type) {
           this.category = item.label;
+          this.detailImg.value = [{url:row.banner_url}] ||[];
         }
       });
       this.$nextTick(() => {
@@ -373,12 +358,16 @@ export default {
     addBannerList() {
       let sendData = {};
       sendData.banner_type = this.form.banner_type;
-      sendData.banner_pic = this.form.banner_pic[0].url;
+      //
+      let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
+      if(!img[0]) return console.error('img value :', img);
+      sendData.banner_pic = img[0];
+
       sendData.banner_order = this.form.banner_order;
       if (this.form.banner_type == 1) {
-        sendData.banner_url = this.form.banner_url[0]
-          ? this.form.banner_url[0].url
-          : null;
+        let detailImg = this.detailImg.value.map(v => { return v.raw ? `${this.detailImg.cdnUrl}/${v.response.key}` : v.url });
+        if(!detailImg[0]) return console.error('img value :', detailImg);
+        sendData.banner_url = detailImg[0];
       } else {
         sendData.banner_url = this.form.banner_url;
       }
@@ -403,27 +392,18 @@ export default {
       console.log(this.form);
       //return
       let sendData = {};
-      if (this.form.banner_pic[0].url) {
-        sendData.banner_pic =
-          this.form.banner_pic.length == 0 ? "" : this.form.banner_pic[0].url;
-        if (this.form.banner_url) {
-          sendData.banner_url = this.form.banner_url;
-        } else {
-          sendData.banner_url = "";
-        }
+      let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
+      if(!img[0]) return console.error('img value :', img);
+      sendData.banner_pic = img[0];
+      
+      if (this.form.banner_type == 1) {
+        let detailImg = this.detailImg.value.map(v => { return v.raw ? `${this.detailImg.cdnUrl}/${v.response.key}` : v.url });
+        if(!detailImg[0]) return console.error('img value :', detailImg);
+        sendData.banner_url = detailImg[0];
       } else {
-        if (
-          Array.isArray(this.form.banner_url) &&
-          this.form.banner_url.length != 0
-        ) {
-          sendData.banner_url = this.form.banner_url[0].url;
-        } else {
-          sendData.banner_url =
-            this.form.banner_url.length == 0 ? "" : this.form.banner_url;
-        }
-        sendData.banner_pic =
-          this.form.banner_pic.length == 0 ? "" : this.form.banner_pic;
+        sendData.banner_url = this.form.banner_url;
       }
+
       sendData.banner_type = this.form.banner_type;
       sendData.banner_id = this.form.banner_id;
       sendData.banner_order = Number(this.form.banner_order);
@@ -484,7 +464,7 @@ export default {
     //获取所有商品列表
     getGoodsList() {
       let getData = Object.assign({}, this.listQuery_Goods);
-      getData.goods_commend = 0;
+      getData.goods_state =1;
       getGoodsList_api(getData).then(res => {
         if (res.status == 0) {
           this.goodList = res.data;
@@ -502,7 +482,15 @@ export default {
       console.log(val);
       this.listQuery_Goods.page = val;
       this.getGoodsList();
-    }
+    },
+    async getUploadToken(){
+      let res = await commonReq.getUploadToken();
+
+      if(res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+
+      this.detailImg.body.token = this.img.body.token = res.data;
+      this.detailImg.body.config = this.img.body.config = "{ useCdnDomain: true }";
+    },
   }
 };
 </script>
