@@ -160,7 +160,6 @@ export default {
       this.$emit('change', this.query);
     },
     init(){
-      console.log('table init ...')
       this.query.page = 1;
       this.query.keyWord = '';
     }

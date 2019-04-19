@@ -127,7 +127,7 @@ import commonReq from '@/api/common'
 import customTable from '@/components/customTable';
 import customHead from '@/components/customHead';
 import customInput from '@/components/input'
-import customImg from '@/components/img'
+import customImg from '@/components/customImg'
 // import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
 
@@ -153,7 +153,7 @@ export default {
         status: 0, // 1:添加分类，2：编辑分类， 3：二级分类列表
       },
       name: { title: '名称', value: '', alert: null, },
-      img: { title: '主图', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
+      img: { title: '主图', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       stopSubmit: false,
 
       headConfig: {

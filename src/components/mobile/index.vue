@@ -1,6 +1,6 @@
 <template>
   <el-form-item :label="obj.title">
-        <el-input v-model="obj.value" auto-complete="off" @input='getMobile'></el-input>
+        <el-input type="number" v-model="obj.value" auto-complete="off" @input='getMobile'></el-input>
         <el-alert :title='obj.alert' :closable='false' type='error' show-icon v-if='obj.alert'></el-alert>
   </el-form-item> 
 </template>

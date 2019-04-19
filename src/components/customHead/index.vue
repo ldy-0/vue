@@ -109,7 +109,6 @@ export default {
     async exportFile() {
       let loading = this.$loading({ fullscreen: true })
 
-      console.log('emit export file');
       this.$emit('export', loading);
 
         // import('@/vendor/Export2Excel').then(excel => {
@@ -117,7 +116,6 @@ export default {
         //   const filterVal = this.classList.map(v => v.value) 
 
         //   let data = this.tableData.map(v => filterVal.map(val => v[val] || '' ) )
-        //   console.log(tHeader, filterVal, data)
 
         //   excel.export_json_to_excel({
         //     header: tHeader,

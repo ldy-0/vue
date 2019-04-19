@@ -64,7 +64,6 @@ export function getROrderList_api(data) {
   });
 }
 export function getROrder_api(data) {
-  //console.log(data)
   return request({
     url: "/api/v2/seller/order/" + data,
     method: "get"
@@ -171,7 +170,6 @@ export function addBanner_api(data) {
 }
 
 export function editBanner_api(data) {
-  console.log(data);
   return request({
     url: "/api/v2/seller/banner/" + data.banner_id,
     method: "put",
@@ -204,7 +202,6 @@ export function getWorker_api(data) {
 }
 
 export function deleteWorker_api(data) {
-  console.log(data);
   return request({
     url: "/api/v2/seller/worker/" + data.workerId,
     method: "DELETE",
@@ -292,7 +289,6 @@ export function addAuth_api(data) {
   });
 }
 export function editAuth_api(data) {
-  console.log("data===>", data);
   return request({
     url: "/api/v2/seller/seller/" + data.seller_id,
     method: "put",

@@ -75,7 +75,7 @@ import customRadio from '@/components/radio'
 import number from '@/components/number'
 import integer from '@/components/integer'
 import dateTimeRange from '@/components/dateTimeRange'
-import customImg from '@/components/img'
+import customImg from '@/components/customImg'
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';

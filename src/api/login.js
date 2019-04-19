@@ -1,7 +1,6 @@
 import request from '@/utils/request'
 
 export function loginByUsername(data) {
-  console.log('----------login api ---------')
   return request({
     url: '/api/v2/seller/login',
     method: 'post',

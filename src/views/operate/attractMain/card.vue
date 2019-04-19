@@ -58,11 +58,12 @@ export default {
 
       this.canSubmit = false;
       this.img.alert = this.img.value.length ? null : '请选择图片作为主图';
+
       let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
       if(!img[0]) return console.error('img value :', img);
 
       param = {
-        business_id:0,
+        business_id:1,
         value:{
           img:img,
           desc:this.desc.value
@@ -81,7 +82,8 @@ export default {
 
     // request
     async getItem(){
-      let res = await api.getBusiness(0);
+      this.img.value = [];
+      let res = await api.getBusiness(1);
       this.desc.value = res.data.desc;
       res.data.img.forEach(v=>{
         this.img.value.push({

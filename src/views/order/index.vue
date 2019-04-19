@@ -71,7 +71,7 @@ import customSelect from '@/components/select'
 import number from '@/components/number'
 import integer from '@/components/integer'
 import dateTimeRange from '@/components/dateTimeRange'
-import customImg from '@/components/img'
+import customImg from '@/components/customImg'
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
@@ -182,7 +182,7 @@ export default {
 
       this.dialogConfig.status = typeof status === 'number' ? status : 2;
 
-      this.img.value = status.image;
+      this.img.value = status.img[0].url;
       this.keys.forEach(v => { formData[v].value = (pricePattern.test(v) ? '￥' : '') + status[v]; });
       this.content.value = status.content || '';
       // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
@@ -213,7 +213,7 @@ export default {
       arr.forEach((v, i) => item[`${v}Str`] = strList[i]);
 
       // 标记发货按钮是否显示
-      item.showSend = item.order_state_id == 30;
+      item.showSend = item.order_state_id == 20;
       // 标记查看评论按钮是否显示
       item.showLookComment = item.order_state_id == 50;
     },
@@ -238,7 +238,7 @@ export default {
       this.isLoading = true
       let res = await api.getOrderList_api(this.listQuery, this);
       res.data.forEach(this.format);
-      this.list = res.data.data;
+      this.list = res.data;
       this.total = res.pagination.total;
       this.isLoading = false
     },

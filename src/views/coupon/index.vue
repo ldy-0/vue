@@ -49,9 +49,9 @@ import customInput from '@/components/input'
 import number from '@/components/number'
 import integer from '@/components/integer'
 import dateTimeRange from '@/components/dateTimeRange'
-import customImg from '@/components/img'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
+import api from '@/api/coupon';
 
 export default {
   components: {
@@ -61,7 +61,6 @@ export default {
     number,
     integer,
     dateTimeRange,
-    customImg,
   },
 
   computed: {
@@ -77,7 +76,7 @@ export default {
       name: { title: '优惠券名称', value: '', alert: null, },
       price: { title: '面值', value: '', alert: null, },
       amount: { title: '数量', value: '', alert: null, },
-      time: { title: '有效期', value: '', alert: null, },
+      time: { title: '有效期', value: '', alert: null, isNow:true},
       limit: { title: '使用条件', value: '', preValue: '满', postValue: '元可用', alert: null, },
       // img: { title: '主图', value: [], limit: 1, alert: null },
       stopSubmit: false,
@@ -90,18 +89,17 @@ export default {
         showOperate: true,
         showDelete: true,
         classList: [
-          { key: '优惠券名称', value: 'name' },
-          { key: '面值', value: 'price' },
-          { key: '数量', value: 'total' },
-          { key: '有效期', value: 'time' },
-          { key: '使用条件', value: 'limit' },
-          { key: '剩余', value: 'amount' },
+          { key: '优惠券名称', value: 'vouchertemplate_title' },
+          { key: '面值', value: 'vouchertemplate_price' },
+          { key: '数量', value: 'vouchertemplate_total' },
+          { key: '有效期', value: 'vouchertemplate_aging' },
+          { key: '使用条件', value: 'vouchertemplate_limit' },
+          { key: '剩余', value: 'vouchertemplate_total' },
         ],
       },
       list: [],
       total: 0,
       query: {
-        
         page: 1,
         limit: 10,
       },
@@ -110,24 +108,29 @@ export default {
     }
   },
   methods: {
-    // search(param){
-    //   console.error('search :', param); 
-    // },
+    //列表============================================
+    async getList() { 
+      this.isLoading = true;
+      let res = await api.getCoupon(this.query, this);
+      res.data.forEach(this.format);
+
+      this.list = res.data;
+      this.total = res.pagination.total;
+      this.isLoading = false;
+    },
+    format(item){
+      item.rest= Number(item.vouchertemplate_total)-Number(item.vouchertemplate_giveout);
+    },
+    //操作============================================
     updateForm(status){
       this.dialogConfig.status = typeof status === 'number' ? status : 2;
-
-      // FIXME: 
-      this.name.value = status.name || ''; 
-      this.price.value = status.price || '';
-      this.amount.value = status.amount || '';
-      this.time.value = status.time || '';
-      this.limit.value = status.limit || '';
-      // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
-    },
-    change(param){
-      console.error('param :', param);
-      this.query.limit = param.limit;
-      this.query.page = param.page;
+      if(status == 1){
+        this.name.value = '';
+        this.price.value ="";
+        this.amount.value ="";
+        this.limit.value ="";
+        this.time.value ='';
+      }
     },
     closeDialog(){
       let config = this.dialogConfig;
@@ -135,61 +138,50 @@ export default {
       config.status = 0;
     },
     async submit(){
-      let paramArr = ['name', 'price', 'amount', 'time', 'limit'],
+      let paramArr = ['name','price','amount','time','limit'],
           query = this.query,
           param;
-
-      // this.img.alert = this.img.value.length ? null : '请选择图片作为主图';
-
       if(paramArr.some(v => { return this[v].value ? false : this[v].alert = `请输入${this[v].title}`; })) return;
-      console.error(this.name.value, this.time);
-      
       this.stopSubmit = true;
 
-      // let uploadArr = this.img.value.filter(v => v.raw).map(v => v.raw);
-      // let imgRes = await uploadFn(uploadArr);
-      // console.error('imgRes :', imgRes);
-
       param = {
-        name: this.name.value,
-        price: this.price.value,
-        amount: this.amount.value,
-        time: this.time.value,
-        limit: this.limit.value,
+        vouchertemplate_title:this.name.value,
+        vouchertemplate_price:this.price.value,
+        vouchertemplate_total:this.amount.value,
+        vouchertemplate_limit:this.limit.value,
+        vouchertemplate_startdate:this.time.value[0],
+        vouchertemplate_enddate:this.time.value[1],
+        vouchertemplate_gettype:3
       };
-
-      // return console.error(img, o, 'about param : ', param);
-      this.save(param);
-    },
-    // 
-    async save(param){
-      console.error('save: ', param); 
-
+      let res = await api.addCoupon(param,this);
+      if(res.status ==0){
+        this.$message({message:'新增成功',type:'success'});
+      }else{
+        this.$message({message:'新增失败',type:'error'});
+      }
+      this.dialogConfig.status = 0;
       this.stopSubmit = false;
-    },
-    async getList() { //获取列表
-      this.isLoading = true
-
-      console.error('param', this.query)
-      // let res = await api.getClassList(this.listQuery, this);
-
-      this.list = [
-        { name: '士大夫', price: '13211122233', total: 1, amount: 1343, time: 1324, limit: 'asdfdsf' },
-        { name: '士大夫', price: '13211122233', total: 1, amount: 1343, time: 1324, limit: 'asdfdsf' },
-        { name: '士大夫', price: '13211122233', total: 1, amount: 1343, time: 1324, limit: 'asdfdsf' },
-        { name: '士大夫', price: '13211122233', total: 1, amount: 1343, time: 1324, limit: 'asdfdsf' },
-        { name: '士大夫', price: '13211122233', total: 1, amount: 1343, time: 1324, limit: 'asdfdsf' },
-      ];
-      res.pagination.total// res.pagination.total;
-      this.isLoading = false
-    },
-    async deleteItem(id){
-      console.error('delete Item', id);
-      // let res = await api.deleteClass(id, null, this);
-
       this.getList();
     },
-
+    async deleteItem(item){
+      let res = await api.deleteCoupon(item.vouchertemplate_id, null, this);
+      if(res.status ==0){
+        this.$message({message:'操作成功',type:'success'});
+      }else{
+        this.$message({message:'操作失败',type:'error'});
+      }
+      this.getList();
+    },
+    //分页 查询==========================================
+    change(param){
+      this.query.limit = param.limit;
+      this.query.page = param.page;
+      this.getList();
+    },
+    search(param){
+      this.query.search = param.search;
+      this.getList();
+    },
   },
 
   created(){

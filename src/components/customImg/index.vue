@@ -8,8 +8,9 @@
               :on-remove='changeImgs'
               :on-change="changeImgs" 
               :on-success='success'
+              multiple
               v-if='obj.url'
-              :class="{disabled:!showCard}">
+              :class="{disabled:showCard}">
               <i class="el-icon-plus"></i>
         </el-upload>
         <el-upload action='' list-type="picture-card" :auto-upload="false"
@@ -17,7 +18,7 @@
               :file-list='obj.value' 
               :on-remove='changeImgs'
               :on-change="changeImgs"
-              :class="{disabled:!showCard}"
+              :class="{disabled:showCard}"
                v-else>
 
               <i class="el-icon-plus"></i>
@@ -37,31 +38,24 @@ export default {
       type: Object
     }
   },
-
+  computed:{
+      showCard(){
+          return  this.obj.value.length>=Number(this.obj.limit);
+      }
+  },
   watch: {
     obj(v1, v2){ console.error('watch'); }
   },
 
   data() {
     return {
-      showCard:true,
       dialogTableVisible: false
     }
-  },
-
-  computed: {
-    
   },
 
   methods: {
     changeImgs(e, list){
       this.obj.value = list;
-      //if imgs's length beyond limit hidden the picture-card
-      if(this.obj.value.length>=Number(this.obj.limit)){
-        this.showCard = false;
-      }else{
-        this.showCard = true;
-      }
       this.obj.alert = this.obj.value.length ? null : '请选择图片作为主图';
     },
     success(res){

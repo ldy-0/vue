@@ -155,7 +155,7 @@ import {
 import Moment from "@/utils/moment";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
-import customImg from '@/components/img';
+import customImg from '@/components/customImg';
 import commonReq from '@/api/common' ;
 import multiSelect from '@/components/multiSelect';
 import classAPI from '@/api/classify';
@@ -174,7 +174,7 @@ export default {
   data() {
     return {
       multiSelect:{ title: '分类', source: [], value: [], alert: null, search:true},
-      img: { title: '封面图', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
+      img: { title: '封面图', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       //本页参数
       choiceGoodsId: 0, //规格对应goods_id
       alertValue: "", //规格select的值

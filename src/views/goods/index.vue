@@ -63,23 +63,22 @@
   </div>
 </template>
 <script>
-
-import customTable from '@/components/customTable';
-import customHead from '@/components/customHead';
-import customInput from '@/components/input'
-import customSelect from '@/components/select'
-import multiSelect from '@/components/multiSelect'
-import customRadio from '@/components/radio'
-import number from '@/components/number'
-import integer from '@/components/integer'
-import dateTimeRange from '@/components/dateTimeRange'
-import customImg from '@/components/img'
-import editor from '@/components/Tinymce'
+import customTable from "@/components/customTable";
+import customHead from "@/components/customHead";
+import customInput from "@/components/input";
+import customSelect from "@/components/select";
+import multiSelect from "@/components/multiSelect";
+import customRadio from "@/components/radio";
+import number from "@/components/number";
+import integer from "@/components/integer";
+import dateTimeRange from "@/components/dateTimeRange";
+import customImg from "@/components/customImg";
+import editor from "@/components/Tinymce";
 import multiSku from "@/components/multiSku";
 import api from "@/api/goods";
-import commonReq from '@/api/common' 
-import classAPI from '@/api/classify' 
-import { voidTypeAnnotation } from 'babel-types';
+import commonReq from "@/api/common";
+import classAPI from "@/api/classify";
+import { voidTypeAnnotation } from "babel-types";
 
 export default {
   components: {
@@ -94,51 +93,63 @@ export default {
     dateTimeRange,
     customImg,
     editor,
-    multiSku,
+    multiSku
   },
 
   computed: {
-    showDialog(){ return Boolean(this.dialogConfig.status); },
+    showDialog() {
+      return Boolean(this.dialogConfig.status);
+    }
   },
 
   data() {
     return {
       dialogConfig: {
-        title: '',
-        status: 0, // 1:添加分类，2：编辑分类， 3：二级分类列表
+        title: "",
+        status: 0 // 1:添加分类，2：编辑分类， 3：二级分类列表
       },
-      img: { title: '商品图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
-      detailImg: { title: '详情图片', value: [], limit: 10, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
-      name: { title: '商品名称', value: '', alert: null, },
-      category: { 
-        title: '类别', 
-        categories: [
-          { id: 0, title: '常规商品' },
-          { id: 1, title: 'VIP商品' },
-        ], 
-        value: '', 
-        alert: null, 
-      },
-      classify: { title: '分类', source: [], value: [], alert: null, },
-      spec: {
-        title: '规格',
-        categories: [
-          { id: 1, title: '单规格' },
-          { id: 2, title: '多规格' },
-        ],
-        value: 1,
+      img: {
+        title: "商品图片",
+        value: [],
+        limit: 1,
         alert: null,
+        url: "https://up-z2.qiniup.com",
+        cdnUrl: "https://cdn.health.healthplatform.xyz",
+        body: {}
       },
-      marketprice: { title: '原价', value: '', alert: null, },
-      price: { title: '售价', value: '', alert: null, },
-      amount: { title: '库存', value: '', alert: null, },
-      freight: { title: '运费', value: '', alert: null,isZero:true },
-      profit: { title: '平台利润', value: '', alert: null, },
-      vip1_commission: { title: 'VIP1佣金', value: '', alert: null, },
-      vip2_commission: { title: 'VIP2佣金', value: '', alert: null, },
-      vip3_commission: { title: 'VIP3佣金', value: '', alert: null, },
-      vip4_commission: { title: 'VIP4佣金', value: '', alert: null, },
-      content: { title: '商品详情', value: '', alert: null, },
+      detailImg: {
+        title: "详情图片",
+        value: [],
+        limit: 10,
+        alert: null,
+        url: "https://up-z2.qiniup.com",
+        cdnUrl: "https://cdn.health.healthplatform.xyz",
+        body: {}
+      },
+      name: { title: "商品名称", value: "", alert: null },
+      category: {
+        title: "类别",
+        categories: [{ id: 0, title: "常规商品" }, { id: 1, title: "VIP商品" }],
+        value: "",
+        alert: null
+      },
+      classify: { title: "分类", source: [], value: [], alert: null },
+      spec: {
+        title: "规格",
+        categories: [{ id: 1, title: "单规格" }, { id: 2, title: "多规格" }],
+        value: 1,
+        alert: null
+      },
+      marketprice: { title: "原价", value: "", alert: null },
+      price: { title: "售价", value: "", alert: null },
+      amount: { title: "库存", value: "", alert: null },
+      freight: { title: "运费", value: "", alert: null, isZero: true },
+      profit: { title: "平台利润", value: "", alert: null },
+      vip1_commission: { title: "VIP1佣金", value: "", alert: null },
+      vip2_commission: { title: "VIP2佣金", value: "", alert: null },
+      vip3_commission: { title: "VIP3佣金", value: "", alert: null },
+      vip4_commission: { title: "VIP4佣金", value: "", alert: null },
+      content: { title: "商品详情", value: "", alert: null },
       skuClassList: [],
       skuList: [],
       classList: [],
@@ -147,76 +158,80 @@ export default {
       stopSubmit: false,
 
       headConfig: {
-        title: '添加商品',
-        placeHolder: '请输入商品名称',
-        showKeywordSearch:'slkfjlksdajf',
-        selectLabelList: ['类别', '状态'],
-        multiSelect:{ title: '分类', source: [], value: [], alert: null, search:true},
+        title: "添加商品",
+        placeHolder: "请输入商品名称",
+        showKeywordSearch: "slkfjlksdajf",
+        selectLabelList: ["类别", "状态"],
+        multiSelect: {
+          title: "分类",
+          source: [],
+          value: [],
+          alert: null,
+          search: true
+        },
         selectList: [
           [
-            { id: null, name: '全部' },
-            { id: 0, name: '常规商品' },
-            { id: 1, name: 'VIP商品' },
+            { id: null, name: "全部" },
+            { id: 0, name: "常规商品" },
+            { id: 1, name: "VIP商品" }
           ],
           [
-            { id: null, name: '全部' },
-            { id: 1, name: '上架' },
-            { id: 0, name: '下架' },
-          ],
-        ] 
+            { id: null, name: "全部" },
+            { id: 1, name: "上架" },
+            { id: 0, name: "下架" }
+          ]
+        ]
       },
 
       tableConfig: {
         showOperate: true,
-        updateTitle: '编辑',
+        updateTitle: "编辑",
         showDelete: true,
-        judge: [ 'goods_state', '下架', '上架'],
+        judge: ["goods_state", "下架", "上架"],
         classList: [
-          { key: '图片', value: 'goods_image', isImg: true, },
-          { key: '商品名称', value: 'goods_name' },
-          { key: '一级分类', value: 'gc_name_1' },
-          { key: '二级分类', value: 'gc_name_2' },
-          { key: '三级分类', value: 'gc_name_3' },
-          { key: '库存', value: 'goods_storage' },
-          { key: '原价', value: 'goods_marketprice' },
-          { key: '售价', value: 'goods_price' },
-          { key: '类别', value: 'is_vipStr' },
-          { key: '状态', value: 'goods_stateStr' },
-        ],
+          { key: "图片", value: "goods_image", isImg: true },
+          { key: "商品名称", value: "goods_name" },
+          { key: "一级分类", value: "gc_name_1" },
+          { key: "二级分类", value: "gc_name_2" },
+          { key: "三级分类", value: "gc_name_3" },
+          { key: "库存", value: "goods_storage" },
+          { key: "原价", value: "goods_marketprice" },
+          { key: "售价", value: "goods_price" },
+          { key: "类别", value: "is_vipStr" },
+          { key: "状态", value: "goods_stateStr" }
+        ]
       },
       list: [],
       total: 0,
       query: {
-        
         page: 1,
-        limit: 10,
+        limit: 10
       },
       isLoading: true,
-      
-      allClass: [],
-    }
+
+      allClass: []
+    };
   },
   methods: {
-    search(param){
+    search(param) {
       this.query.search = param.search;
       this.query.is_vip = param.statusList[0];
       this.query.goods_state = param.statusList[1];
       this.getList();
     },
-    searchByclass(param){
-            this.listQuery2.page =1;
-
+    searchByclass(param) {
+      this.query.page = 1;
       this.query.gc_id = param[2];
       this.getList();
     },
-    async updateForm(status){
+    async updateForm(status) {
       let goods;
 
-      this.dialogConfig.status = typeof status === 'number' ? status : 2;
+      this.dialogConfig.status = typeof status === "number" ? status : 2;
 
-      if(status != 1){
+      if (status != 1) {
         let res = await api.getGoods(status.goods_commonid);
-        if(res.error) return this.$message.error(res.error);
+        if (res.error) return this.$message.error(res.error);
         goods = res.data;
       }
       // get first class list
@@ -228,36 +243,53 @@ export default {
       });
       this.classify.source = classRes.data;
 
-      if(goods){
+      if (goods) {
         await this.loadClass([goods.gc_id_1, 0, 0]);
         await this.loadClass([goods.gc_id_1, goods.gc_id_2, 0]);
       }
 
-      this.img.value = goods?[ { url: goods.goods_image }]:[]; 
-      this.detailImg.value = goods?goods.goodsimagesList.map(v => { return {url: v.goodsimage_url}; }).slice(1): []; 
-      this.name.value = goods?goods.goods_name : '';
-      this.category.value =goods?( 'is_vip' in goods ? goods.is_vip : ''):'';
-      this.classify.value = goods?[goods.gc_id_1, goods.gc_id_2, goods.gc_id_3] : [];
-      this.freight.value = goods?goods.goods_freight : '';
-      this.content.value = goods?goods.goods_body : '';
+      this.img.value = goods ? [{ url: goods.goods_image }] : [];
+      this.detailImg.value = goods
+        ? goods.goodsimagesList
+            .map(v => {
+              return { url: v.goodsimage_url };
+            })
+            .slice(1)
+        : [];
+      this.name.value = goods ? goods.goods_name : "";
+      this.category.value = goods
+        ? "is_vip" in goods ? goods.is_vip : ""
+        : "";
+      this.classify.value = goods
+        ? [goods.gc_id_1, goods.gc_id_2, goods.gc_id_3]
+        : [];
+      this.freight.value = goods ? goods.goods_freight : "";
+      this.content.value = goods ? goods.goods_body : "";
 
-      this.spec.value = goods?(goods.spec_value ? 2 : 1):1;
-      if(goods?!goods.spec_value:true){
-        let sku =goods?goods.SKUList[0]:{};
-        this.marketprice.value = goods?goods.goods_marketprice : '';
-        this.price.value = goods?goods.goods_price : '';
-        this.amount.value = goods?sku.goods_storage : '';
-        this.profit.value = goods?sku.profit : '';
-        this.vip1_commission.value = goods?sku.vip1_commission : '';
-        this.vip2_commission.value = goods?sku.vip2_commission : '';
-        this.vip3_commission.value = goods?sku.vip3_commission : '';
-        this.vip4_commission.value = goods?sku.vip4_commission : '';
-      }else{
-        this.skuClassList = goods.spec_name.map((v, i) => { return { name: v, skus: goods.spec_value[i].map(val => { return { name: val } }) }; });
-        goods.SKUList.forEach(v => { 
-            v.price = Number(v.goods_price); 
-            v.marketprice = Number(v.goods_marketprice);
-            v.count = Number(v.goods_storage);
+      this.spec.value = goods ? (goods.spec_value ? 2 : 1) : 1;
+      if (goods ? !goods.spec_value : true) {
+        let sku = goods ? goods.SKUList[0] : {};
+        this.marketprice.value = goods ? goods.goods_marketprice : "";
+        this.price.value = goods ? goods.goods_price : "";
+        this.amount.value = goods ? sku.goods_storage : "";
+        this.profit.value = goods ? sku.profit : "";
+        this.vip1_commission.value = goods ? sku.vip1_commission : "";
+        this.vip2_commission.value = goods ? sku.vip2_commission : "";
+        this.vip3_commission.value = goods ? sku.vip3_commission : "";
+        this.vip4_commission.value = goods ? sku.vip4_commission : "";
+      } else {
+        this.skuClassList = goods.spec_name.map((v, i) => {
+          return {
+            name: v,
+            skus: goods.spec_value[i].map(val => {
+              return { name: val };
+            })
+          };
+        });
+        goods.SKUList.forEach(v => {
+          v.price = Number(v.goods_price);
+          v.marketprice = Number(v.goods_marketprice);
+          v.count = Number(v.goods_storage);
         });
         this.skuList = goods.SKUList;
       }
@@ -265,69 +297,93 @@ export default {
       this.detail = goods;
       // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
     },
-    change(param){
-      console.log('param :', param);
+    change(param) {
+      console.log("param :", param);
       this.query.limit = param.limit;
       this.query.page = param.page;
       this.getList();
     },
     // Update multi sku goods
-    updateMultiSku(classList, skus){
-      console.log('update', classList, skus);
-      this.classList = classList; 
+    updateMultiSku(classList, skus) {
+      console.log("update", classList, skus);
+      this.classList = classList;
       this.specList = skus;
     },
-    closeDialog(){
+    closeDialog() {
       let config = this.dialogConfig;
 
       config.status = 0;
     },
-    async submit(){
-      let paramArr = ['name'],
-          spec = this.spec,
-          imgList = this.img.value,
-          firstSpec = this.specList[0],
-          param;
+    async submit() {
+      let paramArr = ["name"],
+        spec = this.spec,
+        imgList = this.img.value,
+        firstSpec = this.specList[0],
+        param;
 
-      if(!imgList.length) return this.img.alert = '请选择图片作为主图';
+      if (!imgList.length) return (this.img.alert = "请选择图片作为主图");
 
-      if(spec.value == 1) paramArr.push('marketprice', 'price', 'amount', 'profit', 'vip1_commission', 'vip2_commission', 'vip3_commission', 'vip4_commission');
-      if(paramArr.some(v => { return this[v].value ? false : this[v].alert = `请输入${this[v].title}`; })) return;
+      if (spec.value == 1)
+        paramArr.push(
+          "marketprice",
+          "price",
+          "amount",
+          "profit",
+          "vip1_commission",
+          "vip2_commission",
+          "vip3_commission",
+          "vip4_commission"
+        );
+      if (
+        paramArr.some(v => {
+          return this[v].value
+            ? false
+            : (this[v].alert = `请输入${this[v].title}`);
+        })
+      )
+        return;
 
-      if(typeof this.category.value !== 'number') return this.category.alert = `请选择${this.category.title}`;
-      if(!this.classify.value[2]) return this.classify.alert = `请选择${this.classify.title}`;
+      if (typeof this.category.value !== "number")
+        return (this.category.alert = `请选择${this.category.title}`);
+      if (!this.classify.value[2])
+        return (this.classify.alert = `请选择${this.classify.title}`);
 
       // multiSku
-      if(spec.value == 2){
-        let err = '';
-        if(!this.specList.length) return this.$message.error(`规格类别不能空`);
+      if (spec.value == 2) {
+        let err = "";
+        if (!this.specList.length) return this.$message.error(`规格类别不能空`);
 
-        this.specList.some((item) => {
+        this.specList.some(item => {
           let arr = [
-            { key: 'VIP4佣金', value: 'vip4_commission' },
-            { key: 'VIP3佣金', value: 'vip3_commission' },
-            { key: 'VIP2佣金', value: 'vip2_commission' },
-            { key: 'VIP1佣金', value: 'vip1_commission' },
-            { key: '平台利润', value: 'profit' },
-            { key: '库存数量', value: 'count' },
-            { key: '价格', value: 'price' },
+            { key: "VIP4佣金", value: "vip4_commission" },
+            { key: "VIP3佣金", value: "vip3_commission" },
+            { key: "VIP2佣金", value: "vip2_commission" },
+            { key: "VIP1佣金", value: "vip1_commission" },
+            { key: "平台利润", value: "profit" },
+            { key: "库存数量", value: "count" },
+            { key: "价格", value: "price" }
           ];
 
-          arr.forEach((v, i) => { if(!(item[v.value] > 0)) err = `${v.key}必须为大于零的数字` }); 
+          arr.forEach((v, i) => {
+            if (!(item[v.value] > 0)) err = `${v.key}必须为大于零的数字`;
+          });
 
           return err;
         });
 
-        if(err) return this.$message.error(err);
+        if (err) return this.$message.error(err);
       }
       // freight
-      if(!this.freight.value) return this.freight.alert = `请选择${this.freight.title}`;
-      
+      if (!this.freight.value)
+        return (this.freight.alert = `请选择${this.freight.title}`);
+
       this.stopSubmit = true;
 
       imgList = imgList.concat(this.detailImg.value);
-      let img = imgList.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
-      if(!img[0]) return console.error('img value :', img);
+      let img = imgList.map(v => {
+        return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url;
+      });
+      if (!img[0]) return console.error("img value :", img);
 
       param = {
         goods_image: img,
@@ -339,33 +395,50 @@ export default {
         gc_id: this.classify.value[2],
         goods_freight: this.freight.value,
         goods_body: this.content.value,
-        goods_price: firstSpec ? firstSpec.price : this.price.value,
+        goods_price: firstSpec ? firstSpec.price : this.price.value
       };
 
-      if(spec.value == 1){
+      if (spec.value == 1) {
         let o = {};
-        ['price', 'marketprice', 'profit', 'vip1_commission', 'vip2_commission', 'vip3_commission', 'vip4_commission'].forEach(prop => o[prop] = this[prop].value);
+        [
+          "price",
+          "marketprice",
+          "profit",
+          "vip1_commission",
+          "vip2_commission",
+          "vip3_commission",
+          "vip4_commission"
+        ].forEach(prop => (o[prop] = this[prop].value));
         o.stock = this.amount.value;
-        o.spec_attr = '';
+        o.spec_attr = "";
 
         param.spec_name = null;
         param.spec_value = o.sp_value = null;
         param.spec = [o];
-      }else{
-        let spec_name = {}, spec_value = {};
+      } else {
+        let spec_name = {},
+          spec_value = {};
 
         this.classList.forEach((v, i) => {
           let o = {};
-          v.skus.forEach((sku, skuIndex) => o[skuIndex] = sku.name);
+          v.skus.forEach((sku, skuIndex) => (o[skuIndex] = sku.name));
           spec_value[i] = o;
         });
-        this.classList.forEach((v, i) => spec_name[i] = v.name);
+        this.classList.forEach((v, i) => (spec_name[i] = v.name));
 
         let spec = this.specList.map(v => {
           let o = {};
-          ['price', 'marketprice', 'profit', 'vip1_commission', 'vip2_commission', 'vip3_commission', 'vip4_commission'].forEach(prop => o[prop] = v[prop]);
-          o.spec_attr = v.index.join('_'),
-          o.sp_value = this.formatName(v.name);
+          [
+            "price",
+            "marketprice",
+            "profit",
+            "vip1_commission",
+            "vip2_commission",
+            "vip3_commission",
+            "vip4_commission"
+          ].forEach(prop => (o[prop] = v[prop]));
+          (o.spec_attr = v.index.join("_")),
+            (o.sp_value = this.formatName(v.name));
           o.stock = v.count;
           return o;
         });
@@ -378,171 +451,182 @@ export default {
       // return console.error(img, o, 'about param : ', param);
       this.save(param);
     },
-    async format(item){
-        let matcher,
-            arr = ['is_vip', 'goods_state'],
-            selectList = this.headConfig.selectList,
-            classify;
+    async format(item) {
+      let matcher,
+        arr = ["is_vip", "goods_state"],
+        selectList = this.headConfig.selectList,
+        classify;
 
-        item.img = [ {url: item.goods_image }];
-        item.detailImg = item.detailImg ? item.detailImg.map(v => { return {url: v}; }) : [];
+      item.img = [{ url: item.goods_image }];
+      item.detailImg = item.detailImg
+        ? item.detailImg.map(v => {
+            return { url: v };
+          })
+        : [];
 
-        // get match 
-        matcher = this.exchange(selectList, arr.map(v => item[v]), 'id', 'name');
-        arr.forEach((v, i) => item[`${v}Str`] = matcher[i]);
+      // get match
+      matcher = this.exchange(selectList, arr.map(v => item[v]), "id", "name");
+      arr.forEach((v, i) => (item[`${v}Str`] = matcher[i]));
 
-        // 分类名
-        this.allClass.filter(v=>{
-          if(v.storegc_id == item.gc_id_1){
-            item.gc_name_1 =v.storegc_name;
-          }
-        })
-        this.allClass.filter(v=>{
-          if(v.storegc_id == item.gc_id_2){
-            item.gc_name_2 =v.storegc_name;
-          }
-        })
-        this.allClass.filter(v=>{
-          if(v.storegc_id == item.gc_id_3){
-            item.gc_name_3 =v.storegc_name;
-          }
-        })
+      // 分类名
+      this.allClass.filter(v => {
+        if (v.storegc_id == item.gc_id_1) {
+          item.gc_name_1 = v.storegc_name;
+        }
+      });
+      this.allClass.filter(v => {
+        if (v.storegc_id == item.gc_id_2) {
+          item.gc_name_2 = v.storegc_name;
+        }
+      });
+      this.allClass.filter(v => {
+        if (v.storegc_id == item.gc_id_3) {
+          item.gc_name_3 = v.storegc_name;
+        }
+      });
     },
-    exchange(sourceList, valueList, filterProperty, destProperty){
+    exchange(sourceList, valueList, filterProperty, destProperty) {
       let res,
-          resList = [];
+        resList = [];
 
       sourceList.forEach((list, index) => {
         res = list.filter(v => v[filterProperty] == valueList[index])[0];
-        resList[index] = res ? res[destProperty] : '';
-      }); 
+        resList[index] = res ? res[destProperty] : "";
+      });
       return resList;
     },
-    // 
-    async loadClass(val){
+    //
+    async loadClass(val) {
       let param,
-          selClass,
-          source = this.classify.source;
+        selClass,
+        source = this.classify.source;
 
       selClass = source.find(v => v.value == val[0]);
-      if(val[1]) selClass = selClass.children.find(v => v.value == val[1]);
+      if (val[1]) selClass = selClass.children.find(v => v.value == val[1]);
 
       let res = await classAPI.getClassList({ parent_id: val[1] || val[0] });
 
       res.data.forEach(v => {
         v.label = v.storegc_name;
         v.value = v.storegc_id;
-        if(!val[1]) v.children = [];
+        if (!val[1]) v.children = [];
       });
 
       selClass.children = res.data;
     },
-    async loadClass2(val){
+    async loadClass2(val) {
       let param,
-          selClass,
-          source = this.headConfig.multiSelect.source;
+        selClass,
+        source = this.headConfig.multiSelect.source;
 
       selClass = source.find(v => v.value == val[0]);
-      if(val[1]) selClass = selClass.children.find(v => v.value == val[1]);
+      if (val[1]) selClass = selClass.children.find(v => v.value == val[1]);
 
       let res = await classAPI.getClassList({ parent_id: val[1] || val[0] });
 
       res.data.forEach(v => {
         v.label = v.storegc_name;
         v.value = v.storegc_id;
-        if(!val[1]) v.children = [];
+        if (!val[1]) v.children = [];
       });
 
       selClass.children = res.data;
     },
 
-    async save(param){
+    async save(param) {
       let status = this.dialogConfig.status;
-      console.log('save: ', param, status); 
-      let res = status == 1 ? await api.addGoods(param) : await api.setGoods(this.detail.goods_commonid, param);
+      console.log("save: ", param, status);
+      let res =
+        status == 1
+          ? await api.addGoods(param)
+          : await api.setGoods(this.detail.goods_commonid, param);
 
       this.getList();
       this.stopSubmit = false;
       this.dialogConfig.status = 0;
     },
 
-    async getList() { //获取列表
-      this.isLoading = true
+    async getList() {
+      //获取列表
+      this.isLoading = true;
       let res = await api.getGoodsList(this.query, this);
 
-      if(res.error) return this.$message.error(res.error);
+      if (res.error) return this.$message.error(res.error);
 
       // get all class list
-        let allClass = await classAPI.getClassList();
-        if(allClass.error) this.$message.error(allClass.error);
-        this.allClass = allClass.data;
+      let allClass = await classAPI.getClassList();
+      if (allClass.error) this.$message.error(allClass.error);
+      this.allClass = allClass.data;
       res.data.forEach(this.format);
 
       this.list = res.data;
       this.total = res.pagination.total;
-      this.isLoading = false
+      this.isLoading = false;
     },
 
-    async deleteItem(item){
+    async deleteItem(item) {
       let res = await api.deleteGoods(item.goods_commonid);
 
       this.getList();
     },
 
-    async judgeItem(item){
+    async judgeItem(item) {
       let send = {
-        goods_commonid:[item.goods_commonid]
+        goods_commonid: [item.goods_commonid]
       };
-      if(item.goods_state == 1){
-        send.type="offline"
-      }else{
-        send.type = 'online'
+      if (item.goods_state == 1) {
+        send.type = "offline";
+      } else {
+        send.type = "online";
       }
 
       let res = await api.UpDownGoods(send);
-      if(res.status ==0){
-        this.$message.success('操作成功');
+      if (res.status == 0) {
+        this.$message.success("操作成功");
         this.getList();
-      }else{
-        this.$message.error('操作失败，请刷新重试')
+      } else {
+        this.$message.error("操作失败，请刷新重试");
       }
     },
-    async getUploadToken(){
+    async getUploadToken() {
       let res = await commonReq.getUploadToken();
 
-      if(res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+      if (res.error) return this.$message.error(`getUploadToken: ${res.error}`);
 
       this.detailImg.body.token = this.img.body.token = res.data;
-      this.detailImg.body.config = this.img.body.config = "{ useCdnDomain: true }";
+      this.detailImg.body.config = this.img.body.config =
+        "{ useCdnDomain: true }";
     },
 
     // utils
-    formatClass(){
+    formatClass() {
       let arr = this.classify.value,
-          source = this.classify.source;
+        source = this.classify.source;
       console.error(source);
       return source[arr[0]].children[arr[1]].children[arr[2]];
     },
-    formatName(name){
+    formatName(name) {
       let o = {};
 
-      name.replace(/;$/, '').split(';').forEach((v, i) => o[this.classList[i].name] = v);
+      name
+        .replace(/;$/, "")
+        .split(";")
+        .forEach((v, i) => (o[this.classList[i].name] = v));
 
       return o;
     }
-
   },
 
-  async created(){
+  async created() {
     this.getList();
     this.getUploadToken();
     let classRes = await classAPI.getClassList({ parent_id: 0 });
     classRes.data.forEach(v => {
-        v.label = v.storegc_name;
-        v.value = v.storegc_id;
-        v.children = [];
-      });
-      this.headConfig.multiSelect.source = classRes.data;
-  },
-}
+      v.label = v.storegc_name;
+      v.value = v.storegc_id;
+      v.children = [];
+    });
+    this.headConfig.multiSelect.source = classRes.data;
+  }
+};
 </script>

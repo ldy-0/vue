@@ -69,7 +69,7 @@
         <el-form-item>
           <el-button
             type="primary"
-            @click="onSubmit(form)"
+            @click="onSubmit('form')"
             :disabled="isUpimg"
             :loading="isloading"
           >保存</el-button>
@@ -123,7 +123,7 @@ import {
 } from "@/api/seller";
 import uploadFn from "@/utils/tencent_cos";
 import commonReq from '@/api/common' 
-import customImg from '@/components/img'
+import customImg from '@/components/customImg'
 
 //初始化常量
 const form = {
@@ -168,8 +168,8 @@ export default {
   },
   data() {
     return {
-      img: { title: '图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
-      detailImg: { title: '跳转图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'http://cdn.health.healthplatform.xyz', body: {} },
+      img: { title: '图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
+      detailImg: { title: '跳转图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       //案例列表
       tableData: [],
       //判断弹框是新增还是编辑
@@ -240,6 +240,7 @@ export default {
     CreateItem() {
       this.category = "";
       this.form = Object.assign({}, form);
+      this.category = 0;
       this.img.value = [];
       this.detailImg.value = [];
       this.dialogFormVisible = true; //打开内容弹框
@@ -291,14 +292,12 @@ export default {
       //console.log(this.$refs)
       this.$refs["form"].validate(valid => {
         if (valid) {
-          this.isloading = true;
           if (this.dialogStatus == "create") {
             this.addBannerList();
           } else {
             this.editBanner();
           }
         } else {
-          console.log("error submit!!");
           return false;
         }
       });
@@ -357,6 +356,8 @@ export default {
     //增加轮播图
     addBannerList() {
       let sendData = {};
+      this.img.alert = this.img.value.length ? null : '请选择图片作为主图';
+
       sendData.banner_type = this.form.banner_type;
       //
       let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
@@ -371,6 +372,7 @@ export default {
       } else {
         sendData.banner_url = this.form.banner_url;
       }
+      this.isloading = true;
       addBanner_api(sendData).then(res => {
         if (res.status == 0) {
           this.dialogFormVisible = false;

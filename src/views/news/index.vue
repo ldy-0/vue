@@ -20,7 +20,7 @@
                 @change='change'></custom-table>
 
 
-<el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
+<el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="50%">
     <el-form label-width='100px'>
       <custom-img :obj='img'></custom-img>
 
@@ -54,10 +54,12 @@ import customRadio from '@/components/radio'
 import number from '@/components/number'
 import integer from '@/components/integer'
 import dateTimeRange from '@/components/dateTimeRange'
-import customImg from '@/components/img'
+import customImg from '@/components/customImg'
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
+import api from '@/api/case';
+import commonReq from '@/api/common' 
 
 export default {
   components: {
@@ -83,7 +85,7 @@ export default {
         title: '',
         status: 0, // 1:添加分类，2：编辑分类， 3：二级分类列表
       },
-      img: { title: '主图', value: [], limit: 1, alert: null },
+      img: { title: '商品图片', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       title: { title: '标题', value: '', alert: null, },
       classify: { 
         title: '分类', 
@@ -120,12 +122,12 @@ export default {
         updateTitle: '编辑',
         showDelete: true,
         classList: [
-          { key: '主图', value: 'image', isImg: true, },
-          { key: '案例标题', value: 'title' },
-          { key: '案例内容', value: 'content' },
-          { key: '分类', value: 'class' },
-          { key: '热门推荐', value: 'recommend' },
-        ],
+          { key: "主图", value: "information_image", isImg: true },
+          { key: "案例标题", value: "information_title" },
+          // { key: "案例内容", value: "information_content" },
+          { key: "分类", value: "classify_name" },
+          { key: "热门推荐", value: "recommend" }
+        ]
       },
       list: [],
       total: 0,
@@ -139,95 +141,117 @@ export default {
     }
   },
   methods: {
-    search(param){
-      console.error('search :', param); 
-    },
-    updateForm(status){
-      this.dialogConfig.status = typeof status === 'number' ? status : 2;
+    async getList() {
+      //获取列表
+      this.isLoading = true;
+      this.query.type =1;
+      if(this.query.classify_id){
+        delete this.query.type;
+      }
+      let res = await api.getCase(this.query, this);
 
-      // FIXME: 
-      this.img.value = status.img || []; 
-      this.title.value = status.title || '';
-      this.classify.value = status.class || '';
-      this.recommend.value = status.recommend || '';
-      this.content.value = status.content || '';
-      // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
+      res.data.forEach(this.format);
+
+      this.list = res.data;
+      this.total = res.pagination.total;
+      this.isLoading = false;
     },
-    change(param){
-      console.error('param :', param);
-      this.query.limit = param.limit;
-      this.query.page = param.page;
+    format(item) {
+        item.classify_name = item.classify_id==1?'公司新闻':'行业动态';
+        item.recommend = item.sort==1?'是':'否';
     },
-    closeDialog(){
+    //========================================================
+    updateForm(status) {
+      this.dialogConfig.status = typeof status === "number" ? status : 2;
+      this.img.value =status == 1?[]:[{url:status.information_image}];
+      this.title.value = status.information_title || "";
+      this.classify.value = status.classify_id || 1;
+      this.recommend.value = status.sort || 1;
+      this.content.value = status.information_content || "";
+      this.information_id = status.information_id;
+    },
+    closeDialog() {
       let config = this.dialogConfig;
 
       config.status = 0;
     },
-    async submit(){
-      let paramArr = ['title'],
-          query = this.query,
-          param;
+    async submit() {
+      let paramArr = ["title"],
+        query = this.query,
+        param;
 
-      this.img.alert = this.img.value.length ? null : '请选择图片作为主图';
+      this.img.alert = this.img.value.length ? null : "请选择图片作为主图";
 
-      if(paramArr.some(v => { return this[v].value ? false : this[v].alert = `请输入${this[v].title}`; })) return;
+      if (
+        paramArr.some(v => {
+          return this[v].value
+            ? false
+            : (this[v].alert = `请输入${this[v].title}`);
+        })
+      )
+        return;
 
-      if(typeof this.classify.value !== 'number') return this.classify.alert = `请选择${this.classify.title}`;
-      if(typeof this.recommend.value !== 'number') return this.recommend.alert = `请选择${this.recommend.title}`;
-      
+      if (typeof this.classify.value !== "number")
+        return (this.classify.alert = `请选择${this.classify.title}`);
+      if (typeof this.recommend.value !== "number")
+        return (this.recommend.alert = `请选择${this.recommend.title}`);
+
       this.stopSubmit = true;
 
-      // let uploadArr = this.img.value.filter(v => v.raw).map(v => v.raw);
-      // let imgRes = await uploadFn(uploadArr);
-      // console.error('imgRes :', imgRes);
+      let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
+      if(!img[0]) return console.error('img value :', img);
 
       param = {
-        img: this.img.value,
-        title: this.title.value,
-        classify: this.classify.value,
-        recommend: this.recommend.value,
-        content: this.content.value,
+        information_image: img[0],
+        information_title: this.title.value,
+        classify_id: this.classify.value,
+        sort: this.recommend.value,
+        information_content: this.content.value
       };
-
-      // return console.error(img, o, 'about param : ', param);
-      this.save(param);
-    },
-    format(item){
-      item.img = [ {url: item.image }];
-    },
-    // 
-    async save(param){
-      console.error('save: ', param); 
-
+      let res = null;
+      if(this.dialogConfig.status==1){
+        res = await api.addCase(param,this);
+      }else{
+        param.information_id = this.information_id;
+        res = await api.editCase(param,this);
+      }
+      if(res.status ==0){
+        this.$message.success('操作成功');
+      } else{
+        this.$message.error('操作失败');
+      }
+      this.getList();
       this.stopSubmit = false;
+      this.dialogConfig.status = 0;
     },
-    async getList() { //获取列表
-      this.isLoading = true
-
-      // console.error('param', this.query)
-      // let res = await api.getClassList(this.listQuery, this);
-
-      let res = [
-        { image: 'https://image-static.segmentfault.com/242/285/2422858747-59bb89180b2b2_articlex', title: '13211122233', content: 'skdfsdf', class: 1, recommend: 1 },
-        { image: 'https://image-static.segmentfault.com/242/285/2422858747-59bb89180b2b2_articlex', title: '13211122233', content: 'skdfsdf', class: 1, recommend: 1 },
-      ];
-      res.data.forEach(this.format);
-
-      this.list = res.data;
-      res.pagination.total// res.pagination.total;
-      this.isLoading = false
-    },
-    async deleteItem(id){
-      console.error('delete Item', id);
-      // let res = await api.deleteClass(id, null, this);
-
+    async deleteItem(item) {
+      let res = await api.deleteCase(item.information_id, null, this);
       this.getList();
     },
+    //=========================================================
+    search(param) {
+      this.query.search = param.search;
+      this.query.classify_id = param.status; 
+      this.getList();
+    },
+    change(param) {
+      this.query.limit = param.limit;
+      this.query.page = param.page;
+      this.getList();
+    },
+    async getUploadToken(){
+      let res = await commonReq.getUploadToken();
 
+      if(res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+
+      this.img.body.token = res.data;
+      this.img.body.config = "{ useCdnDomain: true }";
+    },
   },
 
-  created(){
+  created() {
     this.getList();
-  },
+    this.getUploadToken();
+  }
 }
 </script>

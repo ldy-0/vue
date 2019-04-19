@@ -52,7 +52,6 @@ const permission = {
           accessedRouters = asyncRouterMapAdmin
         } 
         else if(roles.indexOf('admin2') >= 0){
-          console.log('---------------',roles)
           accessedRouters = filterAsyncRouter(asyncRouterMapAdmin,roles)
           // let authIndex = -1
           // for(let i=0,len=asyncRouterMapAdmin.length;i<len;i++){
@@ -72,7 +71,6 @@ const permission = {
           accessedRouters = asyncRouterMapSeller
         } 
         else if(roles.indexOf('seller2') >= 0){
-          console.log('---------------',roles)
             accessedRouters = filterAsyncRouter(asyncRouterMapSeller,roles)
             //   let authIndex = -1
             // for(let i=0,len=asyncRouterMapSeller.length;i<len;i++){
@@ -90,7 +88,6 @@ const permission = {
             // }
         }
         // accessedRouters = filterAsyncRouter(asyncRouterMap, roles)
-        console.log('accessedRouters---------------',accessedRouters)
         commit('SET_ROUTERS', accessedRouters)
         resolve()
       })

@@ -12,16 +12,11 @@
 
 <template>
 <div>
-
   <div class='form_wrap'>
-    <el-form label-width='100px'>
-
-      <custom-img :obj='img'></custom-img>
-      
-      <el-form-item :label="desc.title">
-        <editor style='width: 800px;' v-model='desc.value'></editor>
-      </el-form-item>
-
+    <el-form label-width='100px' style="width:50%;margin-top:100px">
+        <custom-input :obj="name"></custom-input>
+        <mobile :obj="phone"></mobile>
+        <custom-input :obj="address"></custom-input>
     </el-form>
 
     <el-button class='submit_btn' @click='submit'>确定</el-button>
@@ -32,40 +27,35 @@
 <script>
 
 import api from './api.js'
-import customImg from '@/components/customImg'
+import mobile from '@/components/mobile'
 import customInput from '@/components/input'
-import editor from '@/components/Tinymce'
-import uploadFn from "@/utils/tencent_cos";
-import commonReq from '@/api/common';
 export default {
 
   components: {
-    customImg,
+    mobile,
     customInput,
-    editor,
+    // editor,
   },
 
   data() {
     return {
-      img: { title: '商品图片', value: [], limit: 5, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
-      desc: { title: '内容', value: '' },
+      name: { title: '收货人', value: '', alert: null, },
+      phone: { title: '联系电话', value: '', alert: null, },
+      address: { title: '收货地址', value: '', alert: null, },
     }
   },
 
   methods: {
     async submit(){
-      let param;
-
+      let param,
+        paramArr = ['name','phone','address'];
+      if(paramArr.some(v => { return this[v].value ? false : this[v].alert = `请输入${this[v].title}`; })) return;
       this.canSubmit = false;
-      this.img.alert = this.img.value.length ? null : '请选择图片作为主图';
-      let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
-      if(!img[0]) return console.error('img value :', img);
-
       param = {
-        business_id:0,
         value:{
-          img:img,
-          desc:this.desc.value
+          name:this.name.value,
+          phone:this.phone.value,
+          address:this.address.value,
         }
       }
       let  res = await api.editBusiness(param,this);
@@ -81,13 +71,10 @@ export default {
 
     // request
     async getItem(){
-      let res = await api.getBusiness(0);
-      this.desc.value = res.data.desc;
-      res.data.img.forEach(v=>{
-        this.img.value.push({
-          url:v
-        })
-      })
+      let res = await api.getBusiness();
+          this.name.value=res.data.name;
+          this.phone.value=res.data.phone;
+          this.address.value=res.data.address;
     },
 
     async save(param){
@@ -110,7 +97,6 @@ export default {
 
   created(){
     this.getItem();
-    this.getUploadToken();
   }
 
 }

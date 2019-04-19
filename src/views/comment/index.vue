@@ -66,7 +66,7 @@
 
 import customTable from '@/components/customTable';
 import customHead from '@/components/customHead';
-import customImg from '@/components/img'
+import customImg from '@/components/customImg'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
 import api from '@/api/comment'

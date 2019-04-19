@@ -261,13 +261,25 @@ export let asyncRouterMapSeller = [
       	path: 'attractMain', // 招商
       	component: () => import('@/views/operate/attractMain/index'),
       	name: 'attractMain',
-      	meta: { title: '招商', noCache: true }
+      	meta: { title: '招商(总商城)', noCache: true }
+      },
+      {
+      	path: 'attractMain2', // 招商
+      	component: () => import('@/views/operate/attractMain/card'),
+      	name: 'attractMain2',
+      	meta: { title: '招商(名片商城)', noCache: true }
       },
       {
       	path: 'about', //关于公司
       	component: () => import('@/views/operate/about/index'),
       	name: 'about',
       	meta: { title: '关于健德', noCache: true }
+      },
+      {
+      	path: 'address', 
+      	component: () => import('@/views/operate/address/index'),
+      	name: 'address',
+      	meta: { title: '退货地址', noCache: true }
       },
     ]
   },

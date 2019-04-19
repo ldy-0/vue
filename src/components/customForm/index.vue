@@ -184,7 +184,6 @@ export default {
 
   watch: {
     error(v1, v2){
-      // console.error(v1, v2);
     },
     detail(v1, v2){
       this.imgsSync();
@@ -201,7 +200,6 @@ export default {
     },
     auth(state) { this.$emit('auth', this.detail, state) },
     cancel() {
-      console.log('cancel dialog --');
       this.$emit('cancel');
     },
     async submitForm(form) {
@@ -219,7 +217,6 @@ export default {
       let uploadList = this.imgs.filter(v => v.raw),
           imgs = [];
 
-      // console.warn('upload list: ', uploadList);
       if(uploadList.length) imgs = await upLoadFile(uploadList.map(v => v.raw));
 
       this.$emit('submit', this.imgs.filter(v => !v.raw).concat(imgs.map(v => { return { url: v }; })), this.goodsImgs);
@@ -230,7 +227,6 @@ export default {
 
     changeImgs(e, list){
       this.imgs = list;
-      console.log(`change img : `, this.imgs)
     },
 
     changeGoodsImgs(file, files){
@@ -260,7 +256,6 @@ export default {
       console.log('add date', key, this.detail[key], e);
     },
     deleteDate(index){
-      console.log('delete date', index);
       this.detail[this.timeKey].splice(index, 1);
     },
     addDetail(key){
@@ -279,10 +274,7 @@ export default {
     // FIXME: a为非法后设置b为非法值，然后设置b为合法，通过检验
     input(item){
       let v = this.detail[item.value],
-          phonePattern = /^((13[0-9])|(14[5|7|9])|(15([0-3]|[5-9]))|(17[0,1,3,5,6,7,8])|(18[0-9]))\d{8}$/;
-
-      console.warn('input --', item, v)
-      
+          phonePattern = /^((13[0-9])|(14[5|7|9])|(15([0-3]|[5-9]))|(17[0,1,3,5,6,7,8])|(18[0-9]))\d{8}$/;      
 
       if(item.isNumber && v <= 0)return this.error.push({ prop: item.value, message: '值必须大于零', duration: 1200 });
 

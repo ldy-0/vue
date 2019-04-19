@@ -1,16 +1,31 @@
 import request from "@/utils/request";
 
-async function getCoupon(_this) {
-
+async function getCoupon(data) {
   let res = await request({
-    url: "/api/v2/common/coupon",
+    url: "/api/v2/seller/coupon",
     method: "GET",
-    params: null
+    params: data
   });
-
-  return res.error !== '' ? _this.$message.error({ message: res.error, duration: 1200 }) : res.data;
+  return res;
+}
+async function deleteCoupon(id) {
+  let res = await request({
+    url: "/api/v2/seller/coupon/"+id,
+    method: "delete",
+  });
+  return res;
+}
+async function addCoupon(data) {
+  let res = await request({
+    url: "/api/v2/seller/coupon",
+    method: "post",
+    data
+  });
+  return res;
 }
 
 export default {
-  getCoupon
+  getCoupon,
+  addCoupon,
+  deleteCoupon
 }

@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // about
 async function setAbout(data, _this){
   let res = await request({
-    url: '/api/v2/admin/about',
+    url: '/api/v2/seller/about',
     method: 'post',
     data,
   });
@@ -13,7 +13,7 @@ async function setAbout(data, _this){
 
 async function getAboutList(params, _this){
   let res = await request({
-    url: '/api/v2/admin/admin',
+    url: '/api/v2/seller/about',
     methods: 'get',
     params,
   });

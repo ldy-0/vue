@@ -129,11 +129,11 @@ const formForNotive = {
 export default {
   created() {
     this.getList();
-    // getSellerAuth().then(res => {
-    //   res.data = res.data.replace(/\s/gi, "");
-    //   let rolesarry = eval("(" + res.data + ")");
-    //   this.rolesList = rolesarry
-    // });
+    getSellerAuth().then(res => {
+      res.data = res.data.replace(/\s/gi, "");
+      let rolesarry = eval("(" + res.data + ")");
+      this.rolesList = rolesarry
+    });
   },
   data() {
     return {
