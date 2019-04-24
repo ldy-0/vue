@@ -7,7 +7,7 @@
   <el-form-item :label="obj.title">
         <div>
           <span v-if='obj.preValue'>{{obj.preValue}}</span>
-          <el-input :class="{input: obj.preValue}" v-model="obj.value" auto-complete="off" @input='getInput'></el-input>
+          <el-input :class="{input: obj.preValue}" v-model.trim="obj.value" auto-complete="off" @input='getInput'></el-input>
           <span v-if='obj.postValue'>{{obj.postValue}}</span>
         </div>
         <el-alert :title='obj.alert' :closable='false' type='error' show-icon v-if='obj.alert'></el-alert>

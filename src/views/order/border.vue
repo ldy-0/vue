@@ -56,7 +56,7 @@
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-form label-width='100px' class="form">
 
-        <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
+                <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
           <div v-if="formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'">
             <span class='form_title'>{{formData[item].title}}</span>
             <span class='form_ctn'>{{formData[item].value}}</span>
@@ -127,6 +127,8 @@ import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
 import api from '@/api/order'
 import apiOfcomment from '@/api/comment'
+import Moment from "@/utils/moment";
+
 
 export default {
   components: {
@@ -178,8 +180,9 @@ export default {
         name: { title: '买家名称:', value: '', alert: null, },
         phone: { title: '买家电话:', value: '', alert: null, },
         address: { title: '买家地址:', value: '', alert: null, },
-        voucher_price: { title: '优惠券:', value: '', alert: null, },
+        // voucher_price: { title: '优惠券:', value: '', alert: null, },
         shipping_code: { title: '物流信息:', value: '', alert: null, },
+        cutprice_time: { title: '起始时间:', value: '', alert: null, },
         order_message: { title: '备注:', value: '', alert: null, },
       },
       formDataTwo: {
@@ -260,7 +263,7 @@ export default {
     async getList() { //获取列表
       this.isLoading = true
       let send = Object.assign({},this.listQuery);
-      send.order_type = 1;
+      send.order_type = 9;
       let res = await api.getOrderList_api(send, this);
       if(res.data &&res.status ==0){
         res.data.forEach(this.format);
@@ -281,6 +284,7 @@ export default {
       item.name = item.order_reciver_info.name;
       item.phone = item.order_reciver_info.phone;
       item.address = item.order_reciver_info.address;
+      item.cutprice_time = Moment(item.cutprice.cutprice_activity_starttime).format("yyyy-MM-dd")+'至'+Moment(item.cutprice.cutprice_activity_endtime).format("yyyy-MM-dd");
       let strList = this.exchange(selectList, arr.map(v => item[v]), 'id', 'title');  
       arr.forEach((v, i) => item[`${v}Str`] = strList[i]);
 
@@ -311,7 +315,7 @@ export default {
       })
       this.goodsList = status.order_goods;
       this.img.value = status.img[0].url;
-      this.keys.forEach(v => { formData[v].value = (pricePattern.test(v) ? '￥' : '') + status[v]; });
+      this.keys.forEach(v => { formData[v].value = (pricePattern.test(v) ? '' : '') + status[v]; });
       this.content.value = status.content || '';
       // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
     },

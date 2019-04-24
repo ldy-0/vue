@@ -76,14 +76,38 @@ export let asyncRouterMapSeller = [
     path: "/order", // 订单
     component: Layout,
     redirect: "/order/index",
-    meta: { roles: "order" },
+    meta: { roles: "order",title:'订单列表',icon:'order'},
     children: [
       {
         path: "index",
         component: () => import("@/views/order/index"),
-        name: "order",
-        meta: { title: "订单列表", icon: "order", noCache: true }
-      }
+        name: "index",
+        meta: { title: "普通订单", noCache: true }
+      },
+      {
+        path: "porder",
+        component: () => import("@/views/order/porder"),
+        name: "porder",
+        meta: { title: "德分订单",noCache: true }
+      },
+      {
+        path: "gorder",
+        component: () => import("@/views/order/gorder"),
+        name: "gorder",
+        meta: { title: "团购订单",noCache: true }
+      },
+      {
+        path: "border",
+        component: () => import("@/views/order/border"),
+        name: "border",
+        meta: { title: "砍价订单", noCache: true }
+      },
+      {
+        path: "corder",
+        component: () => import("@/views/order/corder"),
+        name: "corder",
+        meta: { title: "秒杀订单",noCache: true }
+      },
     ]
   },
   {

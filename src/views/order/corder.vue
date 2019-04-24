@@ -56,7 +56,7 @@
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-form label-width='100px' class="form">
 
-        <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
+                <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
           <div v-if="formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'">
             <span class='form_title'>{{formData[item].title}}</span>
             <span class='form_ctn'>{{formData[item].value}}</span>
@@ -178,9 +178,12 @@ export default {
         name: { title: '买家名称:', value: '', alert: null, },
         phone: { title: '买家电话:', value: '', alert: null, },
         address: { title: '买家地址:', value: '', alert: null, },
-        voucher_price: { title: '优惠券:', value: '', alert: null, },
+        // voucher_price: { title: '优惠券:', value: '', alert: null, },
         shipping_code: { title: '物流信息:', value: '', alert: null, },
         order_message: { title: '备注:', value: '', alert: null, },
+        limit_buy: { title: '每人限购:', value: '', alert: null, },
+        limit_num: { title: '限购数量:', value: '', alert: null, },
+        seckill_time: { title: '起始时间:', value: '', alert: null, },
       },
       formDataTwo: {
         geval_frommembername: { title: '昵称', value: '', alert: null, },
@@ -260,7 +263,7 @@ export default {
     async getList() { //获取列表
       this.isLoading = true
       let send = Object.assign({},this.listQuery);
-      send.order_type = 1;
+      send.order_type = 7;
       let res = await api.getOrderList_api(send, this);
       if(res.data &&res.status ==0){
         res.data.forEach(this.format);
@@ -281,6 +284,11 @@ export default {
       item.name = item.order_reciver_info.name;
       item.phone = item.order_reciver_info.phone;
       item.address = item.order_reciver_info.address;
+
+      item.seckill_time = item.seckill.start_time+'至'+item.seckill.end_time;
+      item.limit_num=item.seckill.limit_num;
+      item.limit_buy=item.seckill.limit_buy;
+
       let strList = this.exchange(selectList, arr.map(v => item[v]), 'id', 'title');  
       arr.forEach((v, i) => item[`${v}Str`] = strList[i]);
 

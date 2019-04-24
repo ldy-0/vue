@@ -16,9 +16,11 @@
   text-align: right;
 }
 .form_img{
-  width: 100px;
-  height: 100px;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
 }
+
 </style>
 
 <template>
@@ -42,20 +44,24 @@
       <!-- <custom-img :obj='formData.img'></custom-img> -->
 
       <div>
-        <span class='form_title'>{{formData.img.title}}</span>
-        <img class='form_img' :src='formData.img.value' />
+        <span class='form_title'>{{img.title}}</span>
+        <img class='form_img' :src='img.value' />
       </div>
 
       <div v-for='(item, index) in keys' :key='index'>
         <span class='form_title'>{{formData[item].title}}</span>
         <span class='form_ctn'>{{formData[item].value}}</span>
       </div>
+      <div >
+        <span class='form_title'>图片</span>
+        <img v-for='(i,index) in detail.geval_image' :key='index' class='form_img' :src="i" alt="">
+      </div>
 
     </el-form>
 
     <span slot="footer" class="dialog-footer">
       <el-button @click="closeDialog" >取消</el-button>
-      <el-button type="primary" :disabled="stopSubmit" :loading="stopSubmit" @click="deleteItem(detail)">删除</el-button>
+      <el-button type="danger" :disabled="stopSubmit" :loading="stopSubmit" @click="deleteItem(detail)">删除</el-button>
     </span>
 </el-dialog>
 
@@ -70,6 +76,7 @@ import customImg from '@/components/customImg'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
 import api from '@/api/comment'
+import Moment from "@/utils/moment";
 
 export default {
   components: {
@@ -80,6 +87,7 @@ export default {
 
   computed: {
     showDialog(){ return Boolean(this.dialogConfig.status); },
+    keys(){ return this.formData ? Object.keys(this.formData) : []; },
   },
 
   data() {
@@ -88,18 +96,17 @@ export default {
         title: '',
         status: 0, // 1:添加分类，2：编辑分类， 3：二级分类列表
       },
-      keys: ['nickName', 'goods_name', 'amount', 'price', 'pay_time', 'comment_time'],
+      img: { title: '头像', value: '', limit: 1, alert: null },
       formData: {
-        img: { title: '主图', value: [], limit: 1, alert: null },
-        nickName: { title: '昵称', value: '', alert: null, },
-        goods_name: { title: '购买商品', value: '', alert: null, },
-        amount: { title: '购买数量', value: '', alert: null, },
-        price: { title: '价格(￥)', value: '', alert: null, },
-        pay_time: { title: '购买时间', value: '', alert: null, },
-        comment_time: { title: '评论时间', value: '', alert: null, },
-        content: { title: '评论内容', value: '', alert: null, },
+        geval_frommembername: { title: '昵称', value: '', alert: null, },
+        geval_goodsname: { title: '商品名称', value: '', alert: null, },
+        order_count: { title: '购买数量', value: '', alert: null, },
+        order_amount: { title: '价格(￥)', value: '', alert: null, },
+        payment_time: { title: '购买时间', value: '', alert: null, },
+        geval_addtime: { title: '评论时间', value: '', alert: null, },
+        geval_content: { title: '评论内容', value: '', alert: null, },
       },
-      detail: null,
+      detail: {},
       stopSubmit: false,
 
       headConfig: {
@@ -112,14 +119,14 @@ export default {
         showDetail: true,
         showDelete: true,
         classList: [
-          { key: '头像', value: 'image', isImg: true, },
-          { key: '昵称', value: 'nickName' },
-          { key: '商品', value: 'goods_name' },
-          { key: '支付金额', value: 'price' },
-          { key: '购买时间', value: 'pay_time' },
-          { key: '评论时间', value: 'comment_time' },
-          { key: '内容', value: 'content' },
-          { key: '订单号', value: 'orderNu' },
+          { key: '头像', value: 'geval_frommemberavatar', isAvatar: true, },
+          { key: '昵称', value: 'geval_frommembername' },
+          { key: '商品', value: 'geval_goodsname' },
+          { key: '支付金额', value: 'order_amount' },
+          { key: '购买时间', value: 'payment_time' },
+          { key: '评论时间', value: 'geval_addtime' },
+          // { key: '内容', value: 'geval_content' },
+          { key: '订单号', value: 'geval_orderno' },
         ],
       },
       list: [],
@@ -141,30 +148,12 @@ export default {
 
       res.data.forEach(this.format);
 
-      this.list = res.data.data;
+      this.list = res.data;
       this.total =res.pagination.total;
       this.isLoading = false;
     },
     format(item) {
-      let matcher,
-        selectList = this.headConfig.selectList;
-
-      item.img = [{ url: item.order_goods[0].goods_image }];
-      item.goods_image = item.order_goods[0].goods_image;
-      item.goods_name = item.order_goods[0].goods_name;
-      item.goods_price = item.order_goods[0].goods_price;
-      item.name = item.order_reciver_info.name;
-      item.phone = item.order_reciver_info.phone;
-      item.address = item.order_reciver_info.address;
-
-      matcher = selectList[0].filter(v => v.id === item.state)[0];
-      item.stateStr = matcher ? matcher.name : "";
-
-      matcher = selectList[1].filter(v => v.id === item.type)[0];
-      item.typeStr = matcher ? matcher.name : "";
-
-      matcher = selectList[2].filter(v => v.id === item.goodsType)[0];
-      item.goodsTypeStr = matcher ? matcher.name : "";
+        item.geval_addtime = Moment(item.geval_addtime*1000).format("yyyy-MM-dd HH:mm:ss");
     },
     //查看详情============================================
     updateForm(status) {
@@ -176,14 +165,20 @@ export default {
         formData[v].value = status[v];
       });
 
-      this.img.value = status.img[0].url;
-      formData.content = status.content;
-      this.detail = status;
+      this.img.value = status.geval_frommemberavatar;
+      this.detail = Object.assign({},status);
+      this.detail.geval_image = JSON.parse(status.geval_image);
     },
     //查询================================================
     search(param) {
-      console.error("search :", param);
-
+        this.query.search  = param.search;
+      if(param.date){
+        this.query.starttime = param.date.startDate;
+        this.query.endtime = param.date.endDate;
+      }else{
+        delete this.query.starttime;
+        delete this.query.endtime;
+      }
       this.getList();
     },
     //操作================================================
@@ -197,9 +192,11 @@ export default {
     async save(param) {
       this.stopSubmit = false;
     },
-    async deleteItem(id) {
-
-      // this.getList();
+    async deleteItem(item) {
+        let res = await api.deleteAssess(item.geval_id);
+        if(res.status == 0) this.$message.success('删除成功');
+        if(res.status != 0) this.$message.error('删除失败',res.error);
+      this.getList();
     },
     //分页
     change(param) {

@@ -31,7 +31,7 @@
 
     <custom-table :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @auth='auth' @change='change'></custom-table>
 
-    <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
+    <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="50%">
       <el-form label-width='100px'>
         <!-- <custom-img :obj='formData.img'></custom-img> -->
 
@@ -48,8 +48,9 @@
       </el-form>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="auth(detail, 0)">拒绝</el-button>
         <el-button type="primary" :disabled="stopSubmit" :loading="stopSubmit" @click="auth(detail, 1)">同意</el-button>
+        <el-button type="danger" @click="auth(detail, 0)">拒绝</el-button>
+        <el-button type="info" @click="closeDialog">关闭</el-button>
       </span>
     </el-dialog>
 
@@ -58,7 +59,7 @@
 <script>
 import customTable from "@/components/customTable";
 import customHead from "@/components/customHead";
-import customImg from "@/components/imgComponent";
+import customImg from "@/components/customImg";
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from "babel-types";
 import api from '@/api/afterSale'
@@ -95,13 +96,13 @@ export default {
         shipping_fee: { title: "运费", value: "", alert: null },
         order_amount: { title: "支付金额", value: "", alert: null },
         add_time: { title: "下单时间", value: "", alert: null },
-        paymant_time: { title: "购买时间", value: "", alert: null },
+        payment_time: { title: "购买时间", value: "", alert: null },
         name: { title: "买家名称", value: "", alert: null },
         phone: { title: "买家电话", value: "", alert: null },
         address: { title: "买家地址", value: "", alert: null },
         reason_info: { title: "退款原因", value: "", alert: null },
-        refundPrice: { title: "退款金额", value: "", alert: null },
-        refundContent: { title: "退款内容", value: "", alert: null }
+        refund_type: { title: "退款金额", value: "", alert: null },
+        buyer_message: { title: "退款内容", value: "", alert: null }
       },
       detail: null,
       stopSubmit: false,
@@ -112,12 +113,13 @@ export default {
         selectLabelList: ["订单状态", "类型", "商品类型"],
         selectList: [
           [
-            { id: 1, name: "同意" },
-            { id: 2, name: "拒绝" },
-            { id: 3, name: "待处理" }
+            { id: null, name: "全部" },
+            { id: 0, name: "已取消" },
+            { id: 1, name: "待处理" },
+            { id: 3, name: "已同意" },
+            { id: 4, name: "已拒绝" },
           ],
           [{ id: 1, name: "退款" }, { id: 2, name: "退换货" }],
-          [{ id: 1, name: "常规商品" }, { id: 2, name: "VIP商品" }]
         ]
       },
 
@@ -131,9 +133,8 @@ export default {
           { key: "订单号", value: "order_sn" },
           { key: "买家", value: "name" },
           { key: "联系方式", value: "phone" },
-          { key: "金额(￥)", value: "goods_price" },
+          { key: "退款金额(￥)", value: "refund_amount" },
           { key: "类型", value: "typeStr" },
-          { key: "商品类型", value: "goodsTypeStr" },
           { key: "状态", value: "order_state" }
         ]
       },
@@ -154,11 +155,12 @@ export default {
     async getList() {
       this.isLoading = true;
       let res = await api.getReturnList(this.query, this);
+      if(res.status == 0&&res.data){
+        res.data.forEach(this.format);
+        this.total =res.pagination.total;
+      }
 
-      res.data.forEach(this.format);
-
-      this.list = res.data.data;
-      this.total =res.pagination.total;
+      this.list = res.data;
       this.isLoading = false;
     },
     format(item) {
@@ -173,14 +175,12 @@ export default {
       item.phone = item.order_reciver_info.phone;
       item.address = item.order_reciver_info.address;
 
+      item.state = item.refund_state == 1? 0:1;
       matcher = selectList[0].filter(v => v.id === item.state)[0];
       item.stateStr = matcher ? matcher.name : "";
 
-      matcher = selectList[1].filter(v => v.id === item.type)[0];
+      matcher = selectList[1].filter(v => v.id === item.refund_type)[0];
       item.typeStr = matcher ? matcher.name : "";
-
-      matcher = selectList[2].filter(v => v.id === item.goodsType)[0];
-      item.goodsTypeStr = matcher ? matcher.name : "";
     },
     //查看详情============================================
     updateForm(status) {
@@ -193,18 +193,59 @@ export default {
       });
 
       this.img.value = status.img[0].url;
-      formData.content = status.content;
+      formData.amount.value = status.order_goods[0].goods_num;
+      let spec = status.order_goods[0].goods_spec;
+      let _spec = '';
+        if(spec){
+          let specValue = Object.values(spec);
+          specValue.forEach(i=>{
+            _spec += i+'/';
+          });
+          formData.spec.value = _spec.substr(0,_spec.length-1);
+        }else{
+          formData.spec.value = '单规格商品';
+        }
       this.detail = status;
     },
     //查询================================================
     search(param) {
       console.error("search :", param);
-
+        this.query.search = param.search;
+        this.query.refund_state = param.statusList[0];
+        this.query.refund_type = param.statusList[1];
+        if(param.date){
+          this.query.starttime = param.date.startDate;
+          this.query.endtime = param.date.endDate;
+        }else{
+          delete this.query.starttime;
+          delete this.query.endtime;
+        }
       this.getList();
     },
     //操作================================================
-    auth(item, state) {
-      
+    async auth(item, state) {
+      let config = {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+      console.log(item);
+      this.$confirm(`确认此操作, 是否继续?`, '提示', config).then(() =>{ 
+        let send = {
+          refund_id:item.refund_id
+        }
+        if(state ==2){
+            send.cancel = 1;
+        }else{
+          delete send.cancel
+        }
+        api.editReturnList(send).then(res=>{
+          console.log(res.data);
+        })
+      }).catch(e =>{
+        this.$notify.info({ message: '已取消操作' })
+      })
+   
     },
     closeDialog() {
       let config = this.dialogConfig;

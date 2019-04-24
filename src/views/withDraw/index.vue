@@ -219,8 +219,11 @@ export default {
       this.query.telephone = param.search;
       this.query.status = param.status;
       if(param.date){
-        this.query.startDate = new Date(param.date.startDate).getTime()/1000;
-        this.query.endDate = new Date(param.date.endDate).getTime()/1000;
+        this.query.starttime = new Date(param.date.startDate).getTime()/1000;
+        this.query.endtime = new Date(param.date.endDate).getTime()/1000;
+      }else{
+        delete this.query.starttime;
+        delete this.query.endtime;
       }
       this.getList();
     },

@@ -34,6 +34,18 @@
   flex-direction: row;
   flex-wrap: wrap;
 }
+.form>div{
+  width: 30%;
+}
+.form>div:last-of-type{
+  width: 100%;
+}
+.form>div:last-of-type .form_title{
+  width: 100px;
+}
+.form>div:last-of-type .form_ctn{
+  width:100%;
+}
 </style>
 
 <template>
@@ -56,7 +68,7 @@
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-form label-width='100px' class="form">
 
-        <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
+        <div v-for='(item, index) in keys' :key='index'>
           <div v-if="formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'">
             <span class='form_title'>{{formData[item].title}}</span>
             <span class='form_ctn'>{{formData[item].value}}</span>
@@ -178,7 +190,7 @@ export default {
         name: { title: '买家名称:', value: '', alert: null, },
         phone: { title: '买家电话:', value: '', alert: null, },
         address: { title: '买家地址:', value: '', alert: null, },
-        voucher_price: { title: '优惠券:', value: '', alert: null, },
+        // voucher_price: { title: '优惠券:', value: '', alert: null, },
         shipping_code: { title: '物流信息:', value: '', alert: null, },
         order_message: { title: '备注:', value: '', alert: null, },
       },
@@ -260,7 +272,7 @@ export default {
     async getList() { //获取列表
       this.isLoading = true
       let send = Object.assign({},this.listQuery);
-      send.order_type = 1;
+      send.order_type = 10;
       let res = await api.getOrderList_api(send, this);
       if(res.data &&res.status ==0){
         res.data.forEach(this.format);

@@ -11,7 +11,18 @@ async function getOrderList_api(data) {
     return res.error !== '' ? _this.$message.error({ message: res.error, duration: 1200 }) : res;
   }
   
+async function changeOrder_api(data) {
+    let res = await request({
+      url: "/api/v2/seller/orderstate/"+data.order_id,
+      method: "PUT",
+      data
+    });
+
+    return res.error !== '' ? _this.$message.error({ message: res.error, duration: 1200 }) : res;
+  }
+  
   export default {
-    getOrderList_api
+    getOrderList_api,
+    changeOrder_api
   }
   

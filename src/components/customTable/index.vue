@@ -69,6 +69,8 @@
                   :page-size="query.limit"
                   :total="total"
                   @size-change="changeSize" 
+                  v-if="showPagination"
+                  class="showPagination"
                   @current-change="changePage" layout="total, sizes, prev, pager, next" >
     </el-pagination>
     
@@ -99,6 +101,10 @@ export default {
     },
     total: {
       type: Number,
+    },
+    showPagination:{
+      type:Boolean,
+      default:true
     }
   },
 
@@ -176,5 +182,8 @@ export default {
   width: 66px;
   height: 66px;
   border-radius: 50%;
+}
+.showPagination{
+  margin-bottom: 100px;
 }
 </style>
