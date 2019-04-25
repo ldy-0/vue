@@ -373,6 +373,7 @@ export default {
     },
     choiceThis(index, row) {
       this.goodsDetail = {price:0};
+      this.QformForNotive = Object.assign({},QformForNotive);
       let id = row.id;
       this.alertValue = "";
       getGoods_api(id).then(res => {
@@ -406,9 +407,9 @@ export default {
       });
       if (!res) return;
       if(!this.choiceGoodsId) return;
-      this.QwaitAddNotice = true;
       let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
       if(!img[0]) return console.error('img value :', img);
+      this.QwaitAddNotice = true;
 
       let send = {
         goods_id:this.choiceGoodsId,

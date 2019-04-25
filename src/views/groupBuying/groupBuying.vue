@@ -185,7 +185,7 @@
     </el-container>
   </div>
 </template>
-<script>
+<script>  
 import {
   getGoodsList_api,
   getgroupbuy_api,

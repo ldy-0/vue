@@ -48,8 +48,8 @@
       </el-form>
 
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" :disabled="stopSubmit" :loading="stopSubmit" @click="auth(detail, 1)">同意</el-button>
-        <el-button type="danger" @click="auth(detail, 0)">拒绝</el-button>
+        <el-button type="primary" v-if="detail.state ==0" :disabled="stopSubmit" :loading="stopSubmit" @click="auth(detail, 1)">同意</el-button>
+        <el-button type="danger" v-if="detail.state ==0" @click="auth(detail, 0)">拒绝</el-button>
         <el-button type="info" @click="closeDialog">关闭</el-button>
       </span>
     </el-dialog>
@@ -93,18 +93,18 @@ export default {
         spec: { title: "规格", value: "", alert: null },
         order_sn: { title: "订单编号", value: "", alert: null },
         goods_price: { title: "商品原价(￥)", value: "", alert: null },
-        shipping_fee: { title: "运费", value: "", alert: null },
-        order_amount: { title: "支付金额", value: "", alert: null },
+        shipping_fee: { title: "运费(￥)", value: "", alert: null },
+        order_amount: { title: "支付金额(￥)", value: "", alert: null },
         add_time: { title: "下单时间", value: "", alert: null },
         payment_time: { title: "购买时间", value: "", alert: null },
         name: { title: "买家名称", value: "", alert: null },
         phone: { title: "买家电话", value: "", alert: null },
         address: { title: "买家地址", value: "", alert: null },
         reason_info: { title: "退款原因", value: "", alert: null },
-        refund_type: { title: "退款金额", value: "", alert: null },
+        refund_amount: { title: "退款金额(￥)", value: "", alert: null },
         buyer_message: { title: "退款内容", value: "", alert: null }
       },
-      detail: null,
+      detail: {},
       stopSubmit: false,
 
       headConfig: {
@@ -240,7 +240,12 @@ export default {
           delete send.cancel
         }
         api.editReturnList(send).then(res=>{
-          console.log(res.data);
+          if(res.status ==0){
+            this.$notify.success({ message: '操作成功' });
+            this.getList();
+          }else{
+            this.$notify.error({ message: res.error });
+          }
         })
       }).catch(e =>{
         this.$notify.info({ message: '已取消操作' })

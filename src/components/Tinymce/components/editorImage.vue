@@ -4,11 +4,13 @@
     </el-button>
     <el-dialog append-to-body :visible.sync="dialogVisible">
       <!-- https://httpbin.org/post :before-upload="beforeUpload"  :on-success="handleSuccess"-->
-      <el-upload class="editor-slide-upload" action="" :auto-upload='false' :multiple="true" :file-list="fileList" :show-file-list="true"
+      <!-- <el-upload class="editor-slide-upload" action="" :auto-upload='false' :multiple="true" :file-list="fileList" :show-file-list="true"
         list-type="picture-card" :on-remove="changeImg" :on-change='changeImg' >
         <el-button size="small" type="primary">点击上传</el-button>
-      </el-upload>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      </el-upload> -->
+      <custom-img :obj='img'></custom-img>
+
+      <el-button style="margin-left:100px;" @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="submitImg">确 定</el-button>
     </el-dialog>
   </div>
@@ -17,20 +19,37 @@
 <script>
 // import { getToken } from 'api/qiniu'
 import uploadFn from '@/utils/tencent_cos'
+import customImg from '@/components/customImg'
+import commonReq from "@/api/common";
 
 export default {
   name: 'editorSlideUpload',
+  components:{
+    customImg
+  },
   props: {
     color: {
       type: String,
       default: '#1890ff'
     }
   },
+  created(){
+    this.getUploadToken();
+  },
   data() {
     return {
       dialogVisible: false,
       listObj: {},
-      fileList: []
+      fileList: [],
+      img: {
+        title: "图片",
+        value: [],
+        limit: 100,
+        alert: null,
+        url: "https://up-z2.qiniup.com",
+        cdnUrl: "https://cdn.health.healthplatform.xyz",
+        body: {}
+      },
     }
   },
   methods: {
@@ -40,11 +59,13 @@ export default {
     async submitImg() {
       let loading = this.$loading({ text: '正在上传中 ...' });
       // if(!this.fileList.length) this.$emit();
+      let img = this.img.value.map(v => {
+        return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url;
+      });
+      // let res = await uploadFn(this.fileList.map(v => v.raw));
+      // console.warn(this.fileList, res);
 
-      let res = await uploadFn(this.fileList.map(v => v.raw));
-      console.warn(this.fileList, res);
-
-      this.$emit('successCBK', res.map(v => { return { url: v }; }));
+      this.$emit('successCBK', img.map(v => { return { url: v }; }));
 
       this.listObj = {}
       this.fileList = []
@@ -99,7 +120,16 @@ export default {
         }
         resolve(true)
       })
-    }
+    },
+    async getUploadToken() {
+      let res = await commonReq.getUploadToken();
+
+      if (res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+
+      this.img.body.token = res.data;
+      this.img.body.config ="{ useCdnDomain: true }";
+    },
+
   }
 }
 </script>

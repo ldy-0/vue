@@ -395,7 +395,8 @@ export default {
         gc_id: this.classify.value[2],
         goods_freight: this.freight.value,
         goods_body: this.content.value,
-        goods_price: firstSpec ? firstSpec.price : this.price.value
+        goods_price: firstSpec ? firstSpec.price : this.price.value,
+        goods_marketprice: firstSpec ? firstSpec.marketprice : this.marketprice.value,
       };
 
       if (spec.value == 1) {

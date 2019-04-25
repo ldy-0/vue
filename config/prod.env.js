@@ -3,7 +3,7 @@ module.exports = {
   NODE_ENV: '"production"',
   ENV_CONFIG: '"prod"',
   // BASE_API: '"https://healthplatform.xyz/"',
-  BASE_API: '"https://test1.healthsource.com.cn/"',
+  BASE_API: '"https://test17.healthsource.com.cn/"',
   ITEM_NAME: '"大健康管理平台"', //登录页项目名称
   SMS_close: '"2"' //是否使用短信验证码更改密码 1为使用
 };

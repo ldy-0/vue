@@ -179,6 +179,8 @@ export default {
         phone: { title: '买家电话:', value: '', alert: null, },
         address: { title: '买家地址:', value: '', alert: null, },
         voucher_price: { title: '优惠券:', value: '', alert: null, },
+        order_points: { title: '积分抵扣:', value: '', alert: null, },
+        pd_amount: { title: '余额抵扣:', value: '', alert: null, },
         shipping_code: { title: '物流信息:', value: '', alert: null, },
         order_message: { title: '备注:', value: '', alert: null, },
       },
@@ -227,6 +229,8 @@ export default {
           { key: '商品名称', value: 'goods_name' },
           { key: '订单号', value: 'order_sn' },
           { key: '金额(￥)', value: 'order_amount' },
+          { key: '积分抵扣', value: 'order_points' },
+          { key: '余额抵扣', value: 'pd_amount' },
           { key: '数量', value: 'order_amount' },
           { key: '买家', value: 'name' },
           { key: '联系方式', value: 'phone' },
@@ -413,7 +417,7 @@ export default {
       this.getList();
     },
     search(param){
-      this.listQuery.order_sn = param.search;
+      this.listQuery.search = param.search;
       this.listQuery.order_state = param.statusList[0];
       if(param.date){
         this.listQuery.starttime = param.date.startDate;
@@ -429,8 +433,65 @@ export default {
       this.listQuery.page = param.page;
       this.getList();
     },
-    exportFile(loading){
+    async exportFile(loading){
+      await this.handleDownload();
       loading.close();
+    },
+        //订单导出
+    async handleDownload() {
+      //请求全部订单数据
+      let res = await api.getOrderList_api({limit:0,order_type:1}, this);
+      let allOrder =null;
+      if(res.status ==0){
+        res.data.forEach(this.format);
+        allOrder = res.data;
+      }
+      if (!allOrder) {
+        return this.$notify({
+          title: "警告",
+          message: "暂无数据",
+          type: "warning"
+        });
+      }
+      import("@/vendor/Export2Excel").then(excel => {
+        const tHeader = ["订单号", "购买数量", "订单总价", "支付金额", "下单时间","购买时间","买家名称","买家电话","买家地址","优惠券","积分抵扣","余额抵扣","物流信息","备注","商品"];
+        const filterVal = [
+          "order_sn",
+          "goods_count",
+          "order_amount",
+          "shipping_fee",
+          "add_time",
+          "payment_time",
+          "name",
+          "phone",
+          "address",
+          "voucher_price",
+          "order_points",
+          "pd_amount",
+          "shipping_code",
+          "order_message",
+          "goods_name"
+        ];
+        const list = allOrder;
+        const data = this.formatJson(filterVal, list);
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: "订单",
+          autoWidth: true
+        });
+      });
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          if (j === "timestamp") {
+            return parseTime(v[j]);
+          } else {
+            return v[j];
+          }
+        })
+      );
     },
   },
 

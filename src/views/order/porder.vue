@@ -425,7 +425,7 @@ export default {
       this.getList();
     },
     search(param){
-      this.listQuery.order_sn = param.search;
+      this.listQuery.search = param.search;
       this.listQuery.order_state = param.statusList[0];
       if(param.date){
         this.listQuery.starttime = param.date.startDate;
@@ -441,8 +441,74 @@ export default {
       this.listQuery.page = param.page;
       this.getList();
     },
-    exportFile(loading){
+    async exportFile(loading){
+      await this.handleDownload();
       loading.close();
+    },
+    //订单导出
+    async handleDownload() {
+      //请求全部订单数据
+      let res = await api.getOrderList_api({limit:0,order_type:10}, this);
+      let allOrder =null;
+      if(res.status ==0){
+        res.data.forEach(this.format);
+        allOrder = res.data;
+        allOrder.forEach(v=>{
+          if(v.order_goods[0].goods_spec){
+            let specValue = Object.values(v.order_goods[0].goods_spec);
+            specValue.forEach(i=>{
+              v.spec += i+'/';
+            });
+            v.spec = v.spec.substr (0,v.spec.length-1);
+          }else{
+            v.spec = '单规格商品'
+          }
+          })
+      }
+      if (!allOrder) {
+        return this.$notify({
+          title: "警告",
+          message: "暂无数据",
+          type: "warning"
+        });
+      }
+      import("@/vendor/Export2Excel").then(excel => {
+        const tHeader = ["商品","规格","订单号", "购买数量", "订单总价", "支付金额", "下单时间","购买时间","买家名称","买家电话","买家地址","物流信息","备注",];
+        const filterVal = [
+          "goods_name",
+          "spec",
+          "order_sn",
+          "goods_count",
+          "order_amount",
+          "shipping_fee",
+          "add_time",
+          "payment_time",
+          "name",
+          "phone",
+          "address",
+          "shipping_code",
+          "order_message",
+        ];
+        const list = allOrder;
+        const data = this.formatJson(filterVal, list);
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: "德分订单",
+          autoWidth: true
+        });
+      });
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          if (j === "timestamp") {
+            return parseTime(v[j]);
+          } else {
+            return v[j];
+          }
+        })
+      );
     },
   },
 

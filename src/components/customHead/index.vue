@@ -14,7 +14,7 @@
         </el-form-item>
 
         <el-form-item label="日期查询" v-if='config.dateWidth'>
-            <el-date-picker :style="{ width: config.dateWidth }" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
+            <el-date-picker :style="{ width: config.dateWidth }" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
             </el-date-picker>
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
@@ -90,7 +90,7 @@ export default {
 
       // date search
       param.date = this.date 
-      ? { startDate: new Date(this.date[0]).toLocaleDateString(), endDate: new Date(this.date[1]).toLocaleDateString(), }
+      ? { startDate: new Date(this.date[0]).toLocaleDateString(), endDate: new Date(this.date[1]+86400000).toLocaleDateString(), }
       : null;
 
       // single status search
