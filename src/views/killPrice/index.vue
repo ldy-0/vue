@@ -374,6 +374,7 @@ export default {
     choiceThis(index, row) {
       this.goodsDetail = {price:0};
       this.QformForNotive = Object.assign({},QformForNotive);
+      this.img.value = [];
       let id = row.id;
       this.alertValue = "";
       getGoods_api(id).then(res => {

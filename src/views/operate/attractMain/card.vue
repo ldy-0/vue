@@ -98,7 +98,7 @@ export default {
       this.isShowForm = false;
       this.canSubmit = true;
 
-      this.getAbout();
+      this.getItem();
     },
     async getUploadToken(){
       let res = await commonReq.getUploadToken();

@@ -21,7 +21,7 @@
     <el-row :gutter="20" style="margin:20px;">
       <el-col :span="6">
         <div class="box">
-          <img src="static/img/icon_zuoridingdan.png" alt>
+          <img src="../../assets/icon_zuoridingdan.png" alt>
           <div>昨日订单量
             <div class="box-num">{{Yorder}}</div>
           </div>
@@ -29,7 +29,7 @@
       </el-col>
       <el-col :span="6">
         <div class="box">
-          <img src="static/img/icon_zuorijine.png" alt>
+          <img src="../../assets/icon_zuorijine.png" alt>
           <div>昨日订单额
             <div class="box-num">{{YorderMoney}}</div>
           </div>
@@ -37,7 +37,7 @@
       </el-col>
       <el-col :span="6">
         <div class="box">
-          <img src="static/img/icon_zongdingdan.png" alt>
+          <img src="../../assets/icon_zongdingdan.png" alt>
           <div>总订单数
             <div class="box-num">{{Aorder}}</div>
           </div>
@@ -45,7 +45,7 @@
       </el-col>
       <el-col :span="6">
         <div class="box">
-          <img src="static/img/icon_zongjine.png" alt>
+          <img src="../../assets/icon_zongjine.png" alt>
           <div>总订单额
             <div class="box-num">{{AorderMoney}}</div>
           </div>

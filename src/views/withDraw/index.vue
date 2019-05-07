@@ -167,7 +167,7 @@ export default {
     format(item){
       let categories = this.headConfig.categories;
       Object.keys(item.member).forEach(v=>{item[v] = item.member[v]});
-      if(item.pdc_payment_state){
+      if(item.pdc_payment_state== 1){
         item.state = false;
       }else{
         item.state= true;

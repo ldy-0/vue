@@ -73,11 +73,11 @@ export default {
       skuClassList: [],
       skus: [],
       attributeList: [
-        // { key: 'name', value: 'name' },
+        { key: '商品编号', value: 'sku' },
         { key: '价格(元)', value: 'price' },
         { key: '标价(元)', value: 'marketprice' },
         { key: '库存', value: 'count' },
-        { key: '平台利润', value: 'profit' },
+        // { key: '平台利润', value: 'profit' },
         { key: 'VIP1佣金', value: 'vip1_commission' },
         { key: 'VIP2佣金', value: 'vip2_commission' },
         { key: 'VIP3佣金', value: 'vip3_commission' },
@@ -126,7 +126,8 @@ export default {
     addSkuClass(){
       let list = this.skuClassList,
           o = {
-            name: `新建规格分类${list.length + 1}`,
+            // name: `新建规格分类${list.length + 1}`,
+            name: ``,
             skus: [],
           };
 
@@ -146,7 +147,8 @@ export default {
     addSku(index){
       let list = this.skuClassList[index].skus,
           sku = {
-            name: `新建规格${list.length + 1}`,
+            // name: `新建规格${list.length + 1}`,
+            name: ``,
           };
 
       list.push(sku);
@@ -193,10 +195,12 @@ export default {
 
         let match = skus.filter(v => v.name === sku.name)[0];
         if(match){
+          sku.sku = match.sku;
           sku.price = match.price;
           sku.marketprice = match.marketprice;
           sku.count = match.count;
-          sku.profit = match.profit;
+          // sku.profit = match.profit;
+          sku.profit = 0;
           sku.vip1_commission = match.vip1_commission;
           sku.vip2_commission = match.vip2_commission;
           sku.vip3_commission = match.vip3_commission;
@@ -206,10 +210,12 @@ export default {
 
         // handle modify sku name
         if(skus.length === length){
+          sku.sku = skus[i].sku;
           sku.price = skus[i].price;
           sku.marketprice = skus[i].marketprice;
           sku.count = skus[i].count;
-          sku.profit = skus[i].profit;
+          // sku.profit = skus[i].profit;
+          sku.profit =0;
           sku.vip1_commission = skus[i].vip1_commission;
           sku.vip2_commission = skus[i].vip2_commission;
           sku.vip3_commission = skus[i].vip3_commission;

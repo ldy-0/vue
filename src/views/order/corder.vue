@@ -79,7 +79,7 @@
 <el-dialog :title="thirdDialogConfig.title" :visible.sync="thirdShowDialog" :before-close='closeDialogThird' width="30%">
   <div v-if="[7, 8].indexOf(thirdDialogConfig.status) !== -1">
     <el-form label-width='100px'>
-      <custom-input :obj="postName"></custom-input>
+      <!-- <custom-input :obj="postName"></custom-input> -->
       <number :obj="post"></number>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -284,7 +284,9 @@ export default {
       item.name = item.order_reciver_info.name;
       item.phone = item.order_reciver_info.phone;
       item.address = item.order_reciver_info.address;
-
+      if(item.shipping_code){
+        item.shipping_code = item.shipping_code[1];
+      }
       item.seckill_time = item.seckill.start_time+'至'+item.seckill.end_time;
       item.limit_num=item.seckill.limit_num;
       item.limit_buy=item.seckill.limit_buy;
@@ -397,7 +399,7 @@ export default {
       config.status = 0;
     }, 
     async submit(){
-      let paramArr = ['post','postName'],
+      let paramArr = ['post'],
           param;
       if(paramArr.some(v => { return this[v].value ? false : this[v].alert = `请输入${this[v].title}`; })) return;
       
@@ -444,7 +446,14 @@ export default {
             //订单导出
     async handleDownload() {
       //请求全部订单数据
-      let res = await api.getOrderList_api({limit:0,order_type:7}, this);
+            let send = {
+        limit:0,
+        order_type:7,
+      }
+      if(this.listQuery.order_state){
+        send.order_state = this.listQuery.order_state
+      }
+      let res = await api.getOrderList_api(send, this);
       let allOrder =null;
       if(res.status ==0){
         res.data.forEach(this.format);

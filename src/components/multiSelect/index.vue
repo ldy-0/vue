@@ -37,7 +37,6 @@ export default {
     },
     search(v){
       let obj = this.obj;
-      console.error('search: ', v); 
       if(!obj.search){
         obj.alert = obj.value[0]? null : `请选择${obj.title}`;
       }

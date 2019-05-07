@@ -32,10 +32,11 @@
         <custom-radio :obj='spec'></custom-radio>
 
         <div v-if="spec.value == 1">
+          <custom-input :obj='sku'></custom-input>
           <number :obj='marketprice'></number>
           <number :obj='price'></number>
           <integer :obj='amount'></integer>
-          <number :obj='profit'></number>
+          <!-- <number :obj='profit'></number> -->
           <number :obj='vip1_commission'></number>
           <number :obj='vip2_commission'></number>
           <number :obj='vip3_commission'></number>
@@ -140,11 +141,12 @@ export default {
         value: 1,
         alert: null
       },
+      sku: { title: "商品编号", value: "", alert: null },
       marketprice: { title: "原价", value: "", alert: null },
       price: { title: "售价", value: "", alert: null },
       amount: { title: "库存", value: "", alert: null },
       freight: { title: "运费", value: "", alert: null, isZero: true },
-      profit: { title: "平台利润", value: "", alert: null },
+      profit: { title: "平台利润", value: 0, alert: null },
       vip1_commission: { title: "VIP1佣金", value: "", alert: null },
       vip2_commission: { title: "VIP2佣金", value: "", alert: null },
       vip3_commission: { title: "VIP3佣金", value: "", alert: null },
@@ -269,10 +271,11 @@ export default {
       this.spec.value = goods ? (goods.spec_value ? 2 : 1) : 1;
       if (goods ? !goods.spec_value : true) {
         let sku = goods ? goods.SKUList[0] : {};
+        this.sku.value = goods ? sku.goods_serial : "";
         this.marketprice.value = goods ? goods.goods_marketprice : "";
         this.price.value = goods ? goods.goods_price : "";
         this.amount.value = goods ? sku.goods_storage : "";
-        this.profit.value = goods ? sku.profit : "";
+        this.profit.value = 0;
         this.vip1_commission.value = goods ? sku.vip1_commission : "";
         this.vip2_commission.value = goods ? sku.vip2_commission : "";
         this.vip3_commission.value = goods ? sku.vip3_commission : "";
@@ -290,6 +293,7 @@ export default {
           v.price = Number(v.goods_price);
           v.marketprice = Number(v.goods_marketprice);
           v.count = Number(v.goods_storage);
+          v.sku = v.goods_serial;
         });
         this.skuList = goods.SKUList;
       }
@@ -325,10 +329,11 @@ export default {
 
       if (spec.value == 1)
         paramArr.push(
+          "sku",
           "marketprice",
           "price",
           "amount",
-          "profit",
+          // "profit",
           "vip1_commission",
           "vip2_commission",
           "vip3_commission",
@@ -342,7 +347,6 @@ export default {
         })
       )
         return;
-
       if (typeof this.category.value !== "number")
         return (this.category.alert = `请选择${this.category.title}`);
       if (!this.classify.value[2])
@@ -359,9 +363,10 @@ export default {
             { key: "VIP3佣金", value: "vip3_commission" },
             { key: "VIP2佣金", value: "vip2_commission" },
             { key: "VIP1佣金", value: "vip1_commission" },
-            { key: "平台利润", value: "profit" },
+            // { key: "平台利润", value: "profit" },
             { key: "库存数量", value: "count" },
-            { key: "价格", value: "price" }
+            { key: "价格", value: "price" },
+            { key: "sku", value: "sku" },
           ];
 
           arr.forEach((v, i) => {
@@ -402,6 +407,7 @@ export default {
       if (spec.value == 1) {
         let o = {};
         [
+          "sku",
           "price",
           "marketprice",
           "profit",
@@ -430,6 +436,7 @@ export default {
         let spec = this.specList.map(v => {
           let o = {};
           [
+            "sku",
             "price",
             "marketprice",
             "profit",
@@ -603,7 +610,6 @@ export default {
     formatClass() {
       let arr = this.classify.value,
         source = this.classify.source;
-      console.error(source);
       return source[arr[0]].children[arr[1]].children[arr[2]];
     },
     formatName(name) {

@@ -23,6 +23,9 @@
           <el-form-item label="团购人数" :label-width="formLabelWidth" prop="tpeople">
             <el-input v-model.number="QformForNotive.tpeople" auto-complete="off"></el-input>
           </el-form-item>
+          <el-form-item label="团购商品库存" :label-width="formLabelWidth" prop="goods_storage">
+            <el-input v-model.number="QformForNotive.goods_storage" auto-complete="off"></el-input>
+          </el-form-item>
           <el-form-item label="团购时限" :label-width="formLabelWidth" prop="thours">
             <el-input v-model.number="QformForNotive.thours" auto-complete="off"></el-input>
           </el-form-item>
@@ -163,6 +166,7 @@
           <el-table-column label="商品价格" prop="goodsprice"></el-table-column>
           <el-table-column label="团购价格" prop="gurouprice"></el-table-column>
           <el-table-column label="团购人数" prop="group_num"></el-table-column>
+          <el-table-column label="团购商品库存" prop="goods_storage"></el-table-column>
           <el-table-column label="团购时限（小时）" width="150" prop="limit_time"></el-table-column>
           <el-table-column label="活动时间" prop="active_time" width="200"></el-table-column>
           <el-table-column label="团购商品状态">
@@ -245,6 +249,15 @@ export default {
           {
             required: true,
             message: "请输入价格,不少于0",
+            trigger: "blur",
+            min: 0,
+            type: "number"
+          }
+        ],
+        goods_storage: [
+          {
+            required: true,
+            message: "请输入库存,不少于0",
             trigger: "blur",
             min: 0,
             type: "number"
@@ -616,7 +629,10 @@ export default {
         group_num: this.QformForNotive.tpeople,
         limit_time: this.QformForNotive.thours,
         start_time: dateStart,
-        end_time: dateEnd
+        end_time: dateEnd,
+        goods:{
+          goods_storage:this.QformForNotive.goods_storage
+        }
       };
       addgroupbuy_api(sendData)
         .then(data => {
@@ -952,6 +968,7 @@ export default {
                 gurouprice: aData.goods_price,
                 group_num: aData.group_num,
                 rule_commend: aData.rule_commend,
+                goods_storage:aData.goods.goods_storage,
                 limit_time: aData.limit_time,
                 active_time:
                   aData.end_time == "2038-01-19 11:14:07"

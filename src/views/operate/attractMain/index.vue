@@ -81,6 +81,7 @@ export default {
 
     // request
     async getItem(){
+      this.img.value = [];
       let res = await api.getBusiness(0);
       this.desc.value = res.data.desc;
       res.data.img.forEach(v=>{
@@ -96,7 +97,7 @@ export default {
       this.isShowForm = false;
       this.canSubmit = true;
 
-      this.getAbout();
+      this.getItem();
     },
     async getUploadToken(){
       let res = await commonReq.getUploadToken();
