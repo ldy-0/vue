@@ -1,24 +1,31 @@
 <template>
+    <div>
 
-      <el-form :inline="true" class="form">
+      <!-- 添加class='form'属性会不显示 -->
+      <el-form :inline="true">
 
         <el-form-item v-if='config.title'>
           <el-button type="primary" icon="el-icon-edit-outline" @click="showForm">{{config.title}}</el-button>
         </el-form-item>
 
+        <!-- btnList -->
+        <el-form-item v-if='config.btnList'>
+          <el-button type="primary" icon="el-icon-edit-outline" @click="emit(index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
+        </el-form-item>
+
         <el-form-item v-if='config.showKeywordSearch || config.placeHolder'>
             <el-input :style="{ width: config.width || '300px' }" :placeholder="config.placeHolder" v-model="keyword"></el-input>
-            <el-button type="primary" icon="el-icon-search" @click="searchByKeyWord">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
 
         <el-form-item label="日期查询" v-if='config.dateWidth'>
-            <el-date-picker :style="{ width: config.dateWidth }" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
+            <el-date-picker :style="{ width: config.dateWidth }" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
             </el-date-picker>
-            <el-button type="primary" icon="el-icon-search" @click="searchByDate">查询</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
 
         <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
-          <el-select placeholder="请选择" v-model='status' @change='changeStatus'> <!-- multiple  -->
+          <el-select placeholder="请选择" v-model='config.status || status' @change='search'> <!-- multiple  -->
             <el-option v-for="item in config.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
@@ -27,7 +34,7 @@
                       :label-width="config.selectWidth" 
                       v-for='(select, selectIndex) in config.selectList' :key='selectIndex' v-if='config.selectList'> 
 
-          <el-select placeholder="请选择" v-model='statusList[selectIndex]' @change='changeStatus(selectIndex)'> <!-- multiple  -->
+          <el-select placeholder="请选择" v-model='statusList[selectIndex]' @change='search($event, selectIndex)'> <!-- multiple  -->
             <el-option v-for="item in select" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
           </el-select>
 
@@ -39,6 +46,7 @@
         </el-form-item>
 
       </el-form>
+    </div>
 
 </template>
 
@@ -54,18 +62,10 @@ export default {
           dateWidth: '400px',
           placeholder: '请输入联系方式',
           selectLabel: '订单状态',
-          // categories: [
-          //   { id: null, title: '全部' },
-          //   { id: 0, title: '已取消' },
-          //   { id: 10, title: '未付款' },
-          //   { id: 20, title: '已付款' },
-          //   { id: 30, title: '已发货' },
-          //   { id: 40, title: '已收货' },
-          //   { id: 50, title: '未评价' },
-          // ],
         }
       }
     },
+
   },
 
   data() {
@@ -74,37 +74,59 @@ export default {
       date: '',
       status: '',
       statusList: [],
+      param: {
+        statusList: [],
+      },
     }
+  },
+
+  watch: {
   },
   
   methods: {
     showForm(){
-      console.log('emit add');
       this.$emit('add');
     },
-    searchByKeyWord() { this.$emit('search', this.keyword); },
-    changeStatus(index) { this.$emit('searchByStatus', index === undefined ? this.status : this.statusList, index) },
-    searchByDate(){
-      console.log('search date:', this.date);
-      let date = {
-        startDate: new Date(this.date[0]).toLocaleDateString(),
-        endDate: new Date(this.date[1]).toLocaleDateString(),
-      };
 
-      this.$emit('searchByDate', date, 'date');
+    emit(index, e){
+      this.$emit('emit', index);
     },
+
+    search(index, selectIndex){
+      let param = this.param,
+          date = this.date;
+
+      param.search = this.keyword;
+
+      // date search
+      param.date = this.date 
+      ? { startDate: new Date(this.date[0]).toLocaleDateString(), endDate: new Date(this.date[1]+86400000).toLocaleDateString(), }
+      : null;
+
+      // single status search
+      if(typeof index === 'number' && typeof selectIndex !== 'number'){
+        param.status = index;
+      }else{
+        param.status = null;
+      }
+
+      if(typeof selectIndex === 'number'){
+        param.statusList[selectIndex] = index;
+      }
+
+      this.$emit('search', param);
+    },
+
     async exportFile() {
       let loading = this.$loading({ fullscreen: true })
 
-      console.log('emit export file');
-      this.$emit('exportFile', loading);
+      this.$emit('export', loading);
 
         // import('@/vendor/Export2Excel').then(excel => {
         //   const tHeader = this.classList.map(v => v.key)
         //   const filterVal = this.classList.map(v => v.value) 
 
         //   let data = this.tableData.map(v => filterVal.map(val => v[val] || '' ) )
-        //   console.log(tHeader, filterVal, data)
 
         //   excel.export_json_to_excel({
         //     header: tHeader,
@@ -115,7 +137,8 @@ export default {
         //   loading.close() 
         // })
     },
-  }
+  },
+
 }
 </script>
 
