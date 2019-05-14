@@ -8,6 +8,11 @@
           <el-button type="primary" icon="el-icon-edit-outline" @click="showForm">{{config.title}}</el-button>
         </el-form-item>
 
+        <!-- btnList -->
+        <el-form-item v-if='config.btnList'>
+          <el-button type="primary" icon="el-icon-edit-outline" @click="emit(index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
+        </el-form-item>
+
         <el-form-item v-if='config.showKeywordSearch || config.placeHolder'>
             <el-input :style="{ width: config.width || '300px' }" :placeholder="config.placeHolder" v-model="keyword"></el-input>
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
@@ -20,7 +25,7 @@
         </el-form-item>
 
         <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
-          <el-select placeholder="请选择" v-model='status' @change='search'> <!-- multiple  -->
+          <el-select placeholder="请选择" v-model='config.status || status' @change='search'> <!-- multiple  -->
             <el-option v-for="item in config.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
@@ -82,6 +87,11 @@ export default {
     showForm(){
       this.$emit('add');
     },
+
+    emit(index, e){
+      this.$emit('emit', index);
+    },
+
     search(index, selectIndex){
       let param = this.param,
           date = this.date;
@@ -106,6 +116,7 @@ export default {
 
       this.$emit('search', param);
     },
+
     async exportFile() {
       let loading = this.$loading({ fullscreen: true })
 

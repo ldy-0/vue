@@ -48,13 +48,11 @@ export default {
     serverShop:'店铺介绍',
     serverAllbuy:'团购',
     serverKill:'砍价',
-    serverSchool:'校区',
-    serverGetFlow:'流量充值',
     serverActivity:'活动',
-    distribution:'分销中心',
-    vote:'投票',
+    distribute:'用户列表',
     evaluation : '评价管理',
     authorityManagement:'权限管理',
+
     //平台
     home: '首页',
     goods: '商品列表',

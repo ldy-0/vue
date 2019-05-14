@@ -58,13 +58,14 @@
 
           <el-button size="mini" type="primary" @click="showSelect(scope.$index, scope.row)" v-if='config.showSelect'>{{config.selectTitle}}</el-button>
           <el-button size="mini" type="danger" @click="showDeleteDialog(scope.$index, scope.row)" v-if='config.showDelete'>删除</el-button>
-          <!-- <slot name='scope.row'></slot> -->
+
         </template>
       </el-table-column>
 
     </el-table>
 
-    <el-pagination background :page-sizes="[10, 20, 30, 50]"
+    <el-pagination ref='pagination'
+                  background :page-sizes="[10, 20, 30, 50]"
                   :current-page="query.page"
                   :page-size="query.limit"
                   :total="total"
@@ -114,7 +115,7 @@ export default {
         limit: 10,
         page: 1,
         keyWord: '',
-      }
+      },
     }
   },
   
@@ -156,18 +157,24 @@ export default {
     changeState(index, row){
       this.$emit('changeState', row);
     },
+
     changeSize(val){
       this.query.limit = val;
       this.query.page = 1;
       this.$emit('change', this.query);
     },
+
     changePage(val){
       this.query.page = val;
       this.$emit('change', this.query);
     },
+
     init(){
       this.query.page = 1;
       this.query.keyWord = '';
+
+      // reset pagination when dynamic change current-page property value
+      this.$refs.pagination.lastEmittedPage = 1;
     }
   }
 }

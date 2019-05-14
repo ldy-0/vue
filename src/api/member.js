@@ -37,11 +37,37 @@ import request from '@/utils/request'
     });
   }
 
+function getIncomeList(id, data){
+  return request({
+    url: `/api/v2/seller/member/${id}/edit`,
+    method: "get",
+    params: data
+  });
+}
+
+function getTip(data){
+  return request({
+    url: `/api/v2/seller/inviter`,
+    method: "get",
+    params: data
+  });
+}
+
+function saveTip(data){
+  return request({
+    url: `/api/v2/seller/inviter`,
+    method: "post",
+    data
+  });
+}
 
   export default {
     getMember_api,
     changeMember_api,
     UpDownMember_api,
     getMemberApply_api,
-    auditMemberApply_api
+    auditMemberApply_api,
+    getIncomeList,
+    getTip,
+    saveTip,
   }

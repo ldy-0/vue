@@ -80,6 +80,7 @@
   <div v-if="[7, 8].indexOf(thirdDialogConfig.status) !== -1">
     <el-form label-width='100px'>
       <!-- <custom-input :obj="postName"></custom-input> -->
+      <custom-select :obj='postName'></custom-select>
       <number :obj="post"></number>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -127,6 +128,7 @@ import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
 import api from '@/api/order'
 import apiOfcomment from '@/api/comment'
+import logistic from './logistic.js';
 
 export default {
   components: {
@@ -149,6 +151,8 @@ export default {
     keys2(){ return this.formDataTwo ? Object.keys(this.formDataTwo) : []; },
   },
 
+  mixins: [logistic],
+
   data() {
     return {
       detail:{},
@@ -165,8 +169,8 @@ export default {
         title: '',
         status: 0, // 4:添加分类，5：编辑分类， 6：四级分类列表
       },
-      post:{ title: '物流单号：', value: '', alert: null, },
-      postName:{ title: '物流公司：', value: '', alert: null, },
+      post:{ title: '物流单号', value: '', alert: null, },
+      postName:{ title: '物流公司', value: '', alert: null, categories: [], },
       formData: {
         order_sn: { title: '订单编号:', value: '', alert: null, },
         goods_count: { title: '购买数量:', value: '', alert: null, },
@@ -181,7 +185,7 @@ export default {
         voucher_price: { title: '优惠券:', value: '', alert: null, },
         order_points: { title: '积分抵扣:', value: '', alert: null, },
         pd_amount: { title: '余额抵扣:', value: '', alert: null, },
-        shipping_code: { title: '物流信息:', value: '', alert: null, },
+        logistic: { title: '物流信息:', value: '', alert: null, },
         order_message: { title: '备注:', value: '', alert: null, },
       },
       formDataTwo: {
@@ -285,9 +289,13 @@ export default {
       item.name = item.order_reciver_info.name;
       item.phone = item.order_reciver_info.phone;
       item.address = item.order_reciver_info.address;
+      
+      item.logistic = '';
       if(item.shipping_code){
+        item.logistic = item.shipping_code[0] ? item.shipping_code : '';
         item.shipping_code = item.shipping_code[1];
       }
+
       let strList = this.exchange(selectList, arr.map(v => item[v]), 'id', 'title');  
       arr.forEach((v, i) => item[`${v}Str`] = strList[i]);
 
@@ -344,7 +352,7 @@ export default {
       this.order_id = status.order_id;
       if(index ==0){
         this.post.value = '';
-        this.postName.value = '';
+        this.postName.value = 'YTO'; 
         this.thirdDialogConfig.status = typeof status === 'number' ? status : 8;
       }else if(index ==1){
         let res = await apiOfcomment.getAssessList({search:status.order_sn});
@@ -397,14 +405,17 @@ export default {
     }, 
     async submit(){
       let paramArr = ['post'],
+          company = this.postName,
           param;
       if(paramArr.some(v => { return this[v].value ? false : this[v].alert = `请输入${this[v].title}`; })) return;
+
+      if(typeof company.value !== 'number' && !company.value) return company.alert = `请选择${company.title}`;
       
       this.stopSubmit = true;
       param = {
         order_id:this.order_id,
         state_type:'deliver_goods',
-        shipping_code:[this.postName.value,this.post.value]
+        shipping_code:[company.categories.filter(v => v.id == company.value)[0].name, company.value, this.post.value]
       }
       let res = await api.changeOrder_api(param);
       if(res.status ==0) this.$message.success('发货成功');
@@ -447,12 +458,12 @@ export default {
         limit:0,
         order_type:1,
       }
-      if(this.listQuery.order_state){
+      if(typeof this.listQuery.order_state === 'number'){
         send.order_state = this.listQuery.order_state
       }
       let res = await api.getOrderList_api(send, this);
       let allOrder =null;
-      if(res.status ==0){
+      if(res.status ==0 && res.data){
         res.data.forEach(this.format);
         allOrder = res.data;
       }
@@ -464,9 +475,10 @@ export default {
         });
       }
       import("@/vendor/Export2Excel").then(excel => {
-        const tHeader = ["订单号", "购买数量", "订单总价", "支付金额", "下单时间","购买时间","买家名称","买家电话","买家地址","优惠券","积分抵扣","余额抵扣","物流信息","备注","商品"];
+        const tHeader = ["订单号", '订单状态', "购买数量", "订单总价", "支付金额", "下单时间","购买时间","买家名称","买家电话","买家地址","优惠券","积分抵扣","余额抵扣","物流信息","备注","商品"];
         const filterVal = [
           "order_sn",
+          'order_state',
           "goods_count",
           "order_amount",
           "shipping_fee",
@@ -478,7 +490,7 @@ export default {
           "voucher_price",
           "order_points",
           "pd_amount",
-          "shipping_code",
+          "logistic",
           "order_message",
           "goods_name"
         ];
@@ -498,7 +510,7 @@ export default {
           if (j === "timestamp") {
             return parseTime(v[j]);
           } else {
-            return v[j];
+            return j === 'logistic' ? typeof v[j] === 'object' ? v[j].join(', ') : v[j] : v[j];
           }
         })
       );
@@ -506,7 +518,8 @@ export default {
   },
 
   created(){
-    // let arr = new Array(10);
+    let str = 'abca';
+    // split initial value undefined, search, match, replace initial value ''
 
     this.getList();
   },

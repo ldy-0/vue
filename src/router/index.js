@@ -143,7 +143,7 @@ export let asyncRouterMapSeller = [
       path: 'index',
       component: () => import('@/views/distribution/index'),
       name: 'distribution',
-      meta: { title: '分销列表', icon: 'fenxiao', noCache: true }
+      meta: { title: 'distribute', icon: 'fenxiao', noCache: true }
     }]
   },
   {

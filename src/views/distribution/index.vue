@@ -90,15 +90,15 @@ export default {
       },
 
       tableConfig: {
-        showOperate: true,
-        detailTitle: "查看下级",
+        // showOperate: true,
+        // detailTitle: "查看下级",
         classList: [
           { key: "头像", value: "member_avatar", isAvatar: true },
           { key: "昵称", value: "member_truename" },
           { key: "联系方式", value: "member_mobile" },
-          { key: "累计佣金", value: "total_rc_balance" },
-          { key: "佣金", value: "available_rc_balance" },
-          { key: "上级", value: "inviter_nick" }
+          // { key: "累计佣金", value: "total_rc_balance" },
+          // { key: "佣金", value: "available_rc_balance" },
+          // { key: "上级", value: "inviter_nick" }
         ]
       },
       list: [],

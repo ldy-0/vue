@@ -29,7 +29,7 @@
 <div>
 
 <el-header class="header">
-  <custom-head :config='headConfig' @add='updateForm(1)' @search='search'></custom-head> 
+  <custom-head :config='headConfig' @emit='emitHandle' @search='search'></custom-head> 
 </el-header>
 
 <custom-table :config='tableConfig' 
@@ -40,14 +40,31 @@
                 @update='updateForm'
                 @look='lookItem'
                 @judge='lockItem'
+                @modify='dispatch'
                 @change='change'></custom-table>
 
 
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
+  <div v-if="dialogConfig.status === 5">
+    <el-form label-width='100px'>
+      <mobile :obj='tipInfo'></mobile>
+    </el-form>
+
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="closeDialog">取消</el-button>
+      <el-button type="primary" :disabled="clicked" :loading="clicked" @click="saveTip">确 定</el-button>
+    </div>
+  </div>
+
+  <div v-if="dialogConfig.status === 4">
+    <custom-head ref='head' :config='incomeHeadConfig' @search='incomeSearch'></custom-head>
+    <custom-table ref='incomeTable' :config='incomeTableConfig' :data='incomeList' :total='incomeTotal' :isLoading='incomeLoading' @change='incomeChange'></custom-table>
+  </div>
+
   <!-- look -->
   <div v-if='dialogConfig.status === 3'>
     <el-header class="header">
-      <custom-head :config='headConfig' @search='searchTwo'></custom-head> 
+      <custom-head :config='twoHeadConfig' @search='searchTwo'></custom-head> 
     </el-header>
 
     <custom-table :config='twoTableConfig' 
@@ -62,6 +79,8 @@
   <div v-if='dialogConfig.status === 2'>
     <el-form label-width='100px'>
       <number :obj='score'></number>
+      
+      <custom-select :obj="scoreCategory"></custom-select>
     </el-form>
 
     <div slot="footer" class="dialog-footer">
@@ -112,7 +131,8 @@ import customHead from '@/components/customHead';
 import customInput from '@/components/input'
 import customRadio from '@/components/radio'
 import number from '@/components/number'
-import integer from '@/components/integer'
+import mobile from '@/components/mobile'
+import customSelect from '@/components/select'
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
@@ -125,7 +145,8 @@ export default {
     customInput,
     customRadio,
     number,
-    integer,
+    mobile,
+    customSelect,
     editor,
   },
 
@@ -138,11 +159,17 @@ export default {
       member_id:null,
       dialogConfig: {
         title: '',
-        status: 0, // 1:添加分类，2：编辑分类， 3：二级分类列表
+        status: 0, // 1:添加分类，2：编辑分类， 3：二级分类列表 4: 收入明细 5: 温馨提示
       },
       img: { title: '主图', value: [], limit: 1, alert: null },
       score: { title: '德分数量', value: '', alert: null, },
+      scoreCategory: { title: '类别', value: '', alert: null, categories: [
+        { id: 1, name: '互助德分' },
+        { id: 2, name: '消费德分' },
+      ], },
       stopSubmit: false,
+      tipInfo: { title: '推荐码', value: '', alert: null, },
+      clicked: false,
 
       headConfig: {
         placeHolder: '请输入手机号',
@@ -152,7 +179,10 @@ export default {
           { id: 2, title: 'vip2' },
           { id: 3, title: 'vip3' },
           { id: 4, title: 'vip4' },
-        ]
+        ],
+        btnList: [
+          { titleKey: 'name', name: '温馨提示' },
+        ],
       },
 
       keys: ['member_truename', 'vip_level', 'total_rc_balance', 'available_rc_balance','member_mobile','inviter_nick'],
@@ -185,14 +215,21 @@ export default {
         detailTitle: '详情',
         lookTitle: '查看下级',
         judge: [ 'lock_state', '关闭', '开启'],
+        btnList: [
+           { key: 'member_id', value: '收入明细' },
+        ],
         classList: [
           { key: '头像', value: 'member_avatar', isAvatar: true, },
           { key: '昵称', value: 'member_truename' },
           { key: '姓名', value: 'member_nick' },
           { key: '联系方式', value: 'member_mobile' },
           { key: '等级', value: 'vip_level' },
-          { key: '累计德分', value: 'total_rc_balance' },
-          { key: '德分', value: 'available_rc_balance' },
+          { key: '总互转德分', value: 'total_rc_balance' },
+          { key: '当前互转德分', value: 'recharge_rc_balance' },
+          { key: '总消费德分', value: 'total_available_rc_balance' },
+          { key: '当前消费德分', value: 'available_rc_balance' },
+          { key: '总余额', value: 'total_predeposit' },
+          { key: '当前余额', value: 'available_predeposit' },
           { key: '邀请码', value: 'member_mobile' },
           { key: '上级', value: 'inviter_nick' },
         ],
@@ -202,8 +239,19 @@ export default {
       query: {
         page: 1,
         limit: 10,
+        is_vip: 1,
       },
       isLoading: true,
+      twoHeadConfig: {
+        placeHolder: '请输入手机号',
+        categories: [
+          { id:'', title: '全部' },
+          { id: 1, title: 'vip1' },
+          { id: 2, title: 'vip2' },
+          { id: 3, title: 'vip3' },
+          { id: 4, title: 'vip4' },
+        ]
+      },
       // two List
       twoTableConfig: {
         classList: [
@@ -212,8 +260,12 @@ export default {
           { key: '姓名', value: 'member_nick' },
           { key: '联系方式', value: 'member_mobile' },
           { key: '等级', value: 'vip_level' },
-          { key: '累计德分', value: 'total_rc_balance' },
-          { key: '德分', value: 'available_rc_balance' },
+          { key: '总互转德分', value: 'total_rc_balance' },
+          { key: '互转德分', value: 'recharge_rc_balance' },
+          { key: '总消费德分', value: 'total_available_rc_balance' },
+          { key: '消费德分', value: 'available_rc_balance' },
+          { key: '总余额', value: 'total_predeposit' },
+          { key: '当前余额', value: 'available_predeposit' },
         ],
       },
       twoList: [],
@@ -221,8 +273,30 @@ export default {
       twoQuery: {
         page: 1,
         limit: 10,
+        is_vip: 1,
       },
       twoIsLoading: true,
+      incomeHeadConfig: {
+        status: null,
+        selectLabel: '类型',
+        categories: [
+          { id: 1, name: '余额明细' },
+          { id: 2, name: '德分明细' },
+          { id: 3, name: '充值德分明细' },
+          { id: 4, name: '激活德分明细' },
+        ]
+      },
+      incomeTableConfig: {
+        classList: [
+          { key: '描述', value: 'desc', },
+          { key: '金额', value: 'price', },
+          { key: '时间', value: 'time', },
+        ],
+      },
+      incomeParam: {},
+      incomeList: [],
+      incomeTotal: 10,
+      incomeLoading: false,
     }
   },
   methods: {
@@ -242,6 +316,7 @@ export default {
       send.inviter_id = id
       let res = await api.getMember_api(send, this);
       // res.data.forEach(this.format);
+      console.error(res.data);
 
       this.twoList = res.data;
       this.twoTotal = res.pagination.total;
@@ -256,6 +331,15 @@ export default {
       }
     },
     //操作============================================
+    emitHandle(index){
+      // let codePoint = 0x22222 - 0x10000;
+      // console.error(codePoint.toString(2).split(/(\d{10})$/g));
+
+      if(index === 0){
+        this.getTip();
+        this.dialogConfig.status = 5;
+      }
+    },
     showDetail(item){
       let dialogConfig = this.dialogConfig,
           formData2 = this.formData2,
@@ -268,11 +352,18 @@ export default {
       this.formData.member_avatar.value = item.member_avatar;
       this.formData.card_mall = item.card_mall;
     },
+
     updateForm(status){
       this.dialogConfig.status = typeof status === 'number' ? status : 2;
       this.member_id = status.member_id;
-      this.score.value = status.available_rc_balance || '';
+
+      this.score.value = '';
+      this.score.alert = null;
+
+      this.scoreCategory.value = '';
+      this.scoreCategory.alert = null;
     },
+
     lookItem(item){
       let dialogConfig = this.dialogConfig;  
 
@@ -280,6 +371,7 @@ export default {
 
       this.getTwoList(item.member_id);
     },
+
     async lockItem(item){
       let send = {
         member_id:item.member_id,
@@ -299,27 +391,36 @@ export default {
       }
       this.getList();
     },
+
     closeDialog(){
       let config = this.dialogConfig;
 
       config.status = 0;
     },
     async submit(){
-      let paramArr = ['title'],
+      let aValidate = ['score', 'scoreCategory'],
           query = this.query,
-          param;
+          param, error;
+
+      aValidate.forEach(v => { if(!this[v].value) this[v].alert = `${this[v].title}不能为空`; });
+
+      if(aValidate.filter(v => this[v].alert)[0]) return ;
+
       this.stopSubmit = true;
 
       param = {
         member_id:this.member_id,
         value: this.score.value,
+        type: this.scoreCategory.value,
       };
+
       let res = await api.changeMember_api(param,this);
       if(res.status ==0){
         this.$message({message:'修改成功',type:'success'});
       }else{
         this.$message({message:'修改失败',type:'error'});
       }
+
       this.dialogConfig.status = 0;
       this.stopSubmit = false;
       this.getList();
@@ -329,6 +430,72 @@ export default {
       // let res = await api.deleteClass(id, null, this);
 
       this.getList();
+    },
+    dispatch(item, index){
+      // console.error(item, index);
+      this.dialogConfig.status = 4;
+      this.incomeParam.id = item.member_id;
+      this.incomeParam.status = this.incomeHeadConfig.status = 1;
+      this.incomeParam.page = 1;
+
+      this.getIncomeList(true);
+    },
+
+    incomeFormat(item){
+      item.time = item.lg_addtime || item.rcblog_addtime;
+      item.price = item.lg_av_amount || item.recharge_amount;
+      item.desc = item.lg_desc || item.rcblog_description;
+    },
+
+    async getIncomeList(isReset){
+      let param = { 
+        page: this.incomeParam.page,
+        limit: this.incomeParam.limit, 
+        type: this.incomeParam.status,
+      };
+
+      let res = await api.getIncomeList(this.incomeParam.id, param);
+      
+      if(res && res.data){
+        res.data.forEach(this.incomeFormat);
+
+        this.incomeList = res.data;
+        this.incomeTotal = res.pagination.total;
+      }
+
+    },
+
+    async getTip(){
+      let res = await api.getTip();
+
+      if(res && (res.data || typeof res.data === 'string')){
+        this.tipInfo.value = res.data;
+        this.tipInfo.alert = null;
+      }
+
+      if(res.error){
+        this.$message.error(res.error);
+      }
+    },
+
+    async saveTip(){
+      let tip = this.tipInfo,
+          param = {};
+
+      if(tip.alert) return ;
+
+      this.clicked = true;
+
+      param.value = tip.value;
+
+      let res = await api.saveTip(param); 
+
+      if(res && res.data) this.$message.success('修改成功');
+
+      if(res.error) this.$message.error(res.error);
+
+      this.clicked = false;
+      this.closeDialog();
     },
     //分页 查询==========================================
     change(param){
@@ -346,10 +513,23 @@ export default {
       this.twoQuery.vip_level = param.status;
       this.getTwoList();
     },
+    incomeSearch(param){
+      this.incomeParam.page = 1;
+      this.incomeHeadConfig.status = this.incomeParam.status = param.status;
+
+      this.$refs.incomeTable.init();
+
+      this.getIncomeList(true);
+    },
     changeTwo(param){
       this.twoQuery.limit = param.limit;
       this.twoQuery.page = param.page;
       this.getTwoList();
+    },
+    incomeChange(param){
+      this.incomeParam.limit = param.limit;
+      this.incomeParam.page = param.page;
+      this.getIncomeList();
     },
   },
 
