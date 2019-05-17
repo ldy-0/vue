@@ -24,25 +24,30 @@
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
 
+        <!-- select -->
         <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
           <el-select placeholder="请选择" v-model='config.status || status' @change='search'> <!-- multiple  -->
             <el-option v-for="item in config.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
 
-        <el-form-item :label="config.selectLabelList && config.selectLabelList[selectIndex]" 
-                      :label-width="config.selectWidth" 
+        <!-- selectList -->
+        <el-form-item :label="select.title || select.name || select.label" 
+                      :label-width="select.width" 
                       v-for='(select, selectIndex) in config.selectList' :key='selectIndex' v-if='config.selectList'> 
 
-          <el-select placeholder="请选择" v-model='statusList[selectIndex]' @change='search($event, selectIndex)'> <!-- multiple  -->
-            <el-option v-for="item in select" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
+          <el-select placeholder="请选择" v-model='select.value' @change='search($event, selectIndex)'> 
+            <el-option v-for="item in select.list" 
+                       :key="item[select.titleKey]" 
+                       :label="item[select.titleKey]" 
+                       :value="item[select.valueKey]"></el-option>
           </el-select>
 
         </el-form-item>
 
-        <el-form-item label="" v-if='config.showExport'>
-          <el-button  type="primary" icon="document" @click="exportFile">导出Excel</el-button>
-          <!-- <span class="hbs-inline-tips">导出所有数据，这个过程可能会需要花费  <span class="hbs-hot">几分钟</span> 的时间，请耐心等待</span> -->
+        <!-- Export -->
+        <el-form-item label="" v-if='config.showExport || config.export || config.exportTitle'>
+          <el-button type="primary" icon="document" @click="exportFile">{{ config.exprotTitle || '导出Excel' }}</el-button>
         </el-form-item>
 
       </el-form>
@@ -110,6 +115,7 @@ export default {
         param.status = null;
       }
 
+      // selectList
       if(typeof selectIndex === 'number'){
         param.statusList[selectIndex] = index;
       }
