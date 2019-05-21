@@ -37,14 +37,16 @@
           <number :obj='price'></number>
           <integer :obj='amount'></integer>
           <!-- <number :obj='profit'></number> -->
-          <number :obj='vip1_commission'></number>
-          <number :obj='vip2_commission'></number>
-          <number :obj='vip3_commission'></number>
-          <number :obj='vip4_commission'></number>
+          <div v-if='category.value == 0'>
+            <number :obj='vip1_commission'></number>
+            <number :obj='vip2_commission'></number>
+            <number :obj='vip3_commission'></number>
+            <number :obj='vip4_commission'></number>
+          </div>
         </div>
         <div v-if="spec.value == 2">
           <el-form-item>
-            <multi-sku :classList='skuClassList' :skuList='skuList' :limit='5' @update='updateMultiSku'></multi-sku>
+            <multi-sku :type='category.value' :classList='skuClassList' :skuList='skuList' :limit='5' @update='updateMultiSku'></multi-sku>
           </el-form-item>
         </div>
 
@@ -333,12 +335,18 @@ export default {
           "marketprice",
           "price",
           "amount",
-          // "profit",
           "vip1_commission",
           "vip2_commission",
           "vip3_commission",
           "vip4_commission"
         );
+
+      // vip
+      if(this.category.value){
+        paramArr = paramArr.slice(0, 4);
+        this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 0;
+      }
+
       if (
         paramArr.some(v => {
           return this[v].value
@@ -368,6 +376,11 @@ export default {
             { key: "价格", value: "price" },
             { key: "sku", value: "sku" },
           ];
+
+          if(this.category.value){
+            arr = arr.slice(4);
+            item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
+          }
 
           arr.forEach((v, i) => {
             if (!(item[v.value] > 0)) err = `${v.key}必须为大于零的数字`;

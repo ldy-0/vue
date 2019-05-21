@@ -236,6 +236,9 @@ export default {
       let config = this.dialogConfig;
 
       config.status = 0;
+
+      this.twoQuery.page = 1;
+      this.twoQuery.limit = 10;
     },
     //=====================================
     updateFormTwo(status){
@@ -261,6 +264,10 @@ export default {
           tableConfig = this.tableConfig;
 
       config.status = 0;
+
+      this.thirdQuery.page = 1;
+      this.thirdQuery.limit = 10;
+
       tableConfig.lookTitle = '查看下级';
     },
     //======================================
@@ -341,8 +348,8 @@ export default {
         v.name = v.storegc_name;
         v.img = [ { url: v.storegc_pic } ];
       });
-      this.list = res.data;
-      this.total = this.list.length
+      this.list = res.data || [];
+      this.total = res.pagination ? res.pagination.total : 0;
       this.isLoading = false
     },
     async getTwoList() { //获取列表
@@ -358,8 +365,8 @@ export default {
         v.img = [ { url: v.storegc_pic } ];
       });
 
-      this.twoList = res.data;
-      this.twoTotal = this.twoList.length
+      this.twoList = res.data || [];
+      this.twoTotal = res.pagination ? res.pagination.total : 0;
       this.twoIsLoading = false
     },
     async getThirdList() { //获取列表
@@ -375,8 +382,8 @@ export default {
         v.img = [ { url: v.storegc_pic } ];
       });
 
-      this.thirdList = res.data;
-      this.thirdTotal = this.thirdList.length;
+      this.thirdList = res.data || [];
+      this.thirdTotal = res.pagination ? res.pagination.total : 0;
       this.thirdIsLoading = false;
     },
     //delete=======================================
@@ -411,14 +418,17 @@ export default {
     change(param){
       this.query.limit = param.limit;
       this.query.page = param.page;
+      this.getList();
     },
     changeTwo(param){
       this.twoQuery.limit = param.limit;
       this.twoQuery.page = param.page;
+      this.getTwoList();
     },
     changeThird(param){
       this.thirdQuery.limit = param.limit;
       this.thirdQuery.page = param.page;
+      this.getThirdList();
     },
   },
 

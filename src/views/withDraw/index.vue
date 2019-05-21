@@ -140,6 +140,7 @@ export default {
           { key: '姓名', value: 'member_nick' },
           { key: '联系方式', value: 'member_mobile' },
           { key: '提现金额', value: 'pdc_amount' },
+          { key: '可提现金额', value: 'available_predeposit' },
           { key: '状态', value: 'statusStr' },
         ],
       },

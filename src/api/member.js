@@ -61,6 +61,22 @@ function saveTip(data){
   });
 }
 
+function changeStatus(id, data){
+  return request({
+    url: `/api/v2/seller/member/${id}/setting`,
+    method: "put",
+    data
+  });
+}
+
+function changeMallStatus(id, data){
+  return request({
+    url: `/api/v2/seller/member/${id}`,
+    method: "put",
+    data
+  });
+}
+
   export default {
     getMember_api,
     changeMember_api,
@@ -70,4 +86,6 @@ function saveTip(data){
     getIncomeList,
     getTip,
     saveTip,
+    changeStatus,
+    changeMallStatus,
   }

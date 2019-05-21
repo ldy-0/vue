@@ -217,6 +217,10 @@ export default {
         judge: [ 'lock_state', '关闭', '开启'],
         btnList: [
            { key: 'member_id', value: '收入明细' },
+           { key: 'is_freeze', status: 0, value: '冻结' },
+           { key: 'is_freeze', status: 1, value: '解冻' },
+          //  { key: 'card_mall', status: 2, value: '上架' },
+          //  { key: 'card_mall', status: 1, value: '下架' },
         ],
         classList: [
           { key: '头像', value: 'member_avatar', isAvatar: true, },
@@ -332,9 +336,6 @@ export default {
     },
     //操作============================================
     emitHandle(index){
-      // let codePoint = 0x22222 - 0x10000;
-      // console.error(codePoint.toString(2).split(/(\d{10})$/g));
-
       if(index === 0){
         this.getTip();
         this.dialogConfig.status = 5;
@@ -433,12 +434,28 @@ export default {
     },
     dispatch(item, index){
       // console.error(item, index);
-      this.dialogConfig.status = 4;
-      this.incomeParam.id = item.member_id;
-      this.incomeParam.status = this.incomeHeadConfig.status = 1;
-      this.incomeParam.page = 1;
+      // 收入明细
+      if(index === 0){
+        this.dialogConfig.status = 4;
+        this.incomeParam.id = item.member_id;
+        this.incomeParam.status = this.incomeHeadConfig.status = 1;
+        this.incomeParam.page = 1;
 
-      this.getIncomeList(true);
+        this.getIncomeList(true);
+      }
+
+      // 冻结
+      if(index === 1) this.changeStatus(item, 1);
+
+      // 解冻
+      if(index === 2) this.changeStatus(item, 0);
+
+      // 下架
+      // if(index === 3) this.changeMallStatus(item, 1);
+
+      // 上架
+      // if(index === 4) this.changeMallStatus(item, 2);
+
     },
 
     incomeFormat(item){
@@ -463,6 +480,26 @@ export default {
         this.incomeTotal = res.pagination.total;
       }
 
+    },
+
+    async changeStatus(item, status){
+      let param = { status };
+
+      let res = await api.changeStatus(item.member_id, param);
+
+      this.$message({ type: res.error ? 'error' : 'success', message: res.error || '修改成功' });
+
+      this.getList();
+    },
+    
+    async changeMallStatus(item, status){
+      let param = { status };
+
+      let res = await api.changeMallStatus(item.member_id, param);
+
+      this.$message({ type: res.error ? 'error' : 'success', message: res.error || '修改成功' });
+      console.error(res);
+      this.getList();
     },
 
     async getTip(){

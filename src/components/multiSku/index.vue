@@ -61,7 +61,10 @@ export default {
     limit: {
       type: Number,
       default(){ return Infinity }
-    }
+    },
+    type: {
+      type: Number 
+    },
   },
 
   data(){
@@ -106,7 +109,7 @@ export default {
   computed: {
     skusTitle(){
       if(this.skuClassList && this.skuClassList.length){
-        return this.skuClassList.map((v, i) => { return { key: v.name, value: i } }).concat(this.attributeList);
+        return this.skuClassList.map((v, i) => { return { key: v.name, value: i } }).concat(this.type === 1 ? this.attributeList.slice(0, 4) : this.attributeList);
       }
     },
     skuArr(){
