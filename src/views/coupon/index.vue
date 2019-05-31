@@ -94,7 +94,7 @@ export default {
           { key: '数量', value: 'vouchertemplate_total' },
           { key: '有效期', value: 'vouchertemplate_aging' },
           { key: '使用条件', value: 'vouchertemplate_limit' },
-          { key: '剩余', value: 'vouchertemplate_total' },
+          { key: '剩余', value: 'rest' },
         ],
       },
       list: [],

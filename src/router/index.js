@@ -207,19 +207,19 @@ export let asyncRouterMapSeller = [
       }
     ]
   },
-  {
-    path: "/memberAuth", //会员审核列表
-    component: Layout,
-    meta: { title: "memberAuth", icon: "user", roles: "memberAuth" },
-    children: [
-      {
-        path: "auth",
-        component: () => import("@/views/member/auth/index"),
-        name: "memberAuth",
-        meta: { title: "会员审核列表", noCache: true, icon: "application" }
-      }
-    ]
-  },
+  // {
+  //   path: "/memberAuth", //会员审核列表
+  //   component: Layout,
+  //   meta: { title: "memberAuth", icon: "user", roles: "memberAuth" },
+  //   children: [
+  //     {
+  //       path: "auth",
+  //       component: () => import("@/views/member/auth/index"),
+  //       name: "memberAuth",
+  //       meta: { title: "会员审核列表", noCache: true, icon: "application" }
+  //     }
+  //   ]
+  // },
   {
     path: "/infoManagement", //运营
     component: Layout,

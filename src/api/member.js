@@ -77,6 +77,14 @@ function changeMallStatus(id, data){
   });
 }
 
+function deleteMember(id, data){
+  return request({
+    url: `/api/v2/seller/member/${id}`,
+    method: "delete",
+    data
+  });
+}
+
   export default {
     getMember_api,
     changeMember_api,
@@ -88,4 +96,5 @@ function changeMallStatus(id, data){
     saveTip,
     changeStatus,
     changeMallStatus,
+    deleteMember,
   }

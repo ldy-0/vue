@@ -244,7 +244,7 @@ export default {
           { key: '商品名称', value: 'goods_name' },
           { key: '订单号', value: 'order_sn' },
           { key: '金额(￥)', value: 'order_amount' },
-          { key: '数量', value: 'order_amount' },
+          { key: '数量', value: 'goods_count' },
           { key: '买家', value: 'name' },
           { key: '联系方式', value: 'phone' },
           { key: '订单状态', value: 'order_state' },

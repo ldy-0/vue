@@ -41,6 +41,7 @@
                 @look='lookItem'
                 @judge='lockItem'
                 @modify='dispatch'
+                @delete='deleteItem'
                 @change='change'></custom-table>
 
 
@@ -78,7 +79,7 @@
   <!-- add/minus score -->
   <div v-if='dialogConfig.status === 2'>
     <el-form label-width='100px'>
-      <number :obj='score'></number>
+      <digit :obj='score'></digit>
       
       <custom-select :obj="scoreCategory"></custom-select>
     </el-form>
@@ -131,6 +132,7 @@ import customHead from '@/components/customHead';
 import customInput from '@/components/input'
 import customRadio from '@/components/radio'
 import number from '@/components/number'
+import digit from '@/components/digit'
 import mobile from '@/components/mobile'
 import customSelect from '@/components/select'
 import editor from '@/components/Tinymce'
@@ -144,6 +146,7 @@ export default {
     customTable,
     customInput,
     customRadio,
+    digit,
     number,
     mobile,
     customSelect,
@@ -164,7 +167,7 @@ export default {
       img: { title: '主图', value: [], limit: 1, alert: null },
       score: { title: '德分数量', value: '', alert: null, },
       scoreCategory: { title: '类别', value: '', alert: null, categories: [
-        { id: 1, name: '互助德分' },
+        { id: 1, name: '互转德分' },
         { id: 2, name: '消费德分' },
       ], },
       stopSubmit: false,
@@ -211,6 +214,7 @@ export default {
       },
       tableConfig: {
         showOperate: true,
+        showDelete: true,
         updateTitle: '增加/减少德分',
         detailTitle: '详情',
         lookTitle: '查看下级',
@@ -285,9 +289,10 @@ export default {
         selectLabel: '类型',
         categories: [
           { id: 1, name: '余额明细' },
-          { id: 2, name: '德分明细' },
-          { id: 3, name: '充值德分明细' },
-          { id: 4, name: '激活德分明细' },
+          { id: 2, name: '互转德分明细' },
+          { id: 3, name: '互转德分充值明细' },
+          { id: 4, name: '消费德分明细' },
+          { id: 5, name: '消费德分充值明细' },
         ]
       },
       incomeTableConfig: {
@@ -426,9 +431,13 @@ export default {
       this.stopSubmit = false;
       this.getList();
     },
-    async deleteItem(id){
-      console.error('delete Item', id);
-      // let res = await api.deleteClass(id, null, this);
+    async deleteItem(item){
+      let res = await api.deleteMember(item.member_id, null);
+
+      if(res) this.$message({
+        type: res.error ? 'error' : 'success',
+        message: res.error || '删除成功',
+      });
 
       this.getList();
     },
@@ -460,7 +469,7 @@ export default {
 
     incomeFormat(item){
       item.time = item.lg_addtime || item.rcblog_addtime;
-      item.price = item.lg_av_amount || item.recharge_amount;
+      item.price = item.lg_av_amount || item.recharge_amount || item.available_amount;
       item.desc = item.lg_desc || item.rcblog_description;
     },
 

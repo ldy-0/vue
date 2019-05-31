@@ -132,7 +132,7 @@ export default {
       tableConfig: {
         showOperate: true,
         showDetail: true,
-        showFinish:['state','已处理'],
+        showFinish:['state','处理'],
         classList: [
           { key: '日期', value: 'pdc_addtime' },
           { key: '头像', value: 'member_avatar', isAvatar: true, },

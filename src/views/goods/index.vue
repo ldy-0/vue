@@ -228,16 +228,19 @@ export default {
       this.query.gc_id = param[2];
       this.getList();
     },
+
     async updateForm(status) {
       let goods;
 
       this.dialogConfig.status = typeof status === "number" ? status : 2;
 
+      // Edit
       if (status != 1) {
         let res = await api.getGoods(status.goods_commonid);
         if (res.error) return this.$message.error(res.error);
         goods = res.data;
       }
+
       // get first class list
       let classRes = await classAPI.getClassList({ parent_id: 0 });
       classRes.data.forEach(v => {
@@ -523,6 +526,8 @@ export default {
         source = this.classify.source;
 
       selClass = source.find(v => v.value == val[0]);
+      if(!selClass) return ;
+
       if (val[1]) selClass = selClass.children.find(v => v.value == val[1]);
 
       let res = await classAPI.getClassList({ parent_id: val[1] || val[0] });
