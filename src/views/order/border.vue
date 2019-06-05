@@ -454,46 +454,63 @@ export default {
             //订单导出
     async handleDownload() {
       //请求全部订单数据
-            let send = {
-        limit:0,
-        order_type:9,
-      }
-      if(typeof this.listQuery.order_state === 'number'){
-        send.order_state = this.listQuery.order_state
+      let send = {
+        limit: 0,
+        order_type: 9
+      };
+      if (typeof this.listQuery.order_state === "number") {
+        send.order_state = this.listQuery.order_state;
       }
       let res = await api.getOrderList_api(send, this);
-      let allOrder =null;
-      if(res.status ==0 && res.data){
+      let allOrder = null;
+      if (res.status == 0 && res.data) {
         res.data.forEach(this.format);
         allOrder = res.data;
-        allOrder.forEach(v=>{
-          v.spec="";
-          if(v.order_goods[0].goods_spec){
-            let specValue = Object.values(v.order_goods[0].goods_spec);
-            specValue.forEach(i=>{
-              v.spec += i+'/';
-            });
-            v.spec = v.spec.substr(0,v.spec.length-1);
-          }else{
-            v.spec = '单规格商品'
+        if (!allOrder) {
+          return this.$notify({
+            title: "警告",
+            message: "暂无数据",
+            type: "warning"
+          });
+        }
+        allOrder.forEach(item => {
+          let goods = item.order_goods[0];
+          item.goods_name = goods.goods_name;
+          item.goods_num = goods.goods_num;
+          item.goods_pay_price = goods.goods_pay_price;
+          item.goods_serial = goods.goods_serial ? goods.goods_serial : "";
+          item.goods_spec = goods.goods_spec
+            ? JSON.stringify(goods.goods_spec)
+            : "";
+          let reciver_info = item.order_reciver_info;
+          for (let k in reciver_info) {
+            item[k] = reciver_info[k];
           }
-          })
-      }
-      if (!allOrder) {
-        return this.$notify({
-          title: "警告",
-          message: "暂无数据",
-          type: "warning"
+          // tempData.push(item);
         });
       }
       import("@/vendor/Export2Excel").then(excel => {
-        const tHeader = ["商品",'订单状态', "规格","订单号", "购买数量", "订单总价", "支付金额", "下单时间","购买时间","买家名称","买家电话","买家地址","物流信息","备注",];
+        const tHeader = [
+          "订单号",
+          "订单状态",
+          "订单总价",
+          "运费",
+          "下单时间",
+          "购买时间",
+          "买家名称",
+          "买家电话",
+          "买家地址",
+          "物流信息",
+          "备注",
+          "商品名",
+          "购买数量",
+          "支付金额",
+          "商品编号",
+          "规格"
+        ];
         const filterVal = [
-          "goods_name",
-          'order_state',
-          "spec",
           "order_sn",
-          "goods_count",
+          "order_state",
           "order_amount",
           "shipping_fee",
           "add_time",
@@ -503,6 +520,11 @@ export default {
           "address",
           "logistic",
           "order_message",
+          "goods_name",
+          "goods_num",
+          "goods_pay_price",
+          "goods_serial",
+          "goods_spec"
         ];
         const list = allOrder;
         const data = this.formatJson(filterVal, list);
