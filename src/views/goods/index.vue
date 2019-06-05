@@ -51,7 +51,7 @@
         </div>
 
         <number :obj='freight'></number>
-
+        <number :obj='goods_sort'></number>
         <el-form-item :label="content.title" v-if='dialogConfig.status'>
           <editor style='width: 800px;' v-model='content.value'></editor>
         </el-form-item>
@@ -148,6 +148,7 @@ export default {
       price: { title: "售价", value: "", alert: null },
       amount: { title: "库存", value: "", alert: null },
       freight: { title: "运费", value: "", alert: null, isZero: true },
+      goods_sort: { title: "排序序号", value: "", alert: null },
       profit: { title: "平台利润", value: 0, alert: null },
       vip1_commission: { title: "VIP1佣金", value: "", alert: null },
       vip2_commission: { title: "VIP2佣金", value: "", alert: null },
@@ -193,6 +194,7 @@ export default {
         showDelete: true,
         judge: ["goods_state", "下架", "上架"],
         classList: [
+          { key: "排序序号", value: "goods_sort" },
           { key: "图片", value: "goods_image", isImg: true },
           { key: "商品名称", value: "goods_name" },
           { key: "一级分类", value: "gc_name_1" },
@@ -231,7 +233,7 @@ export default {
 
     async updateForm(status) {
       let goods;
-
+      this.spec.value = 1;
       this.dialogConfig.status = typeof status === "number" ? status : 2;
 
       // Edit
@@ -272,6 +274,7 @@ export default {
         : [];
       this.freight.value = goods ? goods.goods_freight : "";
       this.content.value = goods ? goods.goods_body : "";
+      this.goods_sort.value = goods ? goods.goods_sort : '';
 
       this.spec.value = goods ? (goods.spec_value ? 2 : 1) : 1;
       if (goods ? !goods.spec_value : true) {
@@ -415,6 +418,7 @@ export default {
         gc_id_3: this.classify.value[2],
         gc_id: this.classify.value[2],
         goods_freight: this.freight.value,
+        goods_sort: this.goods_sort.value,
         goods_body: this.content.value,
         goods_price: firstSpec ? firstSpec.price : this.price.value,
         goods_marketprice: firstSpec ? firstSpec.marketprice : this.marketprice.value,
@@ -575,6 +579,7 @@ export default {
     async getList() {
       //获取列表
       this.isLoading = true;
+      this.query.type = 'sort'
       let res = await api.getGoodsList(this.query, this);
 
       if (res.error) return this.$message.error(res.error);
