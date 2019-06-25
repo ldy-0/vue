@@ -133,6 +133,7 @@
               <!-- <el-button size="mini" v-if="scope.row.rule_status==2?true:false" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'1')">上架</el-button>
               <el-button size="mini" v-if="scope.row.rule_status==1?true:false" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'2')">下架</el-button> -->
               <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteItem(scope.$index, scope.row)">删除秒杀</el-button>
+              <el-button size="mini" type="primary" @click="openDialog(scope.$index, scope.row)">编辑</el-button>      
             </template>
           </el-table-column>
         </el-table>
@@ -141,6 +142,22 @@
         <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,20,30,50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total"></el-pagination>
       </el-footer>
     </el-container>
+
+    <!-- sale num -->
+    <el-dialog title="编辑" :visible.sync="showSaleDialog" width="50%" append-to-body>
+
+      <el-form>
+        <el-form-item label="秒杀商品销量" :label-width="formLabelWidth" prop="goods_storage">
+          <el-input v-model.number="goods_salenum" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showSaleDialog=false">取消</el-button>
+        <el-button type="primary" @click="submitSale('ruleForm')">确 定</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 <script>
@@ -159,6 +176,7 @@ import customImg from '@/components/customImg';
 import commonReq from '@/api/common' ;
 import multiSelect from '@/components/multiSelect';
 import classAPI from '@/api/classify';
+import sale from './sale';
 const QformForNotive = {
   dateRange: [],
   limit_buy:1,
@@ -166,7 +184,7 @@ const QformForNotive = {
   fileList:[]
 };
 export default {
-  mixins: [config],
+  mixins: [config, sale],
   components:{
     customImg,
     multiSelect

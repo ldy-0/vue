@@ -81,6 +81,7 @@ export default {
         { key: '标价(元)', value: 'marketprice' },
         { key: '库存', value: 'count' },
         // { key: '平台利润', value: 'profit' },
+        { key: '体验代理佣金', value: 'vip0_commission' },
         { key: 'VIP1佣金', value: 'vip1_commission' },
         { key: 'VIP2佣金', value: 'vip2_commission' },
         { key: 'VIP3佣金', value: 'vip3_commission' },
@@ -189,6 +190,7 @@ export default {
 
       for(let i = 0; i < length; i++){
         skuIndex = this.getArray(i, classArr);
+        
         sku = { name: '', index: skuIndex, };
 
         skuIndex.forEach((val, index) => {
@@ -204,6 +206,7 @@ export default {
           sku.count = match.count;
           // sku.profit = match.profit;
           sku.profit = 0;
+          sku.vip0_commission = match.vip0_commission;
           sku.vip1_commission = match.vip1_commission;
           sku.vip2_commission = match.vip2_commission;
           sku.vip3_commission = match.vip3_commission;
@@ -219,6 +222,7 @@ export default {
           sku.count = skus[i].count;
           // sku.profit = skus[i].profit;
           sku.profit =0;
+          sku.vip0_commission = skus[i].vip0_commission;
           sku.vip1_commission = skus[i].vip1_commission;
           sku.vip2_commission = skus[i].vip2_commission;
           sku.vip3_commission = skus[i].vip3_commission;

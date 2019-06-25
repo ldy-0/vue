@@ -597,4 +597,3 @@ export function deleteCutprice_api(id) {
     method: "delete",
   });
 }
-

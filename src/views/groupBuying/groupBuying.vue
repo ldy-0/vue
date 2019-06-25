@@ -179,7 +179,9 @@
               <!-- <el-button size="mini" type="success" @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
               <el-button size="mini" type="danger" @click="deleteItem(scope.$index, scope.row)">取消团购</el-button>
               <el-button size="mini" v-if="scope.row.rule_commend == 0" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'1')">首页推荐</el-button>
-              <el-button size="mini" v-if="scope.row.rule_commend == 1" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'0')">取消推荐</el-button>            </template>
+              <el-button size="mini" v-if="scope.row.rule_commend == 1" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'0')">取消推荐</el-button>    
+              <el-button size="mini" type="primary" @click="openDialog(scope.$index, scope.row)">编辑</el-button>        
+            </template>
           </el-table-column>
         </el-table>
       </el-main>
@@ -187,6 +189,22 @@
         <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,20,30,50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total"></el-pagination>
       </el-footer>
     </el-container>
+
+    <!-- sale num -->
+    <el-dialog title="编辑" :visible.sync="showSaleDialog" width="50%" append-to-body>
+
+      <el-form>
+        <el-form-item label="团购商品销量" :label-width="formLabelWidth" prop="goods_storage">
+          <el-input v-model.number="goods_salenum" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showSaleDialog=false">取消</el-button>
+        <el-button type="primary" @click="submitSale('ruleForm')">确 定</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 <script>  
@@ -206,6 +224,7 @@ import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 import multiSelect from '@/components/multiSelect';
 import classAPI from '@/api/classify';
+import sale from './sale';
 const QformForNotive = {
   dateRange: []
 };
@@ -226,7 +245,7 @@ const formForNotiveChild1 = {
 };
 const formForNotiveChild2List = [{}];
 export default {
-  mixins: [config],
+  mixins: [config, sale],
   components:{
     multiSelect
   },

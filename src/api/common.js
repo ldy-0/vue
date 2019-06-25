@@ -41,7 +41,35 @@ async function getUploadToken(data) {
 	return res;
 }
 
+// 修改商品销量
+function changeBargainSale(data){
+  return request({
+    url: `/api/v2/seller/cutprice/setting`,
+    method: 'put',
+    data
+  });
+}
+
+function changeGroupSale(data){
+  return request({
+    url: `/api/v2/seller/groupbuy/setting`,
+    method: 'put',
+    data
+  });
+}
+
+function changeSeckillSale(data){
+  return request({
+    url: `/api/v2/seller/seckill/setting`,
+    method: 'put',
+    data
+  });
+}
+
 // export 
 export default {
-  getUploadToken
+  getUploadToken,
+  changeBargainSale,
+  changeGroupSale,
+  changeSeckillSale,
 }

@@ -160,6 +160,7 @@
               <el-button size="mini" v-if="scope.row.cutprice_commend == 0" type="success" icon="el-icon-sort-up" @click="changeStatus(scope.$index, scope.row,'recommend')">首页推荐</el-button>
               <el-button size="mini" v-if="scope.row.cutprice_commend == 1" type="warning" icon="el-icon-sort-down" @click="changeStatus(scope.$index, scope.row,'notrecommend')">取消推荐</el-button>
               <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteItem(scope.$index, scope.row)">删除砍价</el-button>
+              <el-button size="mini" type="primary" @click="openDialog(scope.$index, scope.row)">编辑</el-button>   
             </template>
           </el-table-column>
         </el-table>
@@ -168,6 +169,21 @@
         <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.page" :page-sizes="[10,20,30,50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next" :total="total"></el-pagination>
       </el-footer>
     </el-container>
+
+     <!-- sale num -->
+    <el-dialog title="编辑" :visible.sync="showSaleDialog" width="50%" append-to-body>
+
+      <el-form>
+        <el-form-item label="砍价商品销量" :label-width="formLabelWidth" prop="goods_storage">
+          <el-input v-model.number="goods_salenum" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showSaleDialog=false">取消</el-button>
+        <el-button type="primary" @click="submitSale('ruleForm')">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -184,6 +200,7 @@ import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 import multiSelect from '@/components/multiSelect';
 import classAPI from '@/api/classify';
+import sale from './sale';
 const QformForNotive = {
   dateRange: [],
   cutprice_type: 1,
@@ -191,7 +208,7 @@ const QformForNotive = {
   goods_storage: 0
 };
 export default {
-  mixins: [config],
+  mixins: [config, sale],
   components:{
     multiSelect
   },

@@ -38,6 +38,7 @@
           <integer :obj='amount'></integer>
           <!-- <number :obj='profit'></number> -->
           <div v-if='category.value == 0'>
+            <number :obj='vip0_commission'></number>
             <number :obj='vip1_commission'></number>
             <number :obj='vip2_commission'></number>
             <number :obj='vip3_commission'></number>
@@ -150,10 +151,11 @@ export default {
       freight: { title: "运费", value: "", alert: null, isZero: true },
       goods_sort: { title: "排序序号", value: "", alert: null },
       profit: { title: "平台利润", value: 0, alert: null },
-      vip1_commission: { title: "VIP1佣金", value: "", alert: null },
-      vip2_commission: { title: "VIP2佣金", value: "", alert: null },
-      vip3_commission: { title: "VIP3佣金", value: "", alert: null },
-      vip4_commission: { title: "VIP4佣金", value: "", alert: null },
+      vip0_commission: { title: "体验代理奖金", value: "", alert: null },
+      vip1_commission: { title: "VIP1奖金", value: "", alert: null },
+      vip2_commission: { title: "VIP2奖金", value: "", alert: null },
+      vip3_commission: { title: "VIP3奖金", value: "", alert: null },
+      vip4_commission: { title: "VIP4奖金", value: "", alert: null },
       content: { title: "商品详情", value: "", alert: null },
       skuClassList: [],
       skuList: [],
@@ -284,6 +286,7 @@ export default {
         this.price.value = goods ? goods.goods_price : "";
         this.amount.value = goods ? sku.goods_storage : "";
         this.profit.value = 0;
+        this.vip0_commission.value = goods ? sku.vip0_commission : "";
         this.vip1_commission.value = goods ? sku.vip1_commission : "";
         this.vip2_commission.value = goods ? sku.vip2_commission : "";
         this.vip3_commission.value = goods ? sku.vip3_commission : "";
@@ -341,6 +344,7 @@ export default {
           "marketprice",
           "price",
           "amount",
+          "vip0_commission",
           "vip1_commission",
           "vip2_commission",
           "vip3_commission",
@@ -350,7 +354,7 @@ export default {
       // vip
       if(this.category.value){
         paramArr = paramArr.slice(0, 4);
-        this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 0;
+        this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 0;
       }
 
       if (
@@ -377,6 +381,7 @@ export default {
             { key: "VIP3佣金", value: "vip3_commission" },
             { key: "VIP2佣金", value: "vip2_commission" },
             { key: "VIP1佣金", value: "vip1_commission" },
+            { key: "体验代理佣金", value: "vip0_commission" },
             // { key: "平台利润", value: "profit" },
             { key: "库存数量", value: "count" },
             { key: "价格", value: "price" },
@@ -385,7 +390,7 @@ export default {
 
           if(this.category.value){
             arr = arr.slice(4);
-            item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
+            item.vip0_commission = item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
           }
 
           arr.forEach((v, i) => {
@@ -431,6 +436,7 @@ export default {
           "price",
           "marketprice",
           "profit",
+          "vip0_commission",
           "vip1_commission",
           "vip2_commission",
           "vip3_commission",
@@ -460,6 +466,7 @@ export default {
             "price",
             "marketprice",
             "profit",
+            "vip0_commission",
             "vip1_commission",
             "vip2_commission",
             "vip3_commission",
