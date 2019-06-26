@@ -5,12 +5,15 @@
 </style>
 <template>
   <el-form-item :label="obj.title">
+
     <div>
       <span>{{obj.preValue}}</span>
-      <el-input :class='{input: obj.preValue }' v-model="obj.value" auto-complete="off" @input='getInput'></el-input>
+      <el-input :class='{input: obj.preValue || obj.postValue }' v-model="obj.value" auto-complete="off" @input='getInput'></el-input>
       <span>{{obj.postValue}}</span>
     </div>
-        <el-alert :title='obj.alert' :closable='false' type='error' show-icon v-if='obj.alert'></el-alert>
+
+    <el-alert type='error' show-icon :title='obj.alert' :closable='false' v-if='obj.alert'></el-alert>
+
   </el-form-item>
 </template>
 
@@ -26,6 +29,11 @@ export default {
 
   data() {
     return {
+      mRegexp: {
+        integer: { pattern: /^[+]?\d+$/, alert: `必须为正整数`, },
+        positive: { pattern: /^[+]?\d+(?:\.\d+)?$/, alert: `必须为正数`, },
+        number: { pattern: /^[+-]?\d+(?:\.\d+)?$/, alert: `必须为数字`, },
+      }
     }
   },
 
@@ -35,15 +43,18 @@ export default {
 
   methods: {
     getInput(v){
-      let o = this.obj;
+      let o = this.obj,
+          // current validate rule
+          reg = o.custom || this.mRegexp[o.type || 'number'];
 
       if(o.preventValidate) return ;
 
       if(!o.value) return o.alert = `请输入${o.title}`;
 
-      if(isNaN(Number(o.value))) return o.alert = `${o.title}必须为数字`;
+      if(!reg.pattern.test(o.value)) return o.alert = `${o.title}${reg.alert}`;
 
-      if(o.value <= 0) return o.alert = `${o.title}必须大于零`;
+      // if(isNaN(Number(o.value))) return o.alert = `${o.title}必须为数字`;
+
       // console.error('custom input obj : ', v);
       o.alert = null;
     },
