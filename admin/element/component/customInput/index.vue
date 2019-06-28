@@ -4,7 +4,7 @@
 }
 </style>
 <template>
-  <el-form-item :label="obj.title">
+  <el-form-item :label="obj.title" :label-width="obj.width">
 
     <div>
       <span>{{obj.preValue}}</span>
@@ -33,6 +33,7 @@ export default {
         integer: { pattern: /^[+]?\d+$/, alert: `必须为正整数`, },
         positive: { pattern: /^[+]?\d+(?:\.\d+)?$/, alert: `必须为正数`, },
         number: { pattern: /^[+-]?\d+(?:\.\d+)?$/, alert: `必须为数字`, },
+        string: { pattern: /^.*$/, alert: `不能为空`, },
       }
     }
   },
@@ -51,6 +52,7 @@ export default {
 
       if(!o.value) return o.alert = `请输入${o.title}`;
 
+      console.error(reg.pattern.test(o.value), reg.pattern, o.value, o.value.length);
       if(!reg.pattern.test(o.value)) return o.alert = `${o.title}${reg.alert}`;
 
       // if(isNaN(Number(o.value))) return o.alert = `${o.title}必须为数字`;

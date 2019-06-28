@@ -1,23 +1,23 @@
 <template>
   <div>
 
-    <el-table :data="data" stripe v-loading="isLoading" element-loading-text="给我一点时间" style="width: 100%" >
+    <el-table :data="data" stripe v-loading="config.loading" element-loading-text="给我一点时间" style="width: 100%" >
 
       <el-table-column align='center' :label="item.key" :prop="item.value" v-for='(item, index) in classList || config.classList' :key='index'>
         <template slot-scope="scope">
-          
-          <img class='thumb_img' :src='scope.row[item.value]' v-if='item.isImg' />
+          <!-- thumb/avatar -->
+          <img :class="{ 'thumb_img': item.isImg, 'avatar_img': item.isAvatar }" :src='scope.row[item.value]' v-if='item.isImg || item.isAvatar' />
 
-          <img class='isAvatar' :src='scope.row[item.value]' v-else-if='item.isAvatar' />
-
-          <div v-else-if='item.isIcon'>
+          <!-- radio -->
+          <div v-else-if='item.isRadio'>
             <i class='el-icon-check' v-if='scope.row[item.value]'></i>
             <i class='el-icon-close' v-else></i>
           </div>
 
+          <!-- level -->
           <el-rate disabled v-model='scope.row[item.value]' v-else-if='item.isRate'></el-rate>
 
-          <!-- -->
+          <!-- list -->
           <el-popover trigger="hover" placement="top" v-else-if='item.isMulti'>
             <div v-for='(item, index) in scope.row[item.value]' :key='index'>
               <p>{{ item }}</p>
@@ -27,6 +27,7 @@
             </div>
           </el-popover>
 
+          <!-- normal text -->
           <div v-else>{{scope.row[item.value]}}</div>
 
         </template>
@@ -41,7 +42,7 @@
 
           <el-button size="mini" type="primary" @click="emit(scope.$index, scope.row, 'look')" v-if='config.lookTitle' v-text='config.lookTitle'></el-button>
 
-          <el-button size='mini' type='primary' @click="show(scope.$index, scope.row, index)" v-for='(item, index) in config.btnList' :key='index' v-if='scope.row[item.key]'>{{item.value}}</el-button>
+          <el-button size='mini' type="primary" @click="show(scope.$index, scope.row, index)" v-for='(item, index) in config.btnList' :key='index' v-if='scope.row[item.key]'>{{item.value}}</el-button>
 
           <!-- auth status -->
           <el-button size="mini" type="success" @click="showAuth(scope.$index, scope.row, 1)" v-if='config.showAuth && scope.row.state == 0'>同意</el-button>
@@ -56,7 +57,7 @@
           <el-button size="mini" type="warning" @click="showJudge(scope.$index, scope.row)" v-if="config.judge" 
                     v-text='scope.row[config.judge[0]] ? config.judge[1] : config.judge[2]'></el-button>
 
-          <el-button size="mini" type="primary" @click="showSelect(scope.$index, scope.row)" v-if='config.showSelect'>{{config.selectTitle}}</el-button>
+          <!-- <el-button size="mini" type="primary" @click="showSelect(scope.$index, scope.row)" v-if='config.showSelect'>{{config.selectTitle}}</el-button> -->
 
           <el-button size="mini" type="danger" @click="showDeleteDialog(scope.$index, scope.row)" v-if='config.showDelete || config.deleteTitle'>删除</el-button>
 
@@ -66,12 +67,12 @@
     </el-table>
 
     <el-pagination ref='pagination'
-                  background :page-sizes="[10, 2, 30, 5]"
+                  background :page-sizes="[10, 20, 30, 50]"
                   :current-page="query.page"
                   :page-size="query.limit"
                   :total="total"
                   @size-change="changeSize" 
-                  v-if="showPagination"
+                  v-if="'showPagination' in config ? config.showPagination : showPagination"
                   class="showPagination"
                   @current-change="changePage" layout="total, sizes, prev, pager, next" >
     </el-pagination>
@@ -161,7 +162,7 @@ export default {
       this.$confirm(`确认操作, 是否继续?`, '提示', config).then(() => this.$emit('finish', row)).catch(e => this.$notify.info({ message: '已取消' }))
     },
 
-    showSelect(index, row){ this.$emit('select', row); },
+    // showSelect(index, row){ this.$emit('select', row); },
 
     changeSize(val){
       this.query.limit = val;
@@ -196,7 +197,7 @@ export default {
   width: 100px;
   height: 100px;
 }
-.isAvatar{
+.avatar_img{
   width: 66px;
   height: 66px;
   border-radius: 50%;
