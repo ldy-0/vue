@@ -13,18 +13,19 @@
           <el-button type="primary" icon="el-icon-edit-outline" @click="emit(index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
         </el-form-item>
 
+        <!-- input -->
         <el-form-item v-if='config.showKeywordSearch || config.placeHolder'>
             <el-input :style="{ width: config.width || '300px' }" :placeholder="config.placeHolder" v-model="keyword"></el-input>
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
 
+        <!-- Date -->
         <el-form-item label="日期查询" v-if='config.dateWidth'>
             <el-date-picker :style="{ width: config.dateWidth }" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
             </el-date-picker>
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
 
-        <!-- select -->
         <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
           <el-select placeholder="请选择" v-model='config.status || status' @change='search'> <!-- multiple  -->
             <el-option v-for="item in config.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
@@ -32,22 +33,19 @@
         </el-form-item>
 
         <!-- selectList -->
-        <el-form-item :label="select.title || select.name || select.label" 
-                      :label-width="select.width" 
+        <el-form-item :label="config.selectLabelList && config.selectLabelList[selectIndex]" 
+                      :label-width="config.selectWidth" 
                       v-for='(select, selectIndex) in config.selectList' :key='selectIndex' v-if='config.selectList'> 
 
-          <el-select placeholder="请选择" v-model='select.value' @change='search($event, selectIndex)'> 
-            <el-option v-for="item in select.list" 
-                       :key="item[select.titleKey]" 
-                       :label="item[select.titleKey]" 
-                       :value="item[select.valueKey]"></el-option>
+          <el-select placeholder="请选择" v-model='statusList[selectIndex]' @change='search($event, selectIndex)'> <!-- multiple  -->
+            <el-option v-for="item in select" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
           </el-select>
 
         </el-form-item>
-
+        
         <!-- Export -->
-        <el-form-item label="" v-if='config.showExport || config.export || config.exportTitle'>
-          <el-button type="primary" icon="document" @click="exportFile">{{ config.exprotTitle || '导出Excel' }}</el-button>
+        <el-form-item label="" v-if='config.showExport'>
+          <el-button  type="primary" icon="document" @click="exportFile">导出Excel</el-button>
         </el-form-item>
 
       </el-form>
@@ -57,8 +55,12 @@
 
 <script>
 export default {
+  // Version 1.0.0
+
   name: 'customHead',
+  
   props: {
+
     config: {
       type: Object,
       default: function() {
@@ -87,10 +89,24 @@ export default {
 
   watch: {
   },
+
+  mounted(){
+    let selectList = this.config.selectList;
+    // console.error(JSON.stringify(this.config.selectList));
+
+    // init statusList
+    if(selectList) this.statusList = selectList.map(v => v[0].id);
+  },
   
   methods: {
     showForm(){
       this.$emit('add');
+    },
+
+    exportFile() {
+      let loading = this.$loading({ fullscreen: true })
+
+      this.$emit('export', loading);
     },
 
     emit(index, e){
@@ -109,40 +125,15 @@ export default {
       : null;
 
       // single status search
-      if(typeof index === 'number' && typeof selectIndex !== 'number'){
-        param.status = index;
-      }else{
-        param.status = null;
-      }
+      param.status = typeof index === 'number' && typeof selectIndex !== 'number' ? index : null;
 
-      // selectList
       if(typeof selectIndex === 'number'){
         param.statusList[selectIndex] = index;
       }
 
       this.$emit('search', param);
     },
-
-    async exportFile() {
-      let loading = this.$loading({ fullscreen: true })
-
-      this.$emit('export', loading);
-
-        // import('@/vendor/Export2Excel').then(excel => {
-        //   const tHeader = this.classList.map(v => v.key)
-        //   const filterVal = this.classList.map(v => v.value) 
-
-        //   let data = this.tableData.map(v => filterVal.map(val => v[val] || '' ) )
-
-        //   excel.export_json_to_excel({
-        //     header: tHeader,
-        //     data,
-        //     filename: 'list',
-        //     autoWidth: true 
-        //   })
-        //   loading.close() 
-        // })
-    },
+    
   },
 
 }
