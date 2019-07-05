@@ -177,7 +177,12 @@ export default {
 
       // reset pagination when dynamic change current-page property value
       this.$refs.pagination.lastEmittedPage = 1;
-    }
+    },
+
+    // call for parent Component
+    initPage(){
+      this.query.page = 1;
+    },
   }
 }
 </script>

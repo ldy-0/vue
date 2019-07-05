@@ -11,7 +11,8 @@
   <custom-head :config='headConfig' @add='updateForm(1)' @search='search'></custom-head> 
 </el-header>
 
-<custom-table :config='tableConfig' 
+<custom-table ref='mainTable'
+                :config='tableConfig' 
                 :data='list' 
                 :total='total' 
                 :isLoading='isLoading' 
@@ -111,10 +112,13 @@ export default {
       headConfig: {
         title: '添加案例',
         placeHolder: '请输入案例名',
-        categories: [
-          { id: 1, title: '公司新闻' },
-          { id: 2, title: '行业动态' },
-        ]
+        selectList: [
+          [
+            { id: -1, title: '全部' },
+            { id: 1, title: '公司新闻' },
+            { id: 2, title: '行业动态' },
+          ],
+        ],
       },
 
       tableConfig: {
@@ -230,8 +234,15 @@ export default {
     },
     //=========================================================
     search(param) {
+      let statusList = param.statusList;
+
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.query.search = param.search;
-      this.query.classify_id = param.status; 
+      // this.query.classify_id = param.status; 
+      statusList[0] == -1 ? (delete this.query.classify_id) : (this.query.classify_id = statusList[0]);
+
       this.getList();
     },
     change(param) {

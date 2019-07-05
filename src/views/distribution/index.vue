@@ -29,7 +29,7 @@
       <custom-head :config='headConfig' @search='search'></custom-head>
     </el-header>
 
-    <custom-table :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @change='change'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @change='change'></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-header class="header" v-if='showDialog'>
@@ -232,6 +232,9 @@ export default {
       this.getList();
     },
     search(param) {
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.query.search = param.search;
       this.query.vip_level = param.status;
       this.getList();

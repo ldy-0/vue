@@ -15,7 +15,7 @@
       </el-form>
     </el-header>
 
-    <custom-table :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @update='updateForm' @delete='deleteItem' @judge="judgeItem" @change='change'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @update='updateForm' @delete='deleteItem' @judge="judgeItem" @change='change'></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-form label-width='100px'>
@@ -222,9 +222,13 @@ export default {
   },
   methods: {
     search(param) {
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.query.search = param.search;
       this.query.is_vip = param.statusList[0];
       this.query.goods_state = param.statusList[1];
+
       this.getList();
     },
     searchByclass(param) {

@@ -63,7 +63,7 @@ function saveTip(data){
 
 function changeStatus(id, data){
   return request({
-    url: `/api/v2/seller/member/${id}/setting`,
+    url: `/api/v2/seller/member/${id}`,
     method: "put",
     data
   });

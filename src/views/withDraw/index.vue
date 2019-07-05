@@ -29,7 +29,8 @@
   <custom-head :config='headConfig' @add='updateForm(1)' @search='search'></custom-head> 
 </el-header>
 
-<custom-table :config='tableConfig' 
+<custom-table ref='mainTable' 
+                :config='tableConfig' 
                 :data='list' 
                 :total='total' 
                 :isLoading='isLoading' 
@@ -126,6 +127,13 @@ export default {
           { id: null, title: '全部' },
           { id: 0, title: '未处理' },
           { id: 1, title: '已处理' },
+        ],
+        selectList: [
+          [
+            { id: -1, title: '全部' },
+            { id: 0, title: '未处理' },
+            { id: 1, title: '已处理' },
+          ],
         ]
       },
 
@@ -216,9 +224,21 @@ export default {
     },
     //分页-查询==========================================
     search(param){
+      let statusList = param.statusList;
       console.error('search :', param); 
+
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.query.telephone = param.search;
-      this.query.status = param.status;
+
+      // this.query.status = param.status;
+      if(statusList[0] != -1){
+        this.query.status = statusList[0];
+      }else{
+        delete this.query.status;
+      }
+
       if(param.date){
         this.query.starttime = new Date(param.date.startDate).getTime()/1000;
         this.query.endtime = new Date(param.date.endDate).getTime()/1000;
@@ -226,6 +246,7 @@ export default {
         delete this.query.starttime;
         delete this.query.endtime;
       }
+
       this.getList();
     },
     change(param){

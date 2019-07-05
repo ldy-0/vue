@@ -43,7 +43,8 @@
   <custom-head :config='headConfig' @search='search' @export='exportFile'></custom-head> 
 </el-header>
 
-<custom-table :config='tableConfig' 
+<custom-table ref='mainTable'
+                :config='tableConfig' 
                 :data='list' 
                 :total='total' 
                 :isLoading='isLoading' 
@@ -54,6 +55,19 @@
 
 
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
+    <div v-if="dialogConfig.status === 3">
+      <el-form label-width='100px'>
+        <custom-input :obj='remark'></custom-input>
+      </el-form>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeRemarkDialog">取消</el-button>
+        <el-button type="primary" @click="submitRemark">确 定</el-button>
+      </div>
+    </div>
+  
+    <!-- 详情 -->
+    <div v-if='dialogConfig.status == 2'>
       <el-form label-width='100px' class="form">
 
                 <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
@@ -62,7 +76,7 @@
             <span class='form_ctn'>{{formData[item].value}}</span>
           </div>
         </div>
-    </el-form>
+      </el-form>
       <custom-table :config='detailTable' 
                       :data='goodsList' 
                       :total='total' 
@@ -74,6 +88,7 @@
       <el-button @click="closeDialog" >取消</el-button>
       <!-- <el-button type="primary" :disabled="stopSubmit" :loading="stopSubmit" @click="submit">确 定</el-button> -->
     </span>
+  </div>
 </el-dialog>
 
 <el-dialog :title="thirdDialogConfig.title" :visible.sync="thirdShowDialog" :before-close='closeDialogThird' width="30%">
@@ -130,8 +145,11 @@ import api from '@/api/order'
 import apiOfcomment from '@/api/comment'
 import Moment from "@/utils/moment";
 import logistic from './logistic.js';
+import remark from "./remark";
 
 export default {
+  mixins: [logistic, remark],
+
   components: {
     customHead,
     customTable,
@@ -152,7 +170,6 @@ export default {
     keys2(){ return this.formDataTwo ? Object.keys(this.formDataTwo) : []; },
   },
 
-  mixins: [logistic],
 
   data() {
     return {
@@ -202,7 +219,7 @@ export default {
       stopSubmit: false,
 
       headConfig: {
-        placeHolder: '请输入订单号',
+        placeHolder: '请输入关键字(订单号、买家姓名、联系方式)',
         dateWidth: 100,
         showExport: true,
         selectLabelList: ['订单状态'],
@@ -227,6 +244,7 @@ export default {
           { key: 'showSend', value: '发货' },
           { key: 'showLookComment', value: '查看评论' },
           { key: 'showFinish', value: '关闭' },
+          { key: 'order_id', value: '备注' },
         ],
         classList: [
           { key: '商品图片', value: 'goods_image', isImg: true, },
@@ -234,8 +252,8 @@ export default {
           { key: '订单号', value: 'order_sn' },
           { key: '金额(￥)', value: 'order_amount' },
           { key: '数量', value: 'goods_count' },
-          { key: '买家', value: 'name' },
-          { key: '联系方式', value: 'phone' },
+          { key: '买家', value: 'buyer_name' },
+          { key: '联系方式', value: 'buyer_telephone' },
           { key: '订单状态', value: 'order_state' },
           { key: '下单时间', value: 'add_time' },
         ],
@@ -349,11 +367,15 @@ export default {
     //======================================
     async changeItem(status,index){
       this.order_id = status.order_id;
+      // 发货
       if(index ==0){
         this.post.value = '';
         this.postName.value = 'YTO'; 
         this.thirdDialogConfig.status = typeof status === 'number' ? status : 8;
-      }else if(index ==1){
+      }
+
+      // 评论
+      if(index ==1){
         let res = await apiOfcomment.getAssessList({search:status.order_sn});
         if(res.status ==0&&res.data.length!=0){
           this.twoDialogConfig.status = 3;
@@ -370,7 +392,10 @@ export default {
         }else{
           this.$message.error('该评论被删除了');
         }
-      }else{
+      }
+
+      // 关闭
+      if(index == 2){
           let config = {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
@@ -391,6 +416,9 @@ export default {
           })
    
       }
+
+      // 备注
+      if(index == 3) this.openRemarkDialog(status);
     },
     closeDialogThird(){
       let config = this.thirdDialogConfig;
@@ -431,6 +459,9 @@ export default {
       this.getList();
     },
     search(param){
+      this.listQuery.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.listQuery.search = param.search;
       this.listQuery.order_state = param.statusList[0];
       if(param.date){

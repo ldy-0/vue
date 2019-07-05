@@ -11,7 +11,7 @@
       <custom-head :config='headConfig' @add='updateForm(1)' @search='search'></custom-head>
     </el-header>
 
-    <custom-table :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @update='updateForm' @delete='deleteItem' @change='change'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @update='updateForm' @delete='deleteItem' @change='change'></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="50%">
       <el-form label-width='100px'>
@@ -102,7 +102,13 @@ export default {
       headConfig: {
         title: "添加案例",
         placeHolder: "请输入案例名",
-        categories: [{id:null,title:'全部'},{ id: 3, title: "产品案例" }, { id: 4, title: "合作案例" }]
+        selectList: [
+          [
+            { id: -1, title:'全部'},
+            { id: 3, title: "产品案例" }, 
+            { id: 4, title: "合作案例" }
+          ],
+        ]
       },
 
       tableConfig: {
@@ -216,9 +222,17 @@ export default {
     },
     //=========================================================
     search(param) {
+      let statusList = param.statusList;
       console.log(param);
+
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.query.search = param.search;
-      this.query.classify_id = param.status; 
+
+      if(statusList[0] != -1) this.query.classify_id = statusList[0]
+        else delete this.query.classify_id
+
       this.getList();
     },
     change(param) {

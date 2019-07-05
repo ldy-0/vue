@@ -44,26 +44,40 @@
       <custom-head :config='headConfig' @search='search' @export='exportFile'></custom-head>
     </el-header>
 
-    <custom-table :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @modify='changeItem' @change='change'>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @modify='changeItem' @change='change'>
     </custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
-      <el-form label-width='100px' class="form">
+      <div v-if="dialogConfig.status === 3">
+        <el-form label-width='100px'>
+          <custom-input :obj='remark'></custom-input>
+        </el-form>
 
-        <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
-          <div v-if="formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'">
-            <span class='form_title'>{{formData[item].title}}</span>
-            <span class='form_ctn'>{{formData[item].value}}</span>
-          </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="closeRemarkDialog">取消</el-button>
+          <el-button type="primary" @click="submitRemark">确 定</el-button>
         </div>
-      </el-form>
-      <custom-table :config='detailTable' :data='goodsList' :total='total' :isLoading='isLoading' :showPagination="false">
-      </custom-table>
+      </div>     
 
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="closeDialog">取消</el-button>
-        <!-- <el-button type="primary" :disabled="stopSubmit" :loading="stopSubmit" @click="submit">确 定</el-button> -->
-      </span>
+      <!-- 详情 -->
+      <div v-if='dialogConfig.status == 2'>
+        <el-form label-width='100px' class="form">
+
+          <div v-for='(item, index) in keys' :key='index' :style="{width:(formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'?'30%':'0')}">
+            <div v-if="formData[item].value != '1970-01-01 08:00:00'&&formData[item].value !='null'">
+              <span class='form_title'>{{formData[item].title}}</span>
+              <span class='form_ctn'>{{formData[item].value}}</span>
+            </div>
+          </div>
+        </el-form>
+        <custom-table :config='detailTable' :data='goodsList' :total='total' :isLoading='isLoading' :showPagination="false">
+        </custom-table>
+
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="closeDialog">取消</el-button>
+          <!-- <el-button type="primary" :disabled="stopSubmit" :loading="stopSubmit" @click="submit">确 定</el-button> -->
+        </span>
+      </div>
     </el-dialog>
 
     <el-dialog :title="thirdDialogConfig.title" :visible.sync="thirdShowDialog" :before-close='closeDialogThird' width="30%">
@@ -106,7 +120,7 @@
 <script>
 import customTable from "@/components/customTable";
 import customHead from "@/components/customHead";
-import customInput from "@/components/input";
+import customInput from "@/components/customInput";
 import customSelect from "@/components/select";
 import number from "@/components/number";
 import integer from "@/components/integer";
@@ -118,8 +132,11 @@ import { voidTypeAnnotation } from "babel-types";
 import api from "@/api/order";
 import apiOfcomment from "@/api/comment";
 import logistic from "./logistic.js";
+import remark from "./remark";
 
 export default {
+  mixins: [logistic, remark],
+
   components: {
     customHead,
     customTable,
@@ -149,8 +166,6 @@ export default {
       return this.formDataTwo ? Object.keys(this.formDataTwo) : [];
     }
   },
-
-  mixins: [logistic],
 
   data() {
     return {
@@ -201,7 +216,7 @@ export default {
       stopSubmit: false,
 
       headConfig: {
-        placeHolder: "请输入订单号",
+        placeHolder: "请输入关键字(订单号、买家姓名、联系方式)",
         dateWidth: 100,
         showExport: true,
         selectLabelList: ["订单状态"],
@@ -225,7 +240,8 @@ export default {
         btnList: [
           { key: "showSend", value: "发货" },
           { key: "showLookComment", value: "查看评论" },
-          { key: "showFinish", value: "关闭" }
+          { key: "showFinish", value: "关闭" },
+          { key: "order_id", value: "备注" },
         ],
         classList: [
           { key: "商品图片", value: "goods_image", isImg: true },
@@ -235,8 +251,8 @@ export default {
           { key: "积分抵扣", value: "order_points" },
           { key: "余额抵扣", value: "pd_amount" },
           { key: "数量", value: "goods_count" },
-          { key: "买家", value: "name" },
-          { key: "联系方式", value: "phone" },
+          { key: "买家", value: "buyer_name" },
+          { key: "联系方式", value: "buyer_telephone" },
           { key: "订单状态", value: "order_state" },
           { key: "下单时间", value: "add_time" }
         ]
@@ -354,13 +370,18 @@ export default {
       return resList;
     },
     //======================================
+
     async changeItem(status, index) {
       this.order_id = status.order_id;
+      // 发货
       if (index == 0) {
         this.post.value = "";
         this.postName.value = "YTO";
         this.thirdDialogConfig.status = typeof status === "number" ? status : 8;
-      } else if (index == 1) {
+      } 
+
+      // 查看评论
+      if (index == 1) {
         let res = await apiOfcomment.getAssessList({ search: status.order_sn });
         if (res.status == 0 && res.data.length != 0) {
           this.twoDialogConfig.status = 3;
@@ -377,7 +398,10 @@ export default {
         } else {
           this.$message.error("该评论被删除了");
         }
-      } else {
+      } 
+
+      // 关闭
+      if(index == 2){
         let config = {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
@@ -399,7 +423,12 @@ export default {
             this.$notify.info({ message: "已取消操作" });
           });
       }
+
+      // 备注
+      if(index == 3) this.openRemarkDialog(status);
+
     },
+
     closeDialogThird() {
       let config = this.thirdDialogConfig;
 
@@ -450,6 +479,9 @@ export default {
       this.getList();
     },
     search(param) {
+      this.listQuery.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.listQuery.search = param.search;
       this.listQuery.order_state = param.statusList[0];
       if (param.date) {

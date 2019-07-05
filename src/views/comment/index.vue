@@ -30,7 +30,8 @@
   <custom-head :config='headConfig' @add='updateForm(1)' @search='search'></custom-head> 
 </el-header>
 
-<custom-table :config='tableConfig' 
+<custom-table ref='mainTable' 
+                :config='tableConfig' 
                 :data='list' 
                 :total='total' 
                 :isLoading='isLoading' 
@@ -171,6 +172,10 @@ export default {
     },
     //查询================================================
     search(param) {
+
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
         this.query.search  = param.search;
       if(param.date){
         this.query.starttime = param.date.startDate;

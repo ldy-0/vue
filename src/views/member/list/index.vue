@@ -32,7 +32,8 @@
   <custom-head :config='headConfig' @emit='emitHandle' @search='search'></custom-head> 
 </el-header>
 
-<custom-table :config='tableConfig' 
+<custom-table ref="mainTable" 
+                :config='tableConfig' 
                 :data='list' 
                 :total='total' 
                 :isLoading='isLoading' 
@@ -46,6 +47,18 @@
 
 
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
+  <div v-if="dialogConfig.status === 6">
+    <el-form label-width='100px'>
+      <custom-input :obj='remark'></custom-input>
+    </el-form>
+
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="closeRemarkDialog">取消</el-button>
+      <el-button type="primary" @click="submitRemark">确 定</el-button>
+    </div>
+  </div>
+
+  <!-- tip -->
   <div v-if="dialogConfig.status === 5">
     <el-form label-width='100px'>
       <mobile :obj='tipInfo'></mobile>
@@ -129,7 +142,7 @@
 
 import customTable from '@/components/customTable';
 import customHead from '@/components/customHead';
-import customInput from '@/components/input'
+import customInput from '@/components/customInput'
 import customRadio from '@/components/radio'
 import number from '@/components/number'
 import digit from '@/components/digit'
@@ -139,8 +152,11 @@ import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
 import api from '@/api/member';
+import remark from './remark';
 
 export default {
+  mixins: [remark],
+
   components: {
     customHead,
     customTable,
@@ -162,7 +178,7 @@ export default {
       member_id:null,
       dialogConfig: {
         title: '',
-        status: 0, // 1:添加分类，2：编辑分类， 3：二级分类列表 4: 收入明细 5: 温馨提示
+        status: 0, // 1: 查看详情 2：增加/减少积分 3：查看下级 4: 收入明细 5: 温馨提示 6: 备注
       },
       img: { title: '主图', value: [], limit: 1, alert: null },
       score: { title: '德分数量', value: '', alert: null, },
@@ -175,7 +191,7 @@ export default {
       clicked: false,
 
       headConfig: {
-        placeHolder: '请输入手机号',
+        placeHolder: '请输入手机号或姓名',
         categories: [
           { id:'', title: '全部' },
           { id: 1, title: 'vip1' },
@@ -185,6 +201,12 @@ export default {
         ],
         btnList: [
           { titleKey: 'name', name: '温馨提示' },
+        ],
+        selectList: [
+          [
+            { id: 0, title: '升序', },
+            { id: 1, title: '降序', },
+          ],
         ],
       },
 
@@ -223,6 +245,7 @@ export default {
            { key: 'member_id', value: '收入明细' },
            { key: 'is_freeze', status: 0, value: '冻结' },
            { key: 'is_freeze', status: 1, value: '解冻' },
+           { key: 'member_id', value: '备注' },
           //  { key: 'card_mall', status: 2, value: '上架' },
           //  { key: 'card_mall', status: 1, value: '下架' },
         ],
@@ -248,8 +271,10 @@ export default {
         page: 1,
         limit: 10,
         is_vip: 1,
+        sort: 0,
       },
       isLoading: true,
+
       twoHeadConfig: {
         placeHolder: '请输入手机号',
         categories: [
@@ -309,7 +334,7 @@ export default {
     }
   },
   methods: {
-    //列表============================================
+    // 列表
     async getList() { 
       this.isLoading = true
       let res = await api.getMember_api(this.query, this);
@@ -319,10 +344,13 @@ export default {
       this.total = res.pagination.total;
       this.isLoading = false
     },
+
     async getTwoList(id) {
       this.twoIsLoading = true
       let send = Object.assign({},this.twoQuery);
-      send.inviter_id = id
+
+      if(id) this.twoQuery.inviter_id = send.inviter_id = id
+
       let res = await api.getMember_api(send, this);
       // res.data.forEach(this.format);
       console.error(res.data);
@@ -331,6 +359,13 @@ export default {
       this.twoTotal = res.pagination.total;
       this.twoIsLoading = false
     },
+
+    initTwoQuery(){
+      this.twoQuery.page = 1;
+      if(this.twoQuery.search) delete this.twoQuery.search;
+      if(this.twoQuery.vip_level) delete this.twoQuery.vip_level;
+    },
+
     format(item){
       item.img = [ {url: item.image }];
       if(item.card_mall == 1){
@@ -339,7 +374,7 @@ export default {
         item.lock_state = false;
       }
     },
-    //操作============================================
+    // member table 操作
     emitHandle(index){
       if(index === 0){
         this.getTip();
@@ -375,13 +410,17 @@ export default {
 
       dialogConfig.status = 3;
 
+      this.initTwoQuery();
       this.getTwoList(item.member_id);
     },
 
+    // 名片商城上下架
     async lockItem(item){
       let send = {
+        type: 'card_mall',
         member_id:item.member_id,
       }
+
       if(item.card_mall == 1) {
         send.status = 2;
       }else if(item.card_mall ==2) {
@@ -403,6 +442,8 @@ export default {
 
       config.status = 0;
     },
+
+    // 修改积分
     async submit(){
       let aValidate = ['score', 'scoreCategory'],
           query = this.query,
@@ -431,6 +472,7 @@ export default {
       this.stopSubmit = false;
       this.getList();
     },
+
     async deleteItem(item){
       let res = await api.deleteMember(item.member_id, null);
 
@@ -441,6 +483,7 @@ export default {
 
       this.getList();
     },
+
     dispatch(item, index){
       // console.error(item, index);
       // 收入明细
@@ -457,13 +500,10 @@ export default {
       if(index === 1) this.changeStatus(item, 1);
 
       // 解冻
-      if(index === 2) this.changeStatus(item, 0);
+      if(index === 2) this.changeStatus(item, 2);
 
-      // 下架
-      // if(index === 3) this.changeMallStatus(item, 1);
-
-      // 上架
-      // if(index === 4) this.changeMallStatus(item, 2);
+      // 备注
+      if(index === 3) this.openRemarkDialog(item);
 
     },
 
@@ -492,7 +532,7 @@ export default {
     },
 
     async changeStatus(item, status){
-      let param = { status };
+      let param = { type: 'freeze', status };
 
       let res = await api.changeStatus(item.member_id, param);
 
@@ -501,15 +541,15 @@ export default {
       this.getList();
     },
     
-    async changeMallStatus(item, status){
-      let param = { status };
+    // async changeMallStatus(item, status){
+    //   let param = { status };
 
-      let res = await api.changeMallStatus(item.member_id, param);
+    //   let res = await api.changeMallStatus(item.member_id, param);
 
-      this.$message({ type: res.error ? 'error' : 'success', message: res.error || '修改成功' });
-      console.error(res);
-      this.getList();
-    },
+    //   this.$message({ type: res.error ? 'error' : 'success', message: res.error || '修改成功' });
+    //   console.error(res);
+    //   this.getList();
+    // },
 
     async getTip(){
       let res = await api.getTip();
@@ -543,25 +583,47 @@ export default {
       this.clicked = false;
       this.closeDialog();
     },
+
     //分页 查询==========================================
     change(param){
       this.query.limit = param.limit;
       this.query.page = param.page;
       this.getList();
     },
+
     search(param){
-      this.query.search = param.search;
+      let statusList = param.statusList,
+          arr = ['vip_asc', 'vip_desc'];
+
+      this.query.search = param.search || null;
       this.query.vip_level = param.status;
+
+      this.query.vip_sort = arr[statusList[0]];
+
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
       this.getList();
     },
+
     searchTwo(param){
+      this.initTwoQuery();
+
       this.twoQuery.search = param.search;
       this.twoQuery.vip_level = param.status;
+
       this.getTwoList();
     },
+
     incomeSearch(param){
+      let classList = this.incomeTableConfig.classList;
+      
       this.incomeParam.page = 1;
       this.incomeHeadConfig.status = this.incomeParam.status = param.status;
+
+      if(param.status > 1 && classList.length == 3) classList.push({ key: '操作者', value: 'admin_name', });
+
+      if(param.status == 1 && classList.length == 4) classList.pop();
 
       this.$refs.incomeTable.init();
 
@@ -570,6 +632,7 @@ export default {
     changeTwo(param){
       this.twoQuery.limit = param.limit;
       this.twoQuery.page = param.page;
+
       this.getTwoList();
     },
     incomeChange(param){
@@ -582,5 +645,6 @@ export default {
   created(){
     this.getList();
   },
+
 }
 </script>

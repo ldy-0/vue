@@ -82,6 +82,14 @@ export default {
 
   watch: {
   },
+
+  mounted(){
+    let selectList = this.config.selectList;
+    // console.error(JSON.stringify(this.config.selectList));
+
+    // init statusList
+    if(selectList) this.statusList = selectList.map(v => v[0].id);
+  },
   
   methods: {
     showForm(){

@@ -29,7 +29,7 @@
       <custom-head :config='headConfig' @add='updateForm(1)' @search='search'></custom-head>
     </el-header>
 
-    <custom-table :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @auth='auth' @change='change'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @auth='auth' @change='change'></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="50%">
       <el-form label-width='100px'>
@@ -209,6 +209,9 @@ export default {
     },
     //查询================================================
     search(param) {
+      this.query.page = 1;
+      this.$refs.mainTable.initPage();
+
       console.error("search :", param);
         this.query.search = param.search;
         this.query.refund_state = param.statusList[0];
