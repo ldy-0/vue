@@ -21,6 +21,24 @@ vue + element
       title: `标题`
       width: `标题宽度`
 
+***
+
+- customDate
+
+  + property
+
+    |  props  | type | desc |  
+    |---------|------|------|  
+    |   obj   |Object|  |
+
+    - obj 
+      type: `[date|datetime|datetimerange]`  
+      title: `标题`
+      isNow: `禁用今天之前时间`
+      preventValidate: `取消检验`
+
+***
+
 
 - customHead
 
@@ -48,6 +66,9 @@ vue + element
     |   emit  | Function | btnList回调 |
     |  export | Function | 导出按钮回调 |
     |  search | Function | input, date, select组件回调 |
+
+***
+
 
 ### utils
 - COS upload
