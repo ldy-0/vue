@@ -65,7 +65,7 @@
                 </template>
               </el-table-column>
               <el-table-column label="商品名" prop="goodsName"></el-table-column>
-              <el-table-column label="价格" prop="goodsPrice"></el-table-column>
+              <el-table-column label="原价" prop="goodsPrice"></el-table-column>
               <el-table-column label="操作" min-width="100px">
                 <template slot-scope="scope">
                   <el-button size="mini" type="primary" @click="editItem(scope.$index, scope.row)">选择</el-button>
@@ -163,7 +163,7 @@
           </el-table-column>
           <el-table-column label="团购商品ID" prop="id"></el-table-column>
           <el-table-column label="商品名" prop="name"></el-table-column>
-          <el-table-column label="商品价格" prop="goodsprice"></el-table-column>
+          <el-table-column label="商品原价" prop="goodsprice"></el-table-column>
           <el-table-column label="团购价格" prop="gurouprice"></el-table-column>
           <el-table-column label="团购人数" prop="group_num"></el-table-column>
           <el-table-column label="团购商品库存" prop="goods_storage"></el-table-column>
@@ -848,7 +848,7 @@ export default {
                 goodsType: aData.is_appoint ? 1 : 0,
                 is_virtualTXT: aData.is_virtual ? "虚拟" : "实体", //显示补充，实际无用
                 goodsName: aData.goods_name, //显示
-                goodsPrice: aData.goods_price, //显示
+                goodsPrice: aData.goods_marketprice, //显示
                 goodsNum: aData.goods_serial //显示
               });
             });
@@ -983,7 +983,7 @@ export default {
                 id: aData.rule_id,
                 image: aData.goods.goods_image,
                 name: aData.goods.goods_name,
-                goodsprice: aData.goods.goods_price,
+                goodsprice: aData.goods.goods_marketprice,
                 gurouprice: aData.goods_price,
                 group_num: aData.group_num,
                 rule_commend: aData.rule_commend,

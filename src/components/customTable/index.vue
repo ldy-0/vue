@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <el-table :data="data" stripe v-loading="isLoading" element-loading-text="给我一点时间" style="width: 100%" >
+    <el-table :data="data" stripe v-loading="'loading' in config ? config.loading : isLoading" element-loading-text="给我一点时间" style="width: 100%" >
 
       <el-table-column align='center' :label="item.key" :prop="item.value" v-for='(item, index) in classList || config.classList' :key='index'>
         <template slot-scope="scope">
@@ -41,7 +41,7 @@
 
           <el-button size="mini" type="primary" @click="showLook(scope.$index, scope.row)" v-if='config.lookTitle' v-text='config.lookTitle'></el-button>
 
-          <el-button size='mini' type='primary' @click="show(scope.$index, scope.row, index)" 
+          <el-button size='mini' :type="item.type || 'primary'" @click="show(scope.$index, scope.row, index, item)" 
                     v-for='(item, index) in config.btnList' :key='index' 
                     v-if='"status" in item ? scope.row[item.key] === item.status : scope.row[item.key]'>{{item.value}}</el-button>
 
@@ -118,11 +118,20 @@ export default {
         page: 1,
         keyWord: '',
       },
+      confirmOpt: {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      },
     }
   },
   
   methods: {
-    show(i, row, index){ this.$emit('modify', row, index); },
+    show(i, row, index, item){ 
+      if(['danger', 'warning'].indexOf(item.type) != -1) return this.$confirm('确认继续操作码?', '', this.confirmOpt).then(() => this.$emit('modify', row, index));
+
+      this.$emit('modify', row, index); 
+    },
     showDetail(index, row) { this.$emit('show', row); },
     showUpdate(index, row) { this.$emit('update', row); },
     showLook(index, row) { this.$emit('look', row); },

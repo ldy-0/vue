@@ -58,7 +58,7 @@
       <custom-head :config='headConfig' @search='search' @export='exportFile'></custom-head>
     </el-header>
 
-    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @modify='changeItem' @change='change'>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @show='updateForm' @modify='changeItem' @change='change'>
     </custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
@@ -93,7 +93,7 @@
             </div>
           </div>
         </div>
-        <custom-table :config='detailTable' :data='goodsList' :total='total' :isLoading='isLoading' :showPagination="false">
+        <custom-table :config='detailTable' :data='goodsList' :total='total' :showPagination="false">
         </custom-table>
 
         <span slot="footer" class="dialog-footer">
@@ -251,6 +251,8 @@ export default {
             { id: null, title: "全部" },
             { id: 0, title: "已取消" },
             { id: 10, title: "待付款" },
+            { id: 2, title: "待成团" },
+            { id: 3, title: "成团失败" },
             { id: 20, title: "待发货" },
             { id: 30, title: "待收货" },
             { id: 40, title: "已收货" },
@@ -261,6 +263,7 @@ export default {
       },
 
       tableConfig: {
+        loading: false,
         showOperate: true,
         detailTitle: "详情",
         btnList: [
@@ -282,6 +285,7 @@ export default {
         ]
       },
       detailTable: {
+        loading: false,
         showOperate: false,
         classList: [
           { key: "商品图片", value: "goods_image", isImg: true },
@@ -299,25 +303,33 @@ export default {
         page: 1,
         limit: 10
       },
-      isLoading: true
     };
   },
   methods: {
+
     async getList() {
-      //获取列表
-      this.isLoading = true;
+      this.tableConfig.loading = true;
+
       let send = Object.assign({}, this.listQuery);
       send.order_type = 6;
+
       let res = await api.getOrderList_api(send, this);
-      if (res.data && res.status == 0) {
+
+      if(res && res.data){
         res.data.forEach(this.format);
+
         this.list = res.data;
-      } else {
-        this.list = [];
+        this.total = res.pagination ? res.pagination.total : this.list.length;
       }
-      this.total = res.pagination.total;
-      this.isLoading = false;
+
+      if(res && !res.data){
+        this.list = [];
+        this.total = 0;
+      }
+
+      this.tableConfig.loading = false;
     },
+
     format(item) {
       let arr = ["status"],
         selectList = this.headConfig.selectList;
@@ -328,6 +340,9 @@ export default {
       item.name = item.order_reciver_info.name;
       item.phone = item.order_reciver_info.phone;
       item.address = item.order_reciver_info.address;
+
+      if(item.order_state_id == 20 && item.group.pintuangroup_state == 1) item.order_state = '待成团';
+      // if(item.order_state_id == 20 && item.group.pintuangroup_state == 2) item.order_state = '已成团';
 
       item.logistic = "";
       if (item.shipping_code) {
@@ -341,20 +356,15 @@ export default {
         "至" +
         Moment(item.group.pintuangroup_endtime).format("yyyy-MM-dd");
 
-      let strList = this.exchange(
-        selectList,
-        arr.map(v => item[v]),
-        "id",
-        "title"
-      );
+      let strList = this.exchange(selectList, arr.map(v => item[v]), "id", "title");
       arr.forEach((v, i) => (item[`${v}Str`] = strList[i]));
 
       // 标记发货按钮是否显示
-      item.showSend = item.order_state_id == 20;
+      item.showSend = item.order_state_id == 20 && item.group.pintuangroup_state != 1;
       // 标记查看评论按钮是否显示
       item.showLookComment = item.evaluation_state == 1;
 
-      item.showFinish = item.order_state_id >= 20 && item.order_state_id <= 40;
+      item.showFinish = item.order_state_id >= 20 && item.order_state_id <= 40 && item.group.pintuangroup_state != 1;
     },
 
     updateForm(status) {
@@ -508,11 +518,26 @@ export default {
       this.getList();
     },
     search(param) {
+      let statusList = param.statusList;
+
       this.listQuery.page = 1;
       this.$refs.mainTable.initPage();
+      delete this.listQuery.pintuan_state;
 
       this.listQuery.search = param.search;
-      this.listQuery.order_state = param.statusList[0];
+      this.listQuery.order_state = statusList[0];
+
+      // 拼团失败: 0, 拼团中: 1, 拼团成功：2
+      if(statusList[0] == 2){
+        this.listQuery.pintuan_state = 1;
+        this.listQuery.order_state = 20;
+      }else if(statusList[0] == 3){
+        this.listQuery.pintuan_state = 0;
+        this.listQuery.order_state = 20;
+      }else if(statusList[0] == 20){
+        this.listQuery.pintuan_state = 2;
+      }
+
       if (param.date) {
         this.listQuery.starttime = param.date.startDate;
         this.listQuery.endtime = param.date.endDate;
@@ -632,8 +657,6 @@ export default {
   },
 
   created() {
-    // let arr = new Array(10);
-
     this.getList();
   }
 };

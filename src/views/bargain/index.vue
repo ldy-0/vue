@@ -23,7 +23,7 @@
             </template>
           </el-table-column>
           <el-table-column label="商品名称" prop="goodsName"></el-table-column>
-          <el-table-column label="商品价格(元/吨)" prop="goodsPrice"></el-table-column>
+          <el-table-column label="商品原价" prop="goodsPrice"></el-table-column>
         </el-table>
         <el-form-item label="规格" :label-width="formLabelWidth" v-if="goodsDetail.skuClassList&&QisAddItem" prop="choiceGoodsId">
           <el-select v-model="alertValue" placeholder="请选择规格" @change="handele_select">
@@ -58,7 +58,7 @@
         <el-form-item style="display:inline-block" v-if="QformForNotive.cutprice_type==2" label="" label-width="0" prop="cutprice_more">
           <el-input type="number" min="1" style="width:150px;" v-model="QformForNotive.cutprice_more" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="现价" :label-width="formLabelWidth">
+        <el-form-item label="售价" :label-width="formLabelWidth">
           <el-input disabled v-model="goodsDetail.price" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="底价" :label-width="formLabelWidth" prop="goods_price">
@@ -100,7 +100,7 @@
                 </template>
               </el-table-column>
               <el-table-column label="商品名" prop="goodsName"></el-table-column>
-              <el-table-column label="价格" prop="goodsPrice"></el-table-column>
+              <el-table-column label="原价" prop="goodsPrice"></el-table-column>
               <el-table-column label="操作">
                 <template slot-scope="scope">
                   <el-button size="mini" type="primary" @click="choiceThis(scope.$index, scope.row)">选择</el-button>
@@ -142,9 +142,9 @@
               {{scope.row.goods.goods_name}}
             </template>
           </el-table-column>
-          <el-table-column label="商品价格（￥）" prop="goodsprice">
+          <el-table-column label="商品原价（￥）" prop="goodsprice">
             <template slot-scope="scope">
-              {{scope.row.goods.goods_price}}
+              {{scope.row.goods.goods_marketprice}}
             </template>
           </el-table-column>
           <el-table-column label="底价（￥）" prop="goods_price"></el-table-column>
@@ -346,7 +346,7 @@ export default {
                 id: aData.goods_commonid,
                 goodsImage: aData.goods_image, //显示
                 goodsName: aData.goods_name, //显示
-                goodsPrice: aData.goods_price, //显示
+                goodsPrice: aData.goods_marketprice, //显示
                 goods_freight: aData.goods_freight
               });
             });
@@ -529,7 +529,7 @@ export default {
         {
           goodsImage: row.goods.goods_image,
           goodsName: row.goods.goods_name,
-          goodsPrice: row.goods.goods_price
+          goodsPrice: row.goods.goods_marketprice
         }
       ])
       this.goodsDetail.price = row.goods.goods_price

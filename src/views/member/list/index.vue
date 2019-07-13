@@ -36,10 +36,8 @@
                 :config='tableConfig' 
                 :data='list' 
                 :total='total' 
-                :isLoading='isLoading' 
                 @show='showDetail'
                 @update='updateForm'
-                @look='lookItem'
                 @judge='lockItem'
                 @modify='dispatch'
                 @delete='deleteItem'
@@ -47,6 +45,19 @@
 
 
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
+  <!-- ModifyLevel -->
+  <div v-if="dialogConfig.status === 7">
+    <el-form label-width='100px'>
+      <custom-select :obj='level'></custom-select>
+    </el-form>
+
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="closeLevelDialog">取消</el-button>
+      <el-button type="primary" @click="submitLevel">确 定</el-button>
+    </div>
+  </div>
+
+  <!-- Remark -->
   <div v-if="dialogConfig.status === 6">
     <el-form label-width='100px'>
       <custom-input :obj='remark'></custom-input>
@@ -70,23 +81,17 @@
     </div>
   </div>
 
+  <!-- IncomeDetail -->
   <div v-if="dialogConfig.status === 4">
     <custom-head ref='head' :config='incomeHeadConfig' @search='incomeSearch'></custom-head>
     <custom-table ref='incomeTable' :config='incomeTableConfig' :data='incomeList' :total='incomeTotal' :isLoading='incomeLoading' @change='incomeChange'></custom-table>
   </div>
 
-  <!-- look -->
+  <!-- LookSubLevel -->
   <div v-if='dialogConfig.status === 3'>
-    <el-header class="header">
-      <custom-head :config='twoHeadConfig' @search='searchTwo'></custom-head> 
-    </el-header>
+    <custom-head :config='twoHeadConfig' @search='searchTwo'></custom-head> 
 
-    <custom-table :config='twoTableConfig' 
-                    :data='twoList' 
-                    :total='twoTotal' 
-                    :isLoading='twoIsLoading' 
-                    @change='changeTwo'></custom-table>
-      
+    <custom-table :config='twoTableConfig' :data='twoList' :total='twoTotal' @change='changeTwo'></custom-table>
   </div>
 
   <!-- add/minus score -->
@@ -153,9 +158,11 @@ import uploadFn from "@/utils/tencent_cos";
 import { voidTypeAnnotation } from 'babel-types';
 import api from '@/api/member';
 import remark from './remark';
+import dScore from './dScore';
+import level from './level';
 
 export default {
-  mixins: [remark],
+  mixins: [remark, dScore, level],
 
   components: {
     customHead,
@@ -210,13 +217,13 @@ export default {
         ],
       },
 
-      keys: ['member_truename', 'vip_level', 'total_rc_balance', 'available_rc_balance','member_mobile','inviter_nick'],
+      keys: ['member_truename', 'vip_level', 'recharge_rc_balance', 'available_rc_balance','member_mobile','inviter_nick'],
       formData: {
         member_avatar: { title: '头像', value: '', alert: null, },
         member_truename: { title: '昵称', value: '', alert: null, },
         vip_level: { title: '等级', value: '', alert: null, },
-        total_rc_balance: { title: '累计德分', value: '', alert: null, },
-        available_rc_balance: { title: '当前德分', value: '', alert: null, },
+        recharge_rc_balance: { title: '可用互转德分', value: '', alert: null, },
+        available_rc_balance: { title: '可用消费德分', value: '', alert: null, },
         member_mobile: { title: '推荐码', value: '', alert: null, },
         inviter_nick: { title: '上级名称', value: '', alert: null, },
       },
@@ -235,19 +242,20 @@ export default {
         content: { title: '内容', value: '', alert: null, },
       },
       tableConfig: {
+        loading: false,
         showOperate: true,
         showDelete: true,
         updateTitle: '增加/减少德分',
         detailTitle: '详情',
-        lookTitle: '查看下级',
         judge: [ 'lock_state', '关闭', '开启'],
         btnList: [
            { key: 'member_id', value: '收入明细' },
            { key: 'is_freeze', status: 0, value: '冻结' },
            { key: 'is_freeze', status: 1, value: '解冻' },
            { key: 'member_id', value: '备注' },
-          //  { key: 'card_mall', status: 2, value: '上架' },
-          //  { key: 'card_mall', status: 1, value: '下架' },
+           { key: 'member_id', value: '查看下级', },
+           { key: 'member_id', value: '修改等级', },
+           { key: 'member_id', value: '清除', type: 'danger', },
         ],
         classList: [
           { key: '头像', value: 'member_avatar', isAvatar: true, },
@@ -255,9 +263,9 @@ export default {
           { key: '姓名', value: 'member_nick' },
           { key: '联系方式', value: 'member_mobile' },
           { key: '等级', value: 'vip_level' },
-          { key: '总互转德分', value: 'total_rc_balance' },
+          // { key: '总互转德分', value: 'total_rc_balance' },
           { key: '当前互转德分', value: 'recharge_rc_balance' },
-          { key: '总消费德分', value: 'total_available_rc_balance' },
+          // { key: '总消费德分', value: 'total_available_rc_balance' },
           { key: '当前消费德分', value: 'available_rc_balance' },
           { key: '总余额', value: 'total_predeposit' },
           { key: '当前余额', value: 'available_predeposit' },
@@ -273,7 +281,6 @@ export default {
         is_vip: 1,
         sort: 0,
       },
-      isLoading: true,
 
       twoHeadConfig: {
         placeHolder: '请输入手机号',
@@ -287,15 +294,16 @@ export default {
       },
       // two List
       twoTableConfig: {
+        loading: false,
         classList: [
           { key: '头像', value: 'member_avatar', isImg: true, },
           { key: '昵称', value: 'member_truename' },
           { key: '姓名', value: 'member_nick' },
           { key: '联系方式', value: 'member_mobile' },
           { key: '等级', value: 'vip_level' },
-          { key: '总互转德分', value: 'total_rc_balance' },
+          // { key: '总互转德分', value: 'total_rc_balance' },
           { key: '互转德分', value: 'recharge_rc_balance' },
-          { key: '总消费德分', value: 'total_available_rc_balance' },
+          // { key: '总消费德分', value: 'total_available_rc_balance' },
           { key: '消费德分', value: 'available_rc_balance' },
           { key: '总余额', value: 'total_predeposit' },
           { key: '当前余额', value: 'available_predeposit' },
@@ -308,7 +316,6 @@ export default {
         limit: 10,
         is_vip: 1,
       },
-      twoIsLoading: true,
       incomeHeadConfig: {
         status: null,
         selectLabel: '类型',
@@ -336,17 +343,22 @@ export default {
   methods: {
     // 列表
     async getList() { 
-      this.isLoading = true
+      this.tableConfig.loading = true;
       let res = await api.getMember_api(this.query, this);
-      res.data.forEach(this.format);
 
-      this.list = res.data;
-      this.total = res.pagination.total;
-      this.isLoading = false
+      if(res && res.data){
+        res.data.forEach(this.format);
+
+        this.list = res.data;
+      }
+      
+      this.total = res.pagination ? res.pagination.total : this.list.length;
+      this.tableConfig.loading = false;
     },
 
     async getTwoList(id) {
-      this.twoIsLoading = true
+      this.twoTableConfig.loading = true;
+
       let send = Object.assign({},this.twoQuery);
 
       if(id) this.twoQuery.inviter_id = send.inviter_id = id
@@ -357,7 +369,7 @@ export default {
 
       this.twoList = res.data;
       this.twoTotal = res.pagination.total;
-      this.twoIsLoading = false
+      this.twoTableConfig.loading = false;
     },
 
     initTwoQuery(){
@@ -429,11 +441,9 @@ export default {
         return this.$message({message:'名片商城未开启，无法操作'})
       }
       let res = await api.UpDownMember_api(send,this);
-      if(res.status == 0){
-        this.$message({message:'操作成功',type:'success'});
-      }else{
-        this.$message({message:res.error,type:'error'});
-      }
+
+      this.$message({ message: res.error || '操作成功', type: typeof res == 'string' || res.error ? 'error' : 'success', });
+      
       this.getList();
     },
 
@@ -485,7 +495,6 @@ export default {
     },
 
     dispatch(item, index){
-      // console.error(item, index);
       // 收入明细
       if(index === 0){
         this.dialogConfig.status = 4;
@@ -504,6 +513,15 @@ export default {
 
       // 备注
       if(index === 3) this.openRemarkDialog(item);
+
+      // 查看下级
+      if(index === 4) this.lookItem(item);
+
+      // 修改会员等级
+      if(index === 5) this.openLevelDialog(item);
+
+      // 清除德分记录
+      if(index === 6) this.clearDScoreRecord(item);
 
     },
 
@@ -540,16 +558,6 @@ export default {
 
       this.getList();
     },
-    
-    // async changeMallStatus(item, status){
-    //   let param = { status };
-
-    //   let res = await api.changeMallStatus(item.member_id, param);
-
-    //   this.$message({ type: res.error ? 'error' : 'success', message: res.error || '修改成功' });
-    //   console.error(res);
-    //   this.getList();
-    // },
 
     async getTip(){
       let res = await api.getTip();

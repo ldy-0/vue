@@ -15,7 +15,7 @@
       </el-form>
     </el-header>
 
-    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @update='updateForm' @delete='deleteItem' @judge="judgeItem" @change='change'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @update='updateForm' @delete='deleteItem' @judge="judgeItem" @change='change'></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-form label-width='100px'>
@@ -82,7 +82,6 @@ import multiSku from "@/components/multiSku";
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
-import { voidTypeAnnotation } from "babel-types";
 
 export default {
   components: {
@@ -191,6 +190,7 @@ export default {
       },
 
       tableConfig: {
+        loading: false,
         showOperate: true,
         updateTitle: "编辑",
         showDelete: true,
@@ -215,7 +215,6 @@ export default {
         page: 1,
         limit: 10
       },
-      isLoading: true,
 
       allClass: []
     };
@@ -265,57 +264,57 @@ export default {
 
       this.img.value = goods ? [{ url: goods.goods_image }] : [];
       this.detailImg.value = goods
-        ? goods.goodsimagesList
-            .map(v => {
-              return { url: v.goodsimage_url };
-            })
-            .slice(1)
+        ? goods.goodsimagesList.map(v => ({ url: v.goodsimage_url })).slice(1)
         : [];
       this.name.value = goods ? goods.goods_name : "";
-      this.category.value = goods
-        ? "is_vip" in goods ? goods.is_vip : ""
-        : "";
-      this.classify.value = goods
-        ? [goods.gc_id_1, goods.gc_id_2, goods.gc_id_3]
-        : [];
+      this.category.value = goods && "is_vip" in goods ? goods.is_vip : "";
+      this.classify.value = goods ? [goods.gc_id_1, goods.gc_id_2, goods.gc_id_3] : [];
       this.freight.value = goods ? goods.goods_freight : "";
       this.content.value = goods ? goods.goods_body : "";
       this.goods_sort.value = goods ? goods.goods_sort : '';
 
-      this.spec.value = goods ? (goods.spec_value ? 2 : 1) : 1;
-      if (goods ? !goods.spec_value : true) {
-        let sku = goods ? goods.SKUList[0] : {};
-        this.sku.value = goods ? sku.goods_serial : "";
-        this.marketprice.value = goods ? goods.goods_marketprice : "";
-        this.price.value = goods ? goods.goods_price : "";
-        this.amount.value = goods ? sku.goods_storage : "";
-        this.profit.value = 0;
-        this.vip0_commission.value = goods ? sku.vip0_commission : "";
-        this.vip1_commission.value = goods ? sku.vip1_commission : "";
-        this.vip2_commission.value = goods ? sku.vip2_commission : "";
-        this.vip3_commission.value = goods ? sku.vip3_commission : "";
-        this.vip4_commission.value = goods ? sku.vip4_commission : "";
+      this.spec.value = goods && goods.spec_value ? 2 : 1;
+      if (!(goods && goods.spec_value)) {
+        this.formatSingleSku(goods);
       } else {
-        this.skuClassList = goods.spec_name.map((v, i) => {
-          return {
-            name: v,
-            skus: goods.spec_value[i].map(val => {
-              return { name: val };
-            })
-          };
-        });
-        goods.SKUList.forEach(v => {
-          v.price = Number(v.goods_price);
-          v.marketprice = Number(v.goods_marketprice);
-          v.count = Number(v.goods_storage);
-          v.sku = v.goods_serial;
-        });
-        this.skuList = goods.SKUList;
+        this.formatMultiSku(goods);
       }
 
       this.detail = goods;
       // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
     },
+
+    formatSingleSku(goods){
+      let sku = goods ? goods.SKUList[0] : {};
+      this.sku.value = goods ? sku.goods_serial : "";
+      this.marketprice.value = goods ? goods.goods_marketprice : "";
+      this.price.value = goods ? goods.goods_price : "";
+      this.amount.value = goods ? sku.goods_storage : "";
+      this.profit.value = 0;
+      this.vip0_commission.value = goods ? sku.vip0_commission : "";
+      this.vip1_commission.value = goods ? sku.vip1_commission : "";
+      this.vip2_commission.value = goods ? sku.vip2_commission : "";
+      this.vip3_commission.value = goods ? sku.vip3_commission : "";
+      this.vip4_commission.value = goods ? sku.vip4_commission : "";
+    },
+
+    formatMultiSku(goods){
+      this.skuClassList = goods.spec_name.map((v, i) => {
+        return {
+          name: v,
+          skus: goods.spec_value[i].map(name => ({ name, }))
+        };
+      });
+
+      goods.SKUList.forEach(v => {
+        v.price = Number(v.goods_price);
+        v.marketprice = Number(v.goods_marketprice);
+        v.count = Number(v.goods_storage);
+        v.sku = v.goods_serial;
+      });
+      this.skuList = goods.SKUList;
+    },
+
     change(param) {
       console.log("param :", param);
       this.query.limit = param.limit;
@@ -589,7 +588,7 @@ export default {
 
     async getList() {
       //获取列表
-      this.isLoading = true;
+      this.tableConfig.loading = true;
       this.query.type = 'sort'
       let res = await api.getGoodsList(this.query, this);
 
@@ -599,11 +598,12 @@ export default {
       let allClass = await classAPI.getClassList();
       if (allClass.error) this.$message.error(allClass.error);
       this.allClass = allClass.data;
+
       res.data.forEach(this.format);
 
       this.list = res.data;
       this.total = res.pagination.total;
-      this.isLoading = false;
+      this.tableConfig.loading = false;
     },
 
     async deleteItem(item) {
@@ -655,7 +655,7 @@ export default {
         .forEach((v, i) => (o[this.classList[i].name] = v));
 
       return o;
-    }
+    },
   },
 
   async created() {

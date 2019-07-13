@@ -33,7 +33,7 @@
               end-placeholder="结束日期" :picker-options="pickerOptions" value-format="yyyy-MM-dd HH:mm:ss">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="现价" :label-width="formLabelWidth">
+          <el-form-item label="售价" :label-width="formLabelWidth">
             <el-input disabled v-model="goodsDetail.price" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="秒杀价" :label-width="formLabelWidth" prop="goods_price">
@@ -77,7 +77,7 @@
                 </template>
               </el-table-column>
               <el-table-column label="商品名" prop="goodsName"></el-table-column>
-              <el-table-column label="价格" prop="goodsPrice"></el-table-column>
+              <el-table-column label="原价" prop="goodsPrice"></el-table-column>
               <el-table-column label="操作">
                 <template slot-scope="scope">
                   <el-button size="mini" type="primary" @click="choiceThis(scope.$index, scope.row)">选择</el-button>
@@ -116,7 +116,7 @@
           </el-table-column>
           <el-table-column label="秒杀商品ID" prop="id"></el-table-column>
           <el-table-column label="商品名" prop="name"></el-table-column>
-          <el-table-column label="商品价格（￥）" prop="goodsprice"></el-table-column>
+          <el-table-column label="商品原价（￥）" prop="goodsprice"></el-table-column>
           <el-table-column label="秒杀价格（￥）" prop="killPrice"></el-table-column>
           <el-table-column label="秒杀数量" prop="limit_num"></el-table-column>
           <el-table-column label="秒杀限购" prop="limit_buy"></el-table-column>
@@ -307,7 +307,7 @@ export default {
                 id: aData.rule_id,
                 image: aData.goods.goods_image,
                 name: aData.goods.goods_name,
-                goodsprice: aData.goods.goods_price,
+                goodsprice: aData.goods.goods_marketprice,
                 killPrice: aData.goods_price,
                 limit_num: aData.limit_num,
                 limit_buy: aData.limit_buy,
@@ -365,7 +365,7 @@ export default {
                 goodsType: aData.is_appoint ? 1 : 0,
                 is_virtualTXT: aData.is_virtual ? "虚拟" : "实体", //显示补充，实际无用
                 goodsName: aData.goods_name, //显示
-                goodsPrice: aData.goods_price, //显示
+                goodsPrice: aData.goods_marketprice, //显示
                 goodsNum: aData.goods_serial //显示
               });
             });
