@@ -42,22 +42,15 @@
 
           <el-button size="mini" type="primary" @click="emit(scope.$index, scope.row, 'look')" v-if='config.lookTitle' v-text='config.lookTitle'></el-button>
 
-          <el-button size='mini' type="primary" @click="show(scope.$index, scope.row, index)" v-for='(item, index) in config.btnList' :key='index' v-if='scope.row[item.key]'>{{item.value}}</el-button>
+          <el-button size='mini' :type="item.type || 'primary'" @click="show(scope.$index, scope.row, index, item)" 
+              v-for='(item, index) in config.btnList' :key='index' v-if='scope.row[item.key]'>{{item.value}}</el-button>
 
           <!-- auth status -->
           <el-button size="mini" type="success" @click="showAuth(scope.$index, scope.row, 1)" v-if='config.showAuth && scope.row.state == 0'>同意</el-button>
           <el-button size="mini" type="warning" @click="showAuth(scope.$index, scope.row, 2)" v-if='config.showAuth && scope.row.state == 0'>拒绝</el-button>
 
-          <el-button size="mini" type="primary" @click="showCustom(scope.$index, scope.row)" v-if="config.custom && typeof config.custom === 'string'" 
-                    v-text='config.custom'></el-button>
-
-          <el-button size="mini" type="primary" @click="showFinish(scope.$index, scope.row)" v-if="config.showFinish &&scope.row[config.showFinish[0]]"
-                    v-text='config.showFinish[1]'></el-button>
-          
           <el-button size="mini" type="warning" @click="showJudge(scope.$index, scope.row)" v-if="config.judge" 
                     v-text='scope.row[config.judge[0]] ? config.judge[1] : config.judge[2]'></el-button>
-
-          <!-- <el-button size="mini" type="primary" @click="showSelect(scope.$index, scope.row)" v-if='config.showSelect'>{{config.selectTitle}}</el-button> -->
 
           <el-button size="mini" type="danger" @click="showDeleteDialog(scope.$index, scope.row)" v-if='config.showDelete || config.deleteTitle'>删除</el-button>
 
@@ -127,13 +120,26 @@ export default {
         page: 1,
         keyWord: '',
       },
-    }
+
+      confirmOpt: {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      },
+    };
   },
   
   methods: {
-    show(i, row, index){ this.$emit('modify', row, index); },
+
+    show(i, row, index, item){ 
+
+      if(['danger', 'warn'].indexOf(item.type) != -1) return this.$confirm('确认继续操作码?', '', this.confirmOpt).then(() => this.$emit('modify', row, index, this.flag));
+
+      this.$emit('modify', row, index, this.flag); 
+
+    },
+
     showAuth(index, row, state){ this.$emit('auth', row, state) },
-    showCustom(index, row){ this.$emit('custom', row, 'custom') },
     showJudge(index, row){ this.$emit('judge', row) },
 
     emit(index, row, eventName) { this.$emit(eventName, row, this.flag); },
@@ -152,18 +158,7 @@ export default {
       }).catch(e => this.$notify.info({ message: '已取消' }))
     },
 
-    showFinish(index, row) {
-      let config = {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-
-      this.$confirm(`确认操作, 是否继续?`, '提示', config).then(() => this.$emit('finish', row)).catch(e => this.$notify.info({ message: '已取消' }))
-    },
-
-    // showSelect(index, row){ this.$emit('select', row); },
-
+    // pagination
     changeSize(val){
       this.query.limit = val;
       this.query.page = 1;
@@ -175,6 +170,7 @@ export default {
       this.$emit('change', this.query, this.flag);
     },
 
+    // outer 
     init(){
       this.query.page = 1;
       this.query.keyWord = '';

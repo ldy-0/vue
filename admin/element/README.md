@@ -69,6 +69,36 @@ vue + element
 
 ***
 
+- customTable
+
+  + property
+
+    |  props  | type | desc |  
+    |---------|------|------|  
+    |  config |Object|  |
+    |  data   |Array|  |
+    |  total  |Number|  |
+    |  flag   |String|  |
+
+    - config  
+      loading: `加载状态`  
+      classList: `[ { key: xx, value: xx(identifiers), isImg|isAvatar|isRadio|isRate|isMulti| } ], 内容列表`  
+      showOperate: `是否显示按钮`  
+      btnList: `[ [ { key: xx(identifiers), value: xx, type: 'primary'|'danger'|'warning' } ] ], 按钮列表`  
+      showPagination: `是否显示分页`
+      flag: `标记table`
+
+    - total
+      `列表数据总数`
+
+  + Methods
+    
+    |  props  |   param | desc |  
+    |---------|----------|------|  
+    |  modify | (item, index, flag) | btnList按钮回调 |
+    |  change | (query, flag) | 换页，换limit回调 |
+
+***
 
 ### utils
 - COS upload
