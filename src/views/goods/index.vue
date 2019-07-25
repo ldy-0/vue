@@ -18,19 +18,20 @@
     <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @update='updateForm' @delete='deleteItem' @judge="judgeItem" @change='change'></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
-      <el-form label-width='100px'>
+      <el-form label-width='120px'>
         <custom-img :obj='img'></custom-img>
 
         <custom-img :obj='detailImg'></custom-img>
 
         <custom-input :obj='name'></custom-input>
 
-        <custom-select :obj='category'></custom-select>
+        <custom-select :obj='category' @change='changeCategory'></custom-select>
 
         <multiSelect :obj='classify' @load='loadClass'></multiSelect>
 
         <custom-radio :obj='spec'></custom-radio>
 
+        <!-- 单规格 -->
         <div v-if="spec.value == 1">
           <custom-input :obj='sku'></custom-input>
           <number :obj='marketprice'></number>
@@ -45,6 +46,7 @@
             <number :obj='vip4_commission'></number>
           </div>
         </div>
+        <!-- 多规格 -->
         <div v-if="spec.value == 2">
           <el-form-item>
             <multi-sku :type='category.value' :classList='skuClassList' :skuList='skuList' :limit='5' @update='updateMultiSku'></multi-sku>
@@ -52,7 +54,20 @@
         </div>
 
         <number :obj='freight'></number>
-        <number :obj='goods_sort'></number>
+        <custom-input :obj='goods_sort'></custom-input>
+
+        <!-- 对接人 -->
+        <custom-radio :obj='owner' @change='changeOwner'></custom-radio>
+        <div v-if="owner.value == 1">
+          <custom-input :obj='ownerCode'></custom-input> 
+
+          <custom-input :obj='ownerVip0Award'></custom-input> 
+          <custom-input :obj='ownerVip1Award'></custom-input> 
+          <custom-input :obj='ownerVip2Award'></custom-input> 
+          <custom-input :obj='ownerVip3Award'></custom-input> 
+          <custom-input :obj='ownerVip4Award'></custom-input> 
+        </div>
+
         <el-form-item :label="content.title" v-if='dialogConfig.status'>
           <editor style='width: 800px;' v-model='content.value'></editor>
         </el-form-item>
@@ -69,7 +84,7 @@
 <script>
 import customTable from "@/components/customTable";
 import customHead from "@/components/customHead";
-import customInput from "@/components/input";
+import customInput from "@/components/customInput";
 import customSelect from "@/components/select";
 import multiSelect from "@/components/multiSelect";
 import customRadio from "@/components/radio";
@@ -82,8 +97,11 @@ import multiSku from "@/components/multiSku";
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
+import owner from './owner';
 
 export default {
+  mixins: [owner],
+
   components: {
     customHead,
     customTable,
@@ -111,50 +129,26 @@ export default {
         title: "",
         status: 0 // 1:添加分类，2：编辑分类， 3：二级分类列表
       },
-      img: {
-        title: "商品图片",
-        value: [],
-        limit: 1,
-        alert: null,
-        url: "https://up-z2.qiniup.com",
-        cdnUrl: "https://cdn.health.healthplatform.xyz",
-        body: {}
-      },
-      detailImg: {
-        title: "详情图片",
-        value: [],
-        limit: 10,
-        alert: null,
-        url: "https://up-z2.qiniup.com",
-        cdnUrl: "https://cdn.health.healthplatform.xyz",
-        body: {}
-      },
-      name: { title: "商品名称", value: "", alert: null },
-      category: {
-        title: "类别",
-        categories: [{ id: 0, title: "常规商品" }, { id: 1, title: "VIP商品" }],
-        value: "",
-        alert: null
-      },
+      img: { title: "商品图片", value: [], limit: 1, alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
+      detailImg: { title: "详情图片", value: [], limit: 10, alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
+      name: { type: 'text', title: "商品名称", value: "", alert: null },
+      category: { title: "类别", categories: [{ id: 0, title: "常规商品" }, { id: 1, title: "VIP商品" }], value: "", alert: null },
       classify: { title: "分类", source: [], value: [], alert: null },
-      spec: {
-        title: "规格",
-        categories: [{ id: 1, title: "单规格" }, { id: 2, title: "多规格" }],
-        value: 1,
-        alert: null
-      },
-      sku: { title: "商品编号", value: "", alert: null },
+      spec: { title: "规格", categories: [{ id: 1, title: "单规格" }, { id: 2, title: "多规格" }], value: 1, alert: null },
+      sku: { type: 'text', title: "商品编号", value: "", alert: null },
       marketprice: { title: "原价", value: "", alert: null },
       price: { title: "售价", value: "", alert: null },
       amount: { title: "库存", value: "", alert: null },
       freight: { title: "运费", value: "", alert: null, isZero: true },
       goods_sort: { title: "排序序号", value: "", alert: null },
+
       profit: { title: "平台利润", value: 0, alert: null },
       vip0_commission: { title: "体验代理奖金", value: "", alert: null },
       vip1_commission: { title: "VIP1奖金", value: "", alert: null },
       vip2_commission: { title: "VIP2奖金", value: "", alert: null },
       vip3_commission: { title: "VIP3奖金", value: "", alert: null },
       vip4_commission: { title: "VIP4奖金", value: "", alert: null },
+
       content: { title: "商品详情", value: "", alert: null },
       skuClassList: [],
       skuList: [],
@@ -166,15 +160,8 @@ export default {
       headConfig: {
         title: "添加商品",
         placeHolder: "请输入商品名称",
-        showKeywordSearch: "slkfjlksdajf",
         selectLabelList: ["类别", "状态"],
-        multiSelect: {
-          title: "分类",
-          source: [],
-          value: [],
-          alert: null,
-          search: true
-        },
+        multiSelect: { title: "分类", source: [], value: [], alert: null, search: true },
         selectList: [
           [
             { id: null, name: "全部" },
@@ -280,6 +267,8 @@ export default {
         this.formatMultiSku(goods);
       }
 
+      this.initOwner(goods);
+
       this.detail = goods;
       // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
     },
@@ -332,89 +321,110 @@ export default {
 
       config.status = 0;
     },
+
+    validateSigleSku(){
+      let paramArr = [ "sku", "marketprice", "price", "amount", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission" ];
+
+      // Vip Good
+      if(this.category.value){
+        paramArr = paramArr.slice(0, 4);
+        this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 0;
+      }
+
+      if ( paramArr.some(v => this[v].value ? false : (this[v].alert = `请输入${this[v].title}`) )) return true;
+    },
+
+    validateMultiSku(){
+      let err = "";
+      if (!this.specList.length) return `规格类别不能为空`;
+
+      this.specList.some(item => {
+        let arr = [
+          { key: "VIP4佣金", value: "vip4_commission" },
+          { key: "VIP3佣金", value: "vip3_commission" },
+          { key: "VIP2佣金", value: "vip2_commission" },
+          { key: "VIP1佣金", value: "vip1_commission" },
+          { key: "体验代理佣金", value: "vip0_commission" },
+          { key: "库存数量", value: "count" },
+          { key: "价格", value: "price" },
+          { key: "商品标价", value: "marketprice" },
+          { key: "商品编号", value: "sku" },
+        ];
+
+        if(this.category.value){
+          arr = arr.slice(4);
+          item.vip0_commission = item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
+        }
+
+        arr.forEach((v, i) => {
+          if (!(item[v.value] >= 0)) err = `${v.key}必须为大于零的数字`;
+        });
+
+        return err;
+      });
+
+      return err;
+    },
+
+    encodeMultiSku(skuPropArr){
+      let spec_name = {},
+        spec_value = {};
+
+      this.classList.forEach((v, i) => {
+        let o = {};
+        v.skus.forEach((sku, skuIndex) => (o[skuIndex] = sku.name));
+        spec_value[i] = o;
+      });
+      this.classList.forEach((v, i) => (spec_name[i] = v.name));
+
+      let spec = this.specList.map(v => {
+        let o = {};
+
+        skuPropArr.forEach(prop => (o[prop] = v[prop]));
+
+        (o.spec_attr = v.index.join("_")),
+          (o.sp_value = this.formatName(v.name));
+        o.stock = v.count;
+        return o;
+      });
+
+      return [spec_name, spec_value, spec];
+    },
+
     async submit() {
-      let paramArr = ["name"],
-        spec = this.spec,
+      // this.mockData();
+      let spec = this.spec,
         imgList = this.img.value,
         firstSpec = this.specList[0],
         param;
 
       if (!imgList.length) return (this.img.alert = "请选择图片作为主图");
 
-      if (spec.value == 1)
-        paramArr.push(
-          "sku",
-          "marketprice",
-          "price",
-          "amount",
-          "vip0_commission",
-          "vip1_commission",
-          "vip2_commission",
-          "vip3_commission",
-          "vip4_commission"
-        );
+      if (!this.name.value) return this.name.alert = `请选择${this.name.title}`;
+      if (typeof this.category.value !== "number") return (this.category.alert = `请选择${this.category.title}`);
+      if (!this.classify.value[2]) return (this.classify.alert = `请选择${this.classify.title}`);
 
-      // vip
-      if(this.category.value){
-        paramArr = paramArr.slice(0, 4);
-        this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 0;
+      // sigleSku
+      if (spec.value == 1){
+        if(this.validateSigleSku()) return ;
       }
-
-      if (
-        paramArr.some(v => {
-          return this[v].value
-            ? false
-            : (this[v].alert = `请输入${this[v].title}`);
-        })
-      )
-        return;
-      if (typeof this.category.value !== "number")
-        return (this.category.alert = `请选择${this.category.title}`);
-      if (!this.classify.value[2])
-        return (this.classify.alert = `请选择${this.classify.title}`);
-
+        
       // multiSku
       if (spec.value == 2) {
-        let err = "";
-        if (!this.specList.length) return this.$message.error(`规格类别不能空`);
-
-        this.specList.some(item => {
-          let arr = [
-            { key: "VIP4佣金", value: "vip4_commission" },
-            { key: "VIP3佣金", value: "vip3_commission" },
-            { key: "VIP2佣金", value: "vip2_commission" },
-            { key: "VIP1佣金", value: "vip1_commission" },
-            { key: "体验代理佣金", value: "vip0_commission" },
-            // { key: "平台利润", value: "profit" },
-            { key: "库存数量", value: "count" },
-            { key: "价格", value: "price" },
-            { key: "sku", value: "sku" },
-          ];
-
-          if(this.category.value){
-            arr = arr.slice(4);
-            item.vip0_commission = item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
-          }
-
-          arr.forEach((v, i) => {
-            if (!(item[v.value] > 0)) err = `${v.key}必须为大于零的数字`;
-          });
-
-          return err;
-        });
-
-        if (err) return this.$message.error(err);
+        let multiSkuErr = this.validateMultiSku();
+        if(multiSkuErr) return this.$message.error(multiSkuErr);
       }
+
       // freight
-      if (!this.freight.value)
-        return (this.freight.alert = `请选择${this.freight.title}`);
+      if (!this.freight.value) return (this.freight.alert = `请选择${this.freight.title}`);
+
+      // owner
+      if(this.owner.value == 1 && !this.ownerCode.value) return this.ownerCode.alert = `请填写${this.ownerCode.title}`;
 
       this.stopSubmit = true;
 
       imgList = imgList.concat(this.detailImg.value);
-      let img = imgList.map(v => {
-        return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url;
-      });
+      let img = imgList.map(v => v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url);
       if (!img[0]) return console.error("img value :", img);
 
       param = {
@@ -428,67 +438,42 @@ export default {
         goods_freight: this.freight.value,
         goods_sort: this.goods_sort.value,
         goods_body: this.content.value,
-        goods_price: firstSpec ? firstSpec.price : this.price.value,
-        goods_marketprice: firstSpec ? firstSpec.marketprice : this.marketprice.value,
+        goods_price: spec.value == 2 ? firstSpec.price : this.price.value,
+        goods_marketprice: spec.value == 2 ? firstSpec.marketprice : this.marketprice.value,
       };
 
+      let skuPropArr = ["sku", "price", "marketprice", "profit", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission"];
       if (spec.value == 1) {
-        let o = {};
-        [
-          "sku",
-          "price",
-          "marketprice",
-          "profit",
-          "vip0_commission",
-          "vip1_commission",
-          "vip2_commission",
-          "vip3_commission",
-          "vip4_commission"
-        ].forEach(prop => (o[prop] = this[prop].value));
-        o.stock = this.amount.value;
-        o.spec_attr = "";
+        let o = {
+          stock: this.amount.value,
+          spec_attr: "",
+          sp_value: null,
+        };
 
-        param.spec_name = null;
-        param.spec_value = o.sp_value = null;
+        skuPropArr.forEach(prop => (o[prop] = this[prop].value));
+
+        param.spec_name = param.spec_value = null;
         param.spec = [o];
       } else {
-        let spec_name = {},
-          spec_value = {};
-
-        this.classList.forEach((v, i) => {
-          let o = {};
-          v.skus.forEach((sku, skuIndex) => (o[skuIndex] = sku.name));
-          spec_value[i] = o;
-        });
-        this.classList.forEach((v, i) => (spec_name[i] = v.name));
-
-        let spec = this.specList.map(v => {
-          let o = {};
-          [
-            "sku",
-            "price",
-            "marketprice",
-            "profit",
-            "vip0_commission",
-            "vip1_commission",
-            "vip2_commission",
-            "vip3_commission",
-            "vip4_commission"
-          ].forEach(prop => (o[prop] = v[prop]));
-          (o.spec_attr = v.index.join("_")),
-            (o.sp_value = this.formatName(v.name));
-          o.stock = v.count;
-          return o;
-        });
-
-        param.spec_value = spec_value;
-        param.spec_name = spec_name;
-        param.spec = spec;
+        [param.spec_name, param.spec_value, param.spec] = this.encodeMultiSku(skuPropArr);
       }
 
-      // return console.error(img, o, 'about param : ', param);
+      // owner
+      if(this.owner.value == 1){
+        let ownerPropArr = ['ownerCode', 'ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award'],
+            arr = ['agent_mobile', 'agent_commission_0', 'agent_commission_1', 'agent_commission_2', 'agent_commission_3', 'agent_commission_4'];
+
+        ownerPropArr.forEach((prop, i) => {
+          param[arr[i]] = this[prop].value;
+        });
+
+        if(this.dialogConfig.status == 2) param.agent_id = this.detail.SKUList[0].agent_id;
+      }
+
+      // return console.error(img, 'about param : ', param);
       this.save(param);
     },
+
     async format(item) {
       let matcher,
         arr = ["is_vip", "goods_state"],
@@ -576,10 +561,9 @@ export default {
     async save(param) {
       let status = this.dialogConfig.status;
       console.log("save: ", param, status);
-      let res =
-        status == 1
-          ? await api.addGoods(param)
-          : await api.setGoods(this.detail.goods_commonid, param);
+      let res = status == 1 ? await api.addGoods(param) : await api.setGoods(this.detail.goods_commonid, param);
+
+      if(typeof res == 'string' || res.error) this.$message.error(res.error || res);
 
       this.getList();
       this.stopSubmit = false;
@@ -656,6 +640,21 @@ export default {
 
       return o;
     },
+
+    mockData(){
+      if(this.dialogConfig.status == 2) return ;
+      this.img.value = [ { url: "https://cdn.health.healthplatform.xyz/FpRp_lTUWcu5fehu5b2dBlSOPvwv" } ]; 
+      this.name.value = 'pub商品(商品对接人)';
+      this.price.value = 1;
+      this.marketprice.value = 124;
+      this.sku.value = 12345;
+      this.amount.value = 2400,
+      this.freight.value = 1.2;
+      this.category.value = 0;
+      this.classify.value = [12, 13, 14];
+      this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 1;
+    }
+
   },
 
   async created() {

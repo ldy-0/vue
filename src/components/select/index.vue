@@ -40,6 +40,8 @@ export default {
       let obj = this.obj;
       // console.error('search: ', v); 
       obj.alert = typeof obj.value === 'number' || obj.value ? null : `请选择${obj.title}`;
+
+      this.$emit('change', v);
     },
 
   }

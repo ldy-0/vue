@@ -7,9 +7,15 @@
   <el-form-item :label="obj.title" :label-width="obj.width">
 
     <div>
-      <span>{{obj.preValue}}</span>
-      <el-input :class='{input: obj.preValue || obj.postValue }' v-model="obj.value" auto-complete="off" @input='getInput'></el-input>
-      <span>{{obj.postValue}}</span>
+      <span>{{obj.pre || obj.preValue}}</span>
+
+      <el-input :class='{input: obj.pre || obj.post || obj.preValue || obj.postValue }' 
+                v-model="obj.value"
+                :disabled="'disabled' in obj ? obj.disabled : false" 
+                auto-complete="off" 
+                @input='getInput'></el-input>
+      
+      <span>{{obj.post || obj.postValue}}</span>
     </div>
 
     <el-alert type='error' show-icon :title='obj.alert' :closable='false' v-if='obj.alert'></el-alert>
@@ -34,6 +40,7 @@ export default {
         positive: { pattern: /^[+]?\d+(?:\.\d+)?$/, alert: `必须为正数`, },
         number: { pattern: /^[+-]?\d+(?:\.\d+)?$/, alert: `必须为数字`, },
         string: { pattern: /^.*$/, alert: `不能为空`, },
+        text: { pattern: /^.*$/, alert: `不能为空`, },
       }
     }
   },

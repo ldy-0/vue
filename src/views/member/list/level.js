@@ -32,7 +32,7 @@ export default {
 
       this.dialogConfig.status = 7;
 
-      this.level.value = item.vip_level;
+      this.level.value = Number(item.vip_level);
 
       this.levelItem = item;
 
@@ -60,7 +60,7 @@ export default {
           item = this.levelItem;
 
       arr.forEach(v => {
-        if(!this[v].value) this[v].alert = `请输入${this[v].title}`;
+        if(typeof this[v].value != 'number') this[v].alert = `请输入${this[v].title}`;
       });
     },
 
