@@ -1,5 +1,5 @@
 <template>
-  <el-form-item :label="obj.title">
+  <el-form-item :label="obj.title" :label-width="obj.width || '100px'">
         <el-upload list-type="picture-card"
               :action='obj.url' 
               :data='obj.body'
@@ -7,6 +7,7 @@
               :file-list='obj.value' 
               :on-remove='changeImgs'
               :on-change="changeImgs" 
+              :on-preview='preview'
               :on-success='success'
               multiple
               v-if='obj.url'
@@ -18,6 +19,7 @@
               :file-list='obj.value' 
               :on-remove='changeImgs'
               :on-change="changeImgs"
+              :on-preview='preview'
               :class="{disabled:showCard}"
                v-else>
 
@@ -26,6 +28,11 @@
         </el-upload>
 
         <el-alert :title='obj.alert' :closable='false' type='error' show-icon v-if='obj.alert'></el-alert>
+
+        <!-- preview -->
+        <div class='preview_mask' v-if='previewUrl' @click='previewUrl = null'>
+          <img class='preview_img' :src='previewUrl' @click.stop=';' />
+        </div>
   </el-form-item>
 </template>
 
@@ -49,11 +56,14 @@ export default {
 
   data() {
     return {
-      dialogTableVisible: false
+      previewUrl: null,
     }
   },
 
   methods: {
+    preview(file){
+      this.previewUrl = file.url;
+    },
 
     changeImgs(e, list){
       let obj = this.obj;
@@ -77,4 +87,21 @@ export default {
   .disabled .el-upload--picture-card{
     display: none;
   }
+
+.preview_mask{
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, .6);
+  text-align: center;
+}
+.preview_img{
+  width: 800px;
+  height: 600px;
+  margin: 40px 0 0;
+  background: #fff;
+}
 </style>

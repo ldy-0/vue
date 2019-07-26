@@ -39,6 +39,24 @@ vue + element
 
 ***
 
+- customImg
+
+  + property
+
+    |  props  | type | desc |  
+    |---------|------|------|  
+    |   obj   |Object|  |
+
+    - obj 
+      limit: `图片可允许最大数量`
+      value: `图片地址数组`
+      preventValidate: `取消检验`
+      url: `自动上传地址`
+      body: `请求体内容`
+      title: `标题`
+      width: `标题宽度`
+
+***
 
 - customHead
 
