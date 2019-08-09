@@ -18,7 +18,6 @@ export default {
 		news: '新闻资讯',
     memberList:'人员列表',
     manage:'提现管理',
-    setting:'分销设置',
     record:'提现记录',
     statistics:'分销统计',
     rReturn:'售后订单',
@@ -52,6 +51,7 @@ export default {
     distribute:'用户列表',
     evaluation : '评价管理',
     authorityManagement:'权限管理',
+    business: '招商申请',
 
     //平台
     home: '首页',

@@ -32,7 +32,7 @@
                 :total='total' 
                 :isLoading='isLoading' 
                 @update='updateForm'
-                @look='look'
+                @modify='dispatch'
                 @delete='deleteItem'
                 @change='change'></custom-table>
 
@@ -54,15 +54,14 @@
 
   <div v-if="dialogConfig.status === 3">
     <el-header class="header">
-      <custom-head :config='twoHeadConfig' @add='updateFormTwo(4)'></custom-head> 
+      <custom-head :config='twoHeadConfig' @add='updateFormTwo(4)' @search='searchTwo'></custom-head> 
     </el-header>
-    <custom-table :config='tableConfig' 
+    <custom-table ref='goodsTable' :config='twoTableConfig' 
                 :data='twoList' 
                 :total='twoTotal' 
                 :isLoading='twoIsLoading' 
                 @update='updateFormTwo'
-                @look='lookTwo'
-                @delete='deleteItemTwo'
+                @modify='dispatchTwo'
                 @change='changeTwo'></custom-table>
 
   </div>
@@ -70,7 +69,7 @@
 </el-dialog>
 
 <!-- two class -->
-<el-dialog :title="twoDialogConfig.title" :visible.sync="twoShowDialog" :before-close='closeDialogTwo' width="80%">
+<!-- <el-dialog :title="twoDialogConfig.title" :visible.sync="twoShowDialog" :before-close='closeDialogTwo' width="80%">
   <div v-if="[4, 5].indexOf(twoDialogConfig.status) !== -1">
     <el-form label-width='100px'>
       <custom-input :obj='name'></custom-input>
@@ -98,23 +97,10 @@
 
   </div>
 
-</el-dialog>
+</el-dialog> -->
 
-<el-dialog :title="thirdDialogConfig.title" :visible.sync="thirdShowDialog" :before-close='closeDialogThird' width="80%">
-  <div v-if="[7, 8].indexOf(thirdDialogConfig.status) !== -1">
-    <el-form label-width='100px'>
-      <custom-input :obj='name'></custom-input>
-
-      <custom-img :obj='img'></custom-img>
-    </el-form>
-
-    <span slot="footer" class="dialog-footer">
-      <el-button @click="closeDialogThird" >取消</el-button>
-      <el-button type="primary" :disabled="stopSubmit" :loading="stopSubmit" @click="submit">确 定</el-button>
-    </span>
-  </div>
-</el-dialog>
 <!-- </el-container> -->
+
 
 </div>
 </template>
@@ -122,6 +108,7 @@
 
 import api from '@/api/classify' 
 import commonReq from '@/api/common' 
+import goodsApi from "@/api/goods";
 import customTable from '@/components/customTable';
 import customHead from '@/components/customHead';
 import customInput from '@/components/input'
@@ -160,12 +147,16 @@ export default {
       tableConfig: {
         showOperate: true,
         updateTitle: '编辑',
-        lookTitle: '查看下级',
+        // lookTitle: '查看下级',
         // showDetail: true,
         showDelete: true,
+        btnList: [
+          { key: 'customcatalog_id', value: '选择' },
+          { key: 'customcatalog_id', value: '商品' },
+        ],
         classList: [
           { key: '名称', value: 'name' },
-          { key: '图片', value: 'storegc_pic',isImg:true },
+          { key: '图片', value: 'customcatalog_image',isImg:true },
         ],
       },
       list: [],
@@ -176,6 +167,8 @@ export default {
         limit: 10,
       },
       isLoading: true,
+      detail: null,
+      operateIndex: null,
       // two classify
       twoDialogConfig: {
         title: '',
@@ -183,52 +176,71 @@ export default {
       },
 
       twoHeadConfig: {
-        title: '添加分类' 
+        // title: '添加分类' 
+        placeHolder: '请输入商品名称',
+      },
+      twoTableConfig: {
+        loading: false,
+        showOperate: true,
+        btnList: [],
+        classList: [
+          { key: '商品名', value: 'goods_name' },
+          { key: "商品图片", value: "goods_image", isImg: true },
+          { key: "售价", value: "goods_price" },
+          { key: "状态", value: "stateStr" },
+        ],
       },
       twoList: [],
       twoTotal: 0,
       twoQuery: {
-        parent_id: 0,
         page: 1,
         limit: 10,
       },
       twoIsLoading: true,
-      // third classify
-      thirdDialogConfig: {
-        title: '',
-        status: 0, // 7:添加分类，8：编辑分类， 9：四级分类列表
-      },
-
-      thirdHeadConfig: {
-        title: '添加分类' 
-      },
-      thirdList: [],
-      thirdTotal: 0,
-      thirdQuery: {
-        parent_id: 0,
-        page: 1,
-        limit: 10,
-      },
-      thirdIsLoading: true,
+      stateArr: ['下架', '上架'],
 
     }
   },
   methods: {
     updateForm(status){
       this.dialogConfig.status = typeof status === 'number' ? status : 2;
-      this.storegc_id = status.storegc_id;
+      this.storegc_id = status.customcatalog_id;
       this.name.value = status.name || ''; 
       this.img.value = status.img || [];
       // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
     },
-    look(item){
+
+    dispatch(item, index){
       let config = this.dialogConfig;
 
       config.status = 3;
-      this.twoQuery.parent_id = item.storegc_id;
 
-      this.getTwoList();
+      this.detail = item;
+      this.operateIndex = index;
+
+      // 选择商品
+      if(index == 0){
+        this.twoTableConfig.btnList = [ { key: 'goods_commonid', value: '添加', } ];
+        return this.getGoodList();
+      }
+
+      // 分类中商品列表
+      if(index == 1){
+        this.twoTableConfig.btnList = [ { type: 'danger', key: 'goods_commonid', value: '删除', } ];
+        return this.getClassGoodsList();
+      }
+
+      // this.twoQuery.parent_id = item.storegc_id;
+      // this.getTwoList();
     },
+
+    dispatchTwo(item, index){
+      // 添加商品至分类
+      if(this.operateIndex == 0) this.addGoods(item);
+
+      if(this.operateIndex == 1) this.deleteGoods(item);
+    },
+
     closeDialog(){
       let config = this.dialogConfig;
 
@@ -238,6 +250,15 @@ export default {
       this.twoQuery.limit = 10;
     },
     //=====================================
+    searchTwo(o){
+      this.twoQuery.page = 1;
+      this.$refs.goodsTable.initPage();
+
+      o.search ? this.twoQuery.search = o.search : delete this.twoQuery.search;
+
+      this.getGoodList();
+    },
+
     updateFormTwo(status){
       this.twoDialogConfig.status = typeof status === 'number' ? status : 5;
       this.storegc_id = status.storegc_id;
@@ -245,6 +266,7 @@ export default {
       this.img.value = status.img || [];
       console.error('updateform two', this.twoDialogConfig.status, this.name.value, this.img.value);
     },
+
     lookTwo(item){
       let config = this.twoDialogConfig,
           tableConfig = this.tableConfig;
@@ -267,23 +289,10 @@ export default {
 
       tableConfig.lookTitle = '查看下级';
     },
-    //======================================
-    updateFormThird(status){
-      this.thirdDialogConfig.status = typeof status === 'number' ? status : 8;
-      this.storegc_id = status.storegc_id;
-      this.name.value = status.name || ''; 
-      this.img.value = status.img || [];
-      console.error('updateform third', this.thirdDialogConfig.status, this.name.value, this.img.value);
-    },
-    closeDialogThird(){
-      let config = this.thirdDialogConfig;
-
-      config.status = 0;
-    },
 
     async submit(){
       let paramArr = ['name',],
-          status = this.thirdDialogConfig.status || this.twoDialogConfig.status || this.dialogConfig.status,
+          status = this.twoDialogConfig.status || this.dialogConfig.status,
           imgList = this.img.value,
           param;
       if(!imgList.length) return this.img.alert = '请选择图片作为主图';
@@ -293,13 +302,13 @@ export default {
       this.stopSubmit = true;
       let img = imgList.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
       if(!img[0]) return console.error('img value :', img);
+
       param = {
-        storegc_name: this.name.value,
-        storegc_pic: img[0],
+        customcatalog_name: this.name.value,
+        customcatalog_image: img[0],
       };
-      if(status == 7 || status == 8){
-        param.storegc_parent_id = this.thirdQuery.parent_id;
-      }else if(status == 4 || status == 5){
+
+      if(status == 4 || status == 5){
         param.storegc_parent_id = this.twoQuery.parent_id;
       }
 
@@ -307,22 +316,19 @@ export default {
     },
     // 
     async save(param){
-      let status = this.thirdDialogConfig.status || this.twoDialogConfig.status || this.dialogConfig.status;
+      let status = this.twoDialogConfig.status || this.dialogConfig.status;
       let res = null;
 
       if(status ==2||status ==5 ||status ==8){
-        param.storegc_id = this.storegc_id;
-        res = await api.editClassList(param);
+        param.customcatalog_id = this.storegc_id;
+        res = await api.editCustomClass(param);
       }else{
-        res = await api.addClass(param);
+        res = await api.addCustomClass(param);
       }
       if(res.status ==0) this.$message.success('操作成功');
       if(res.error) return this.$message.error(`addClass: ${res.error}`);
 
-      if(status == 7 || status == 8){
-        this.thirdDialogConfig.status = 0;
-        this.getThirdList();
-      }else if(status == 4 || status == 5){
+      if(status == 4 || status == 5){
         this.twoDialogConfig.status = 0;
         this.getTwoList();
       }else{
@@ -333,22 +339,48 @@ export default {
       this.stopSubmit = false;
     },
     //get =========================================
+    format(v){
+      v.name = v.customcatalog_name;
+      v.img = [ { url: v.customcatalog_image } ];
+    },
+
     async getList() { //获取列表
       this.isLoading = true
 
       console.error('getclassList param: ', this.query)
-      let res = await api.getClassList(this.query, this);
+      let res = await api.getCustomClassList(this.query, this);
 
       if(res.error) return this.isLoading = false;
 
-      res.data.forEach(v => {
-        v.name = v.storegc_name;
-        v.img = [ { url: v.storegc_pic } ];
-      });
+      res.data.forEach(this.format);
       this.list = res.data || [];
       this.total = res.pagination ? res.pagination.total : 0;
       this.isLoading = false
     },
+
+    // 某一分类的商品列表
+    async getClassGoodsList() {
+      this.twoTableConfig.loading = true;
+
+      let res = await api.getClassGoodsList(this.detail.customcatalog_id, this.twoQuery);
+
+      if (typeof res == 'string' || res.error) return this.$message.error(res.error);
+
+      res.data.forEach(this.classGoodsFormat);
+
+      this.twoList = res.data;
+      this.twoTotal = res.pagination.total;
+      this.twoTableConfig.loading = false;
+    },
+
+    classGoodsFormat(v){
+      let goods = v.goodscommon;
+
+      for(let key in goods) v[key] = goods[key];
+
+      v.stateStr = this.stateArr[v.goods_state];
+    },
+
     async getTwoList() { //获取列表
       this.twoIsLoading = true
 
@@ -357,51 +389,23 @@ export default {
 
       if(res.error) return this.twoIsLoading = false;
 
-      res.data.forEach(v => {
-        v.name = v.storegc_name;
-        v.img = [ { url: v.storegc_pic } ];
-      });
+      res.data.forEach(this.format);
 
       this.twoList = res.data || [];
       this.twoTotal = res.pagination ? res.pagination.total : 0;
       this.twoIsLoading = false
     },
-    async getThirdList() { //获取列表
-      this.thirdIsLoading = true
 
-      console.error('getclassList param: ', this.thirdQuery)
-      let res = await api.getClassList(this.thirdQuery, this);
-
-      if(res.error) return this.thirdIsLoading = false;
-
-      res.data.forEach(v => {
-        v.name = v.storegc_name;
-        v.img = [ { url: v.storegc_pic } ];
-      });
-
-      this.thirdList = res.data || [];
-      this.thirdTotal = res.pagination ? res.pagination.total : 0;
-      this.thirdIsLoading = false;
-    },
     //delete=======================================
     async deleteItem(item){
-      let res = await api.deleteClassList(item.storegc_id, null, this);
+      let res = await api.deleteCustomClass(item.customcatalog_id, null, this);
+
       if(res.status ==0) this.$message.success('操作成功');
       if(res.status !=0) this.$message.success(res.error);
+
       this.getList();
     },
-    async deleteItemTwo(item){
-      let res = await api.deleteClassList(item.storegc_id, null, this);
-      if(res.status ==0) this.$message.success('操作成功');
-      if(res.status !=0) this.$message.success(res.error);
-      this.getTwoList();
-    },
-    async deleteItemThird(item){
-      let res = await api.deleteClassList(item.storegc_id, null, this);
-      if(res.status ==0) this.$message.success('操作成功');
-      if(res.status !=0) this.$message.success(res.error);
-      this.getThirdList();
-    },
+
     async getUploadToken(){
       let res = await commonReq.getUploadToken();
 
@@ -411,22 +415,67 @@ export default {
       this.img.body.config = "{ useCdnDomain: true }";
       // incorrect region, please use up-z2.qiniup.com  upload domain error
     },
+
     //分页=========================================
     change(param){
       this.query.limit = param.limit;
       this.query.page = param.page;
       this.getList();
     },
+
     changeTwo(param){
       this.twoQuery.limit = param.limit;
       this.twoQuery.page = param.page;
-      this.getTwoList();
+
+      if(this.operateIndex == 0) return this.getGoodList();
+      if(this.operateIndex == 1) return this.getClassGoodsList();
     },
-    changeThird(param){
-      this.thirdQuery.limit = param.limit;
-      this.thirdQuery.page = param.page;
-      this.getThirdList();
+
+    // Goods
+    async addGoods(item){
+      let param = {
+        customcatalog_id: this.detail.customcatalog_id,
+        goods_commonid: item.goods_commonid,
+      };
+
+      let res = await api.addGoods(param);
+
+      res && res.data ? this.$message.success(`添加成功`) : this.$message.error(res.error || res);
+
     },
+
+    async deleteGoods(item){
+      let res = await api.deleteGoods(item.cataloggoods_id, null, this);
+
+      if(res.status ==0) this.$message.success('操作成功');
+      if(res.status !=0) this.$message.success(res.error);
+
+      this.getClassGoodsList();
+    },
+
+    async getGoodList() {
+      this.twoTableConfig.loading = true;
+      this.twoQuery.type = 'sort'
+      let res = await goodsApi.getGoodsList(this.twoQuery, this);
+
+      if (res.error) return this.$message.error(res.error);
+
+      // get all class list
+      // let allClass = await classAPI.getClassList();
+      // if (allClass.error) this.$message.error(allClass.error);
+      // this.allClass = allClass.data;
+
+      res.data.forEach(this.goodsFormat);
+
+      this.twoList = res.data;
+      this.twoTotal = res.pagination.total;
+      this.twoTableConfig.loading = false;
+    },
+
+    goodsFormat(v){
+      v.stateStr = this.stateArr[v.goods_state];
+    },
+    
   },
 
   created(){

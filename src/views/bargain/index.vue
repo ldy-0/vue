@@ -4,10 +4,20 @@
     margin-top: 20px;
   }
 }
+
+.test{
+  width: 200px;
+  height: 200px;
+  background: #000;
+  transform: translateX(600px);
+  transition: transform 10s;
+}
 </style>
 
 <template>
   <div>
+    <!-- <div class='test' @click='transitionEnd'>1</div> -->
+
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt>
     </el-dialog>
@@ -33,7 +43,13 @@
         <el-form-item label="规格" :label-width="formLabelWidth" v-if="!QisAddItem" prop="choiceGoodsId">
           {{QformForNotive.goods_spec||'单规格商品'}}
         </el-form-item>
-        <p class="hbs-margin-left140">图片建议尺寸：宽750*高750;限传一张;</p>
+        <!-- <p class="hbs-margin-left140">图片建议尺寸：宽750*高750;限传一张;</p> -->
+
+        <!-- 活动封面图 -->
+        <custom-img :obj='img'></custom-img>
+        <!-- 活动名 -->
+        <custom-input :obj='ruleName'></custom-input>
+
         <el-form-item label="活动时间" :label-width="formLabelWidth" prop="dateRange">
           <el-date-picker style="width:400px" :picker-options="pickerOptions" v-model="QformForNotive.dateRange" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="timestamp">
           </el-date-picker>
@@ -120,7 +136,7 @@
           <el-form-item>
             <el-button type="primary" icon="el-icon-edit-outline" @click="addItem">添加砍价商品</el-button>
           </el-form-item>
-                    <el-form-item>
+          <el-form-item>
               <el-input style="width: 340px;" placeholder="请输入商品名称" v-model="listQuery.search"></el-input>
           </el-form-item>
           <el-form-item>
@@ -136,6 +152,9 @@
                 <img :src="scope.row.goods.goods_image" alt style="width:100px">
               </div>
             </template>
+          </el-table-column>
+          <el-table-column label="活动名">
+            <template slot-scope="scope">{{scope.row.rule_name}}</template>
           </el-table-column>
           <el-table-column label="商品名">
             <template slot-scope="scope">
@@ -184,6 +203,7 @@
         <el-button type="primary" @click="submitSale('ruleForm')">确 定</el-button>
       </span>
     </el-dialog>
+
   </div>
 </template>
 <script>
@@ -199,7 +219,10 @@ import Moment from "@/utils/moment";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 import multiSelect from '@/components/multiSelect';
+import customInput from '@/components/customInput';
+import customImg from '@/components/customImg';
 import classAPI from '@/api/classify';
+import commonReq from '@/api/common' ;
 import sale from './sale';
 const QformForNotive = {
   dateRange: [],
@@ -210,7 +233,9 @@ const QformForNotive = {
 export default {
   mixins: [config, sale],
   components:{
-    multiSelect
+    multiSelect,
+    customInput,
+    customImg,
   },
   data() {
     return {
@@ -274,12 +299,15 @@ export default {
         page: 1,
         limit: 10
       },
-      total: 1
+      total: 1,
+      ruleName: { type: 'text', title: '活动名', value: '', alert: null, width: '120px', },
+      img: { title: '封面图', value: [], alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {}, width: '120px' },
     };
   },
   async created() {
     //获取自定义商品分类
     this.getList();
+    this.getUploadToken();
     let classRes = await classAPI.getClassList({ parent_id: 0 });
     classRes.data.forEach(v => {
         v.label = v.storegc_name;
@@ -310,6 +338,14 @@ export default {
     }
   },
   methods: {
+    transitionEnd(e){
+      // realm: { globalObj, globalEnv, }
+      // globalEnvRec: { objEnvRec, declarationEnvRec, varName: [] }
+      // Job: { job, realm, scirptOrModal }
+
+      // instantiateRealm, initRealm->intantiateLexicalEnv->instantiateGlobalEnvRec
+      // instantiateExecEnv initExecEnv 
+    },
     //get data============================================
     getList() {
       this.listLoading = true;
@@ -369,6 +405,7 @@ export default {
       this.isAddItem = true;
       this.addNewShow = true;
       this.QformForNotive = Object.assign({},QformForNotive);
+
       this.getList2();
     },
     choiceThis(index, row) {
@@ -400,6 +437,8 @@ export default {
       });
       this.QaddNewShow = true;
       this.QisAddItem = true;
+
+      this.initBargain();
     },
     handele_select(e) {
       this.QformForNotive.choiceGoodsId = this.goodsDetail.SKUList[e].goods_id;
@@ -421,6 +460,11 @@ export default {
       });
       if (!res) return;
       if (!this.choiceGoodsId) return;
+
+      //
+      if(!this.img.value.length) return this.img.alert = `${this.img.title}不能为空!`;
+      if(!this.ruleName.value) return this.ruleName.alert = `${this.ruleName.title}不能为空!`;
+
       this.QwaitAddNotice = true;
       let send = {
         goods_id: this.choiceGoodsId,
@@ -430,7 +474,9 @@ export default {
         end_time: this.QformForNotive.dateRange[1]/1000,
         goods_freight: this.QformForNotive.goods_freight,
         goods_storage: this.QformForNotive.goods_storage,
-        cutprice_type: this.QformForNotive.cutprice_type
+        cutprice_type: this.QformForNotive.cutprice_type,
+        rule_name: this.ruleName.value, 
+        images: this.img.value.map(v => (v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url )),
       };
       if (this.QformForNotive.cutprice_type == 1) {
         send.cutprice_price = this.QformForNotive.cutprice_price;
@@ -544,7 +590,21 @@ export default {
         cutprice_type:row.cutprice_type,
         goods_price:row.goods_price,
         goods_spec:row.goods.goods_spec
-      }
+      };
+
+      this.img = { 
+        title: '封面图', 
+        value: row.images ? row.images.map(v => ({ url: v })) : [], 
+        limit: 1,
+        alert: null, 
+        url: 'https://up-z2.qiniup.com', 
+        cdnUrl: 'https://cdn.health.healthplatform.xyz', 
+        body: this.img.body, 
+        width: '120px' 
+      },
+
+      this.img.limit = this.img.value.length;
+      this.ruleName.value = row.rule_name;
     },
     //search=============================================
     search() {
@@ -594,6 +654,24 @@ export default {
       this.listQuery2.gc_id = param[2];
       this.getList2();
     },
+
+    initBargain(){
+      this.ruleName.value = '';
+      this.ruleName.alert = null;
+
+      this.img.value = [];
+      this.img.alert = null;
+
+      if('limit' in this.img) delete this.img.limit;
+    },
+
+    async getUploadToken(){
+      let res = await commonReq.getUploadToken();
+      if(res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+      this.img.body.token= res.data;
+      this.img.body.config= "{ useCdnDomain: true }";
+    },
+
   }
 };
 </script>

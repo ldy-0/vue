@@ -115,6 +115,7 @@
             </template>
           </el-table-column>
           <el-table-column label="秒杀商品ID" prop="id"></el-table-column>
+          <el-table-column label="活动名" prop="rule_name"></el-table-column>
           <el-table-column label="商品名" prop="name"></el-table-column>
           <el-table-column label="商品原价（￥）" prop="goodsprice"></el-table-column>
           <el-table-column label="秒杀价格（￥）" prop="killPrice"></el-table-column>
@@ -192,7 +193,7 @@ export default {
   data() {
     return {
       multiSelect:{ title: '分类', source: [], value: [], alert: null, search:true},
-      img: { title: '封面图', value: [], limit: 1, alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
+      img: { title: '封面图', value: [], alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       //本页参数
       choiceGoodsId: 0, //规格对应goods_id
       alertValue: "", //规格select的值
@@ -305,6 +306,7 @@ export default {
               tempTableData.push({
                 //后端生成
                 id: aData.rule_id,
+                rule_name: aData.rule_name,
                 image: aData.goods.goods_image,
                 name: aData.goods.goods_name,
                 goodsprice: aData.goods.goods_marketprice,
@@ -426,8 +428,12 @@ export default {
       });
       if (!res) return;
       if(!this.choiceGoodsId) return;
+
+      // cover Image
+      if(!this.img.value.length) return this.img.alert = `封面图不能为空!`;
       let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
       if(!img[0]) return console.error('img value :', img);
+
       this.QwaitAddNotice = true;
 
       let send = {

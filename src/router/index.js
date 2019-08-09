@@ -236,6 +236,18 @@ export let asyncRouterMapSeller = [
         meta: { title: "分类", noCache: true }
       },
       {
+        path: "customClass", // 自定义分类信息
+        component: () => import("@/views/operate/customClass/index"),
+        name: "customClass",
+        meta: { title: "自定义分类", noCache: true }
+      },
+      {
+        path: "newsClass", // 新闻分类信息
+        component: () => import("@/views/operate/newsClass/index"),
+        name: "newsClass",
+        meta: { title: "新闻分类", noCache: true }
+      },
+      {
         path: "groupBuying",
         component: () => import("@/views/groupBuying/groupBuying"),
         name: "groupBuying",
@@ -304,6 +316,18 @@ export let asyncRouterMapSeller = [
       	component: () => import('@/views/operate/address/index'),
       	name: 'address',
       	meta: { title: '退货地址', noCache: true }
+      },
+      {
+      	path: 'business', 
+      	component: () => import('@/views/operate/business/index'),
+      	name: 'business',
+      	meta: { title: 'business', noCache: true }
+      },
+      {
+      	path: 'setting', // 设置
+      	component: () => import('@/views/operate/setting/index'),
+      	name: 'setting',
+      	meta: { title: 'setting', noCache: true }
       },
     ]
   },

@@ -10,8 +10,14 @@
   <div>
     <!-- 添加-->
     <el-dialog title="添加团购商品" :visible.sync="addNewShow" width="70%">
+
       <el-dialog title="新增团购" :visible.sync="QaddNewShow" width="50%" append-to-body>
         <el-form :model="QformForNotive" ref="qruleForm" :rules="Qrules">
+          <!-- 活动封面图 -->
+          <custom-img :obj='img'></custom-img>
+          <!-- 活动名 -->
+          <custom-input :obj='ruleName'></custom-input>
+
           <el-form-item label="规格" :label-width="formLabelWidth" v-if="goodsDetail" prop="choiceGoodsId">
             <el-select v-model="alertValue" placeholder="请选择规格" @change="handele_select">
               <el-option v-for="(item,index) in goodsDetail.skuClassList" :key="index" :label="item" :value="index"></el-option>
@@ -42,6 +48,7 @@
           <el-button type="primary" @click="QaddOne('ruleForm')" :disabled="QwaitAddNotice" :loading="QwaitAddNotice">确 定</el-button>
         </span>
       </el-dialog>
+
       <el-container class="notice">
         <el-header class="header">
           <el-form :inline="true" :model="formInline" class="form">
@@ -138,6 +145,7 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+
     <el-container class="notice">
       <el-header class="header">
         <el-form :inline="true" :model="formInline" class="form">
@@ -162,6 +170,7 @@
             </template>
           </el-table-column>
           <el-table-column label="团购商品ID" prop="id"></el-table-column>
+          <el-table-column label="活动名" prop="rule_name"></el-table-column>
           <el-table-column label="商品名" prop="name"></el-table-column>
           <el-table-column label="商品原价" prop="goodsprice"></el-table-column>
           <el-table-column label="团购价格" prop="gurouprice"></el-table-column>
@@ -223,7 +232,10 @@ import Moment from "@/utils/moment";
 import uploadFn from "@/utils/tencent_cos";
 import config from "@/utils/config";
 import multiSelect from '@/components/multiSelect';
+import customInput from '@/components/customInput';
+import customImg from '@/components/customImg';
 import classAPI from '@/api/classify';
+import commonReq from '@/api/common' ;
 import sale from './sale';
 const QformForNotive = {
   dateRange: []
@@ -247,7 +259,9 @@ const formForNotiveChild2List = [{}];
 export default {
   mixins: [config, sale],
   components:{
-    multiSelect
+    multiSelect,
+    customInput,
+    customImg,
   },
   data() {
     return {
@@ -564,13 +578,17 @@ export default {
             type: "number"
           }
         ]
-      }
+      },
+
+      ruleName: { type: 'text', title: '活动名', value: '', alert: null, width: '120px', },
+      img: { title: '封面图', value: [], alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {}, width: '120px' },
     };
   },
   async created() {
     //获取自定义商品分类
     this.getGoodsClass();
     this.getList();
+    this.getUploadToken();
     let classRes = await classAPI.getClassList({ parent_id: 0 });
     classRes.data.forEach(v => {
         v.label = v.storegc_name;
@@ -625,6 +643,11 @@ export default {
       if (!res) {
         return;
       }
+
+      //
+      if(!this.img.value.length) return this.img.alert = `${this.img.title}不能为空!`;
+      if(!this.ruleName.value) return this.ruleName.alert = `${this.ruleName.title}不能为空!`;
+
       this.QwaitAddNotice = true;
       let dateStart = Moment(new Date().getTime()).format(
         "yyyy-MM-dd HH:mm:ss"
@@ -651,7 +674,9 @@ export default {
         end_time: dateEnd,
         goods:{
           goods_storage:this.QformForNotive.goods_storage
-        }
+        },
+        rule_name: this.ruleName.value,
+        rule_images: this.img.value.map(v => (v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url )),
       };
       addgroupbuy_api(sendData)
         .then(data => {
@@ -884,6 +909,8 @@ export default {
         } else {
           this.choiceGoodsId = res.data.SKUList[0].goods_id;
         }
+
+        this.initGroupBuy();
       });
       this.HeditItem(id); //弹出表单
     },
@@ -981,6 +1008,7 @@ export default {
               tempTableData.push({
                 //后端生成
                 id: aData.rule_id,
+                rule_name: aData.rule_name,
                 image: aData.goods.goods_image,
                 name: aData.goods.goods_name,
                 goodsprice: aData.goods.goods_marketprice,
@@ -1261,6 +1289,21 @@ export default {
 
       this.listQuery2.gc_id = param[2];
       this.getList2();
+    },
+
+    initGroupBuy(){
+      this.ruleName.value = '';
+      this.ruleName.alert = null;
+
+      this.img.value = [];
+      this.img.alert = null;
+    },
+
+    async getUploadToken(){
+      let res = await commonReq.getUploadToken();
+      if(res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+      this.img.body.token= res.data;
+      this.img.body.config= "{ useCdnDomain: true }";
     },
   }
 };

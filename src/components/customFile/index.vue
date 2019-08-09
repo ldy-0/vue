@@ -1,6 +1,6 @@
 <template>
   <el-form-item :label="obj.title" :label-width="obj.width || '100px'">
-        <el-upload list-type="picture-card"
+        <el-upload
               :action='obj.url' 
               :data='obj.body'
               :limit='obj.limit'
@@ -12,9 +12,13 @@
               multiple
               v-if='obj.url'
               :class="{disabled:showCard}">
-              <i class="el-icon-plus"></i>
+
+              <div class='el-upload--picture-card'>
+                <i class="el-icon-plus"></i>
+              </div>
+
         </el-upload>
-        <el-upload action='' list-type="picture-card" :auto-upload="false"
+        <el-upload action='' :auto-upload="false"
               :limit='obj.limit'
               :file-list='obj.value' 
               :on-remove='changeImgs'
@@ -23,7 +27,9 @@
               :class="{disabled:showCard}"
                v-else>
 
-              <i class="el-icon-plus"></i>
+              <div class='el-upload--picture-card'>
+                <i class="el-icon-plus"></i>
+              </div>
 
         </el-upload>
 
@@ -38,7 +44,7 @@
 
 <script>
 export default {
-  name: 'customImg',
+  name: 'customFile',
 
   props: {
     obj: {
@@ -46,12 +52,14 @@ export default {
     }
   },
   computed:{
-      showCard(){
-          return  this.obj.value.length>=Number(this.obj.limit);
-      }
+    showCard(){ return this.obj.value.length >= Number(this.obj.limit); }
   },
   watch: {
-    // obj(v1, v2){ console.error('watch'); },
+    // obj: {
+    //   immediate: true,
+    //   deep: true,
+    //   handler(v1, v2){ console.error('watch', v1, v2, this.obj.value); }
+    // },
   },
 
   data() {
@@ -72,7 +80,7 @@ export default {
 
       if(obj.preventValidate) return ;
 
-      this.obj.alert = this.obj.value.length ? null : '请选择图片';
+      this.obj.alert = this.obj.value.length ? null : `${obj.title}不能为空!`;
     },
 
     success(res){
@@ -84,9 +92,14 @@ export default {
 </script>
 
 <style>
-  .disabled .el-upload--picture-card{
-    display: none;
-  }
+.disabled .el-upload--picture-card{
+  display: none;
+}
+
+.plus_wrap{
+  padding: 30px 50px;
+  border: 1px dashed #606266;
+}
 
 .preview_mask{
   position: fixed;

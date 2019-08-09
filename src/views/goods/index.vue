@@ -56,6 +56,9 @@
         <number :obj='freight'></number>
         <custom-input :obj='goods_sort'></custom-input>
 
+        <!-- 促销活动描述 -->
+        <custom-input :obj='activityDesc'></custom-input>
+
         <!-- 对接人 -->
         <custom-radio :obj='owner' @change='changeOwner'></custom-radio>
         <div v-if="owner.value == 1">
@@ -141,6 +144,7 @@ export default {
       amount: { title: "库存", value: "", alert: null },
       freight: { title: "运费", value: "", alert: null, isZero: true },
       goods_sort: { title: "排序序号", value: "", alert: null },
+      activityDesc: { type: 'string', title: "促销活动描述", value: "", alert: null, preventValidate: true, },
 
       profit: { title: "平台利润", value: 0, alert: null },
       vip0_commission: { title: "体验代理奖金", value: "", alert: null },
@@ -259,6 +263,7 @@ export default {
       this.freight.value = goods ? goods.goods_freight : "";
       this.content.value = goods ? goods.goods_body : "";
       this.goods_sort.value = goods ? goods.goods_sort : '';
+      this.activityDesc.value = goods ? goods.goods_advword : '';
 
       this.spec.value = goods && goods.spec_value ? 2 : 1;
       if (!(goods && goods.spec_value)) {
@@ -418,6 +423,9 @@ export default {
       // freight
       if (!this.freight.value) return (this.freight.alert = `请选择${this.freight.title}`);
 
+      // activityDesc
+      if(this.category.value == 0 && this.activityDesc.value.length > 4) return this.$message.error(`普通商品促销活动描述不能超过4个字!`);
+
       // owner
       if(this.owner.value == 1 && !this.ownerCode.value) return this.ownerCode.alert = `请填写${this.ownerCode.title}`;
 
@@ -440,6 +448,7 @@ export default {
         goods_body: this.content.value,
         goods_price: spec.value == 2 ? firstSpec.price : this.price.value,
         goods_marketprice: spec.value == 2 ? firstSpec.marketprice : this.marketprice.value,
+        goods_advword: this.activityDesc.value,
       };
 
       let skuPropArr = ["sku", "price", "marketprice", "profit", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission"];
