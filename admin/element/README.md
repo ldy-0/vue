@@ -13,13 +13,14 @@ vue + element
     - obj  
       > 如果声明custom，type属性会被忽略
 
-      custom: `{ pattern: RegExp, alert: null }`  
-      type: positive|integer|number|string 
-      preValue: `输入框前缀`  
+      custom: `{ pattern: RegExp, alert: null }自定义验证规则`  
+      type: positive|integer|number|string|normal|text  
+      pre(preValue): `输入框前缀`  
       value: `输入框值`  
-      postValue: `输入框后缀`  
-      title: `标题`
-      width: `标题宽度`
+      post(postValue): `输入框后缀`  
+      title: `标题`  
+      width(labelWidth): `标题宽度`  
+      disabled: `是否禁止输入`
 
 ***
 
@@ -31,11 +32,15 @@ vue + element
     |---------|------|------|  
     |   obj   |Object|  |
 
-    - obj 
-      type: `[date|datetime|datetimerange]`  
-      title: `标题`
-      isNow: `禁用今天之前时间`
-      preventValidate: `取消检验`
+    - obj  
+      > type为time|timerange时, 为时间选择
+
+      type: `[date|datetime|datetimerange|time|timerange]`  
+      isNow: `禁用今天之前时间`  
+      title: `标题`  
+      width: `标题宽度`  
+      preventValidate: `取消检验`  
+      disabled: `是否禁止输入`
 
 ***
 
@@ -47,14 +52,15 @@ vue + element
     |---------|------|------|  
     |   obj   |Object|  |
 
-    - obj 
-      limit: `图片可允许最大数量`
-      value: `图片地址数组`
-      preventValidate: `取消检验`
-      url: `自动上传地址`
-      body: `请求体内容`
-      title: `标题`
-      width: `标题宽度`
+    - obj  
+      limit: `图片可允许最大数量`  
+      value: `图片地址数组`  
+      preventValidate: `取消检验`  
+      url: `自动上传地址`  
+      body: `请求体内容`  
+      title: `标题`  
+      width: `标题宽度`  
+      disabled: `是否禁止输入`
 
 ***
 
