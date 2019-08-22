@@ -9,6 +9,7 @@
               :on-change="changeImgs" 
               :on-preview='preview'
               :on-success='success'
+              :disabled="obj.disabled"
               multiple
               v-if='obj.url'
               :class="{disabled:showCard}">
@@ -21,6 +22,7 @@
               :on-change="changeImgs"
               :on-preview='preview'
               :class="{disabled:showCard}"
+              :disabled="obj.disabled"
                v-else>
 
               <i class="el-icon-plus"></i>
@@ -45,13 +47,15 @@ export default {
       type: Object
     }
   },
+
   computed:{
-      showCard(){
-          return  this.obj.value.length>=Number(this.obj.limit);
-      }
+    showCard(){
+      return  this.obj.value.length>=Number(this.obj.limit);
+    }
   },
+
   watch: {
-    obj(v1, v2){ console.error('watch'); }
+    // obj(v1, v2){ console.error('watch'); }
   },
 
   data() {
