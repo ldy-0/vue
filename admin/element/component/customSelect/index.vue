@@ -1,0 +1,59 @@
+<style scoped>
+.input{
+  width: 100px;
+}
+</style>
+<template>
+  <el-form-item :label="obj.title || obj.name || obj.label">
+
+      <el-select :placeholder="obj.placeholder || PLACEHOLDER" :disabled="obj.disabled" v-model='obj.value' @change='search'> <!-- multiple  -->
+
+        <el-option v-for="item in obj.list" 
+                   :label="key ? item[key] : item.title || item.name || item.label" 
+                   :key="value ? item[value] : item.id" :value="value ? item[value] : item.id || item.value"></el-option>
+
+      </el-select>
+
+      <el-alert type='error' show-icon :title='obj.alert' :closable='false' v-if='obj.alert'></el-alert>
+
+  </el-form-item>
+</template>
+
+<script>
+export default {
+  name: 'customSelect',
+
+  props: {
+    obj: {
+      type: Object
+    },
+  },
+
+  data() {
+    return {
+      PLACEHOLDER: '请选择',
+    }
+  },
+
+  computed: {
+    key(){ return this.obj.titleKey || null; },
+    value(){ return this.obj.valueKey || null; },
+  },
+
+  methods: {
+
+    search(v){
+      let obj = this.obj;
+      console.error('search: ', v); 
+
+      obj.alert = typeof obj.value === 'number' || obj.value ? null : `请选择${obj.title}`;
+
+      this.$emit('change', v);
+    },
+
+  }
+
+}
+</script>
+
+

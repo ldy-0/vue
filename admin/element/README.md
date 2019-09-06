@@ -124,6 +124,27 @@ vue + element
 
 ***
 
+- customSelect/customRadio
+
+  + property
+
+    | props | type | desc |
+    |-------|------|------|
+    | obj   |Object|  |
+
+    - obj  
+
+      value: `值`  
+      list: [ { title: '项名', value: '项值' } ]
+      titleKey: `项名对应属性`
+      valueKey: `项值对应属性`
+      title(name): `标题`  
+      width(labelWidth): `标题宽度`  
+      disabled: `是否禁止输入`
+
+***
+
+
 ### utils
 - COS upload
 
