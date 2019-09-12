@@ -4,9 +4,9 @@
 }
 </style>
 <template>
-  <el-form-item :label="obj.title || obj.name || obj.label">
+  <el-form-item :label="obj.title || obj.name || obj.label" :label-width="obj.width || obj.labelWidth">
 
-      <el-select :placeholder="obj.placeholder || PLACEHOLDER" :disabled="obj.disabled" v-model='obj.value' @change='search'> <!-- multiple  -->
+      <el-select :placeholder="obj.placeholder || PLACEHOLDER" :multiple="obj.type == MULTI" :disabled="obj.disabled" v-model='obj.value' @change='search' @visible-change="show">
 
         <el-option v-for="item in obj.list" 
                    :label="key ? item[key] : item.title || item.name || item.label" 
@@ -32,6 +32,7 @@ export default {
   data() {
     return {
       PLACEHOLDER: '请选择',
+      MULTI: 'multi',
     }
   },
 
@@ -44,12 +45,16 @@ export default {
 
     search(v){
       let obj = this.obj;
-      console.error('search: ', v); 
+      // console.error('search: ', v); 
 
       obj.alert = typeof obj.value === 'number' || obj.value ? null : `请选择${obj.title}`;
 
       this.$emit('change', v);
     },
+
+    show(v){
+      this.$emit(v ? 'show' : 'hide');
+    }
 
   }
 

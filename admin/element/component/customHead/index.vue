@@ -4,13 +4,19 @@
       <!-- 添加class='form'属性会不显示 -->
       <el-form :inline="true">
 
+        <!-- btn -->
         <el-form-item v-if='config.title'>
-          <el-button type="primary" icon="el-icon-edit-outline" @click="showForm">{{config.title}}</el-button>
+          <el-button type="primary" icon="el-icon-edit-outline" @click="click('add')">{{config.title}}</el-button>
+        </el-form-item>
+
+        <!-- Export -->
+        <el-form-item label="" v-if='config.showExport'>
+          <el-button  type="primary" icon="document" @click="click('export')">导出Excel</el-button>
         </el-form-item>
 
         <!-- btnList -->
         <el-form-item v-if='config.btnList'>
-          <el-button type="primary" icon="el-icon-edit-outline" @click="emit(index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
+          <el-button class='btn_wrap' type="primary" @click="click('click', index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
         </el-form-item>
 
         <!-- input -->
@@ -42,10 +48,14 @@
           </el-select>
 
         </el-form-item>
-        
-        <!-- Export -->
-        <el-form-item label="" v-if='config.showExport'>
-          <el-button  type="primary" icon="document" @click="exportFile">导出Excel</el-button>
+
+        <!-- switch -->
+        <el-form-item label="" v-if="'switchList' in config">
+          <el-switch v-model="item.value" 
+                     v-for="(item, index) in config.switchList" :key="index"
+                     :disabled="item.disabled"
+                     :active-text="item.title || item.activeText || '开关'"
+                     :active-color="item.color || item.activeColor || '#13ce66'" :inactive-color="item.inactiveColor || '#C0CCDA'" @change="change('switch', index, $event)"></el-switch>
         </el-form-item>
 
       </el-form>
@@ -99,18 +109,16 @@ export default {
   },
   
   methods: {
-    showForm(){
-      this.$emit('add');
+    // btn click
+    click(type, index, other){
+      if(type == 'export') var loading = this.$loading({ fullscreen: true })
+
+      this.$emit(type, index || loading, other);
     },
 
-    exportFile() {
-      let loading = this.$loading({ fullscreen: true })
-
-      this.$emit('export', loading);
-    },
-
-    emit(index, e){
-      this.$emit('emit', index);
+    // switch change
+    change(type, index, e){
+      this.$emit('change', type, index, e);
     },
 
     search(index, selectIndex){
@@ -140,5 +148,7 @@ export default {
 </script>
 
 <style scoped>
-  
+.btn_wrap{
+  margin-right: 20px;
+} 
 </style>

@@ -4,9 +4,17 @@
 }
 </style>
 <template>
-  <el-form-item :label="obj.title || obj.name || obj.label">
+  <el-form-item :label="obj.title || obj.name || obj.label" :label-width="obj.width || obj.labelWidth">
 
-    <el-radio-group v-model="obj.value" :disabled="obj.disabled" @change='select'>
+    <el-checkbox-group v-model="obj.value" :disabled="obj.disabled" @change='multiSelect' v-if="obj.type == MULTI">
+
+      <el-checkbox v-for="(item, index) in obj.list"
+                   :disabled="item.disabled"
+                   :label="value ? item[value] : item.id || item.value"
+                   :key="index">{{key ? item[key] : item.name || item.title}}</el-checkbox>
+
+    </el-checkbox-group>
+    <el-radio-group v-model="obj.value" :disabled="obj.disabled" @change='select' v-else>
 
       <el-radio v-for='(item, index) in obj.list' 
                 :label='value ? item[value] : item.id || item.value' 
@@ -31,6 +39,7 @@ export default {
 
   data() {
     return {
+      MULTI: 'multi',
     }
   },
 
@@ -42,8 +51,16 @@ export default {
   methods: {
     select(v){
       let obj = this.obj;
-      // console.error('search: ', v); 
+      console.error('search: ', v); 
       obj.alert = typeof obj.value === 'number' ? null : `请选择${obj.title}`;
+
+      this.$emit('change', v);
+    },
+
+    multiSelect(v, e){
+      let obj = this.obj;
+
+      obj.alert = obj.value.length ? null : `请选择${obj.title}`;
 
       this.$emit('change', v);
     },
