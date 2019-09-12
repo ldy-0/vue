@@ -81,14 +81,15 @@ vue + element
       selectList: `[ [ {id: xx, title: xx} ] ], 显示声明select组件显示`  
       selectLabelList: `[ xx ], selectList对应索引项的标题`  
       selectWidth: `select组件宽度`
+      switchList: `[ { title: '', value: '', color: '#13ce66', inactiveColor: '#c0ccda', disabled: false } ]`
 
   + Methods
     
     |  props  |   type   | desc |  
     |---------|----------|------|  
     |   add   | Function | 编辑按钮回调 |
-    |   emit  | Function | btnList回调 |
     |  export | Function | 导出按钮回调 |
+    |  click  | Function | btnList回调 |
     |  search | Function | input, date, select组件回调 |
 
 ***
@@ -134,14 +135,23 @@ vue + element
 
     - obj  
 
+      type: 'multi' `多选`
       value: `值`  
       list: [ { title: '项名', value: '项值' } ]
       titleKey: `项名对应属性`
       valueKey: `项值对应属性`
-      title(name): `标题`  
-      width(labelWidth): `标题宽度`  
+      title(name|label): `标题`  
+      width(labelWidth): `标题宽度` 
+      placeholder: `占位内容` 
       disabled: `是否禁止输入`
+    
+  + methods
 
+    |  props  |   param | desc |  
+    |---------|----------|------|  
+    |  change | (item, flag) | value值修改回调 |
+    |  show   | null     |  显示下拉框回调(仅customSelect)   |
+    |  hide   | null     |  隐藏下拉框回调(仅customSelect)   |
 ***
 
 
