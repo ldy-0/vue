@@ -16,7 +16,7 @@
 
         <!-- btnList -->
         <el-form-item v-if='config.btnList'>
-          <el-button class='btn_wrap' type="primary" @click="click('click', index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
+          <el-button class='btn_wrap' type="primary" @click="click('emit', index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
         </el-form-item>
 
         <!-- input -->
@@ -32,19 +32,27 @@
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
 
-        <el-form-item :label="config.selectLabel" :label-width="config.selectWidth" v-if='config.categories'> 
-          <el-select placeholder="请选择" v-model='config.status || status' @change='search'> <!-- multiple  -->
-            <el-option v-for="item in config.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
+        <!-- select -->
+        <el-form-item :label="config.selectTitle || config.selectLabel" :label-width="config.selectWidth" v-if='isSelect'> 
+
+          <el-select placeholder="请选择" v-model='status' @change='search'> <!-- multiple  -->
+            <el-option v-for="item in config.selectList" :key="item.value || item.id" 
+                       :label="item.title || item.name || item.label" 
+                       :value="item.value || item.id"></el-option>
           </el-select>
+
         </el-form-item>
 
         <!-- selectList -->
-        <el-form-item :label="config.selectLabelList && config.selectLabelList[selectIndex]" 
-                      :label-width="config.selectWidth" 
-                      v-for='(select, selectIndex) in config.selectList' :key='selectIndex' v-if='config.selectList'> 
+        <el-form-item v-for='(select, selectIndex) in config.selectList' :key='selectIndex' 
+                      :label="select.title || select.name || select.label" 
+                      :label-width="select.width || config.selectWidth" 
+                      v-if='isSelectList'> 
 
           <el-select placeholder="请选择" v-model='statusList[selectIndex]' @change='search($event, selectIndex)'> <!-- multiple  -->
-            <el-option v-for="item in select" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
+            <el-option v-for="item in select.list" :key="item.value || item.id" 
+                       :label="item[select.titleKey] || item.title || item.name || item.label" 
+                       :value="item[select.valueKey] || item.value || item.id"></el-option>
           </el-select>
 
         </el-form-item>
@@ -97,15 +105,35 @@ export default {
     }
   },
 
+  computed: {
+    isSelect(){ 
+      let config = this.config;
+
+      return config.selectList && !config.selectList[0].list;
+    },
+
+    isSelectList(){
+      let config = this.config;
+
+      return config.selectList && config.selectList[0].list;
+    },
+  },
+
   watch: {
+    status(v1, v2){ console.error(v1, v2); }
   },
 
   mounted(){
-    let selectList = this.config.selectList;
+    let selectList = this.config.selectList,
+        status = this.config.status,
+        statusList = this.config.statusList || [];
     // console.error(JSON.stringify(this.config.selectList));
 
+    // init Status
+    this.status = status || '';
+
     // init statusList
-    if(selectList) this.statusList = selectList.map(v => v[0].id);
+    if(selectList && selectList[0].list) this.statusList = selectList.map((v, i) => statusList[i] || '');
   },
   
   methods: {
@@ -113,7 +141,7 @@ export default {
     click(type, index, other){
       if(type == 'export') var loading = this.$loading({ fullscreen: true })
 
-      this.$emit(type, index || loading, other);
+      this.$emit(type, typeof index == 'number' ? index : index || loading, other);
     },
 
     // switch change
@@ -133,10 +161,10 @@ export default {
       : null;
 
       // single status search
-      param.status = typeof index === 'number' && typeof selectIndex !== 'number' ? index : null;
+      param.status = typeof index === 'number' && typeof selectIndex !== 'number' ? index || 0 : null;
 
       if(typeof selectIndex === 'number'){
-        param.statusList[selectIndex] = index;
+        param.statusList[selectIndex] = index || 0; // when value is 0, return undefined
       }
 
       this.$emit('search', param);

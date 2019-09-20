@@ -78,8 +78,10 @@ vue + element
       btnList: `[ { titleKey: xx, title: xx } ], 显示声明按钮显示`  
       placeHolder: `文本输入占位符,显示声明input组件显示`  
       dateWidth: `日期组件宽度，显示声明日期组件显示`  
-      selectList: `[ [ {id: xx, title: xx} ] ], 显示声明select组件显示`  
-      selectLabelList: `[ xx ], selectList对应索引项的标题`  
+      status: `状态值(单select)`  
+      statusList: `状态值(多select)`  
+      selectTitle: `标题(单select)`  
+      selectList: `1. 单select(每项为select item) [ { title: xx, value: xx } ] 2. 多select [ {title: xx, width: xx, list: [ { title: xx, value: xx, } ] } ], `  
       selectWidth: `select组件宽度`
       switchList: `[ { title: '', value: '', color: '#13ce66', inactiveColor: '#c0ccda', disabled: false } ]`
 
