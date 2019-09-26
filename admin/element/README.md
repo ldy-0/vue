@@ -75,15 +75,24 @@ vue + element
     - config  
       title: `编辑标题, 显示声明编辑按钮显示`  
       showExport: `显示声明导出按钮显示`  
-      btnList: `[ { titleKey: xx, title: xx } ], 显示声明按钮显示`  
+      btnList: `[ { titleKey: xx, title: xx, } ], 显示声明按钮显示`  
       placeHolder: `文本输入占位符,显示声明input组件显示`  
       dateWidth: `日期组件宽度，显示声明日期组件显示`  
       status: `状态值(单select)`  
       statusList: `状态值(多select)`  
       selectTitle: `标题(单select)`  
       selectList: `1. 单select(每项为select item) [ { title: xx, value: xx } ] 2. 多select [ {title: xx, width: xx, list: [ { title: xx, value: xx, } ] } ], `  
-      selectWidth: `select组件宽度`
+      selectWidth: `select组件宽度`  
       switchList: `[ { title: '', value: '', color: '#13ce66', inactiveColor: '#c0ccda', disabled: false } ]`
+  
+    - btnList项  
+      title: `显示文字`  
+      titleKey: `item[titleKey]为显示文字`   
+      type: `类型，import为导入按钮`  
+      url: `上传路径(仅type=import有效)`  
+      header: `上传请求头信息(仅type=import有效)`  
+      body: `上传请求体信息(仅type=import有效)`  
+      limit: `上传数量限制(仅type=import有效)`  
 
   + Methods
     
@@ -93,6 +102,9 @@ vue + element
     |  export | Function | 导出按钮回调 |
     |  click  | Function | btnList回调 |
     |  search | Function | input, date, select组件回调 |
+    |  beforeUpload | Function | 导入按钮上传前回调 |
+    |  uploadSuccess | Function | 导入按钮上传成功回调 |
+    |  uploadError | Function | 导入按钮上传失败回调 |
 
 ***
 

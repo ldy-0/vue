@@ -16,7 +16,17 @@
 
         <!-- btnList -->
         <el-form-item v-if='config.btnList'>
-          <el-button class='btn_wrap' type="primary" @click="click('emit', index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
+          <el-button class='btn_wrap' type="primary" @click="click('emit', index, $event)" 
+                     v-for='(item, index) in config.btnList' :key='index'>
+
+                     <el-upload class='clear_upload' :action='item.url' :headers='item.header' :data='item.body' :limit='item.limit' :file-list='item.value' :show-file-list='false' multiple
+                                :before-upload='beforeUpload'
+                                :on-success='uploadSuccess'
+                                :on-error='uploadError'
+                                v-if="item.type == 'import'">{{item.titleKey ? item[item.titleKey] : item.title}}</el-upload>
+                     
+                     <div v-else>{{item.titleKey ? item[item.titleKey] : item.title}}</div>
+          </el-button>
         </el-form-item>
 
         <!-- input -->
@@ -144,6 +154,19 @@ export default {
       this.$emit(type, typeof index == 'number' ? index : index || loading, other);
     },
 
+    beforeUpload(file){
+      this.$emit('beforeUpload', file);
+      return true;
+    },
+
+    uploadSuccess(res, file, list){
+      this.$emit('uploadSuccess', res, file, list);
+    },
+
+    uploadError(err){
+      this.$emit('uploadError', err);
+    },
+
     // switch change
     change(type, index, e){
       this.$emit('change', type, index, e);
@@ -179,4 +202,10 @@ export default {
 .btn_wrap{
   margin-right: 20px;
 } 
+
+</style>
+<style>
+.el-upload:focus{
+  color: #fff!important;
+}
 </style>
