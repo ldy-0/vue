@@ -94,9 +94,8 @@
 <el-dialog :title="thirdDialogConfig.title" :visible.sync="thirdShowDialog" :before-close='closeDialogThird' width="30%">
   <div v-if="[7, 8].indexOf(thirdDialogConfig.status) !== -1">
     <el-form label-width='100px'>
-      <!-- <custom-input :obj="postName"></custom-input> -->
       <custom-select :obj='postName'></custom-select>
-      <number :obj="post"></number>
+      <custom-input :obj="post"></custom-input>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="closeDialogThird" >取消</el-button>
@@ -134,7 +133,6 @@ import customTable from '@/components/customTable';
 import customHead from '@/components/customHead';
 import customInput from '@/components/customInput'
 import customSelect from '@/components/select'
-import number from '@/components/number'
 import integer from '@/components/integer'
 import dateTimeRange from '@/components/dateTimeRange'
 import customImg from '@/components/customImg'
@@ -154,7 +152,6 @@ export default {
     customTable,
     customInput,
     customSelect,
-    number,
     integer,
     dateTimeRange,
     customImg,
@@ -185,7 +182,7 @@ export default {
         title: '',
         status: 0, // 4:添加分类，5：编辑分类， 6：四级分类列表
       },
-      post:{ title: '物流单号', value: '', alert: null, },
+      post:{ type: 'string', title: '物流单号', value: '', alert: null, },
       postName:{ title: '物流公司', value: '', alert: null, categories: [], },
       formData: {
         order_sn: { title: '订单编号:', value: '', alert: null, },

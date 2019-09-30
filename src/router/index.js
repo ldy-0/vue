@@ -248,6 +248,30 @@ export let asyncRouterMapSeller = [
         meta: { title: "新闻分类", noCache: true }
       },
       {
+        path: "special", // VIP特惠
+        component: () => import("@/views/operate/special/index"),
+        name: "special",
+        meta: { title: "special", noCache: true }
+      },
+      {
+        path: "read", // VIP解读
+        component: () => import("@/views/operate/read/index"),
+        name: "read",
+        meta: { title: "read", noCache: true }
+      },
+      {
+        path: "rainPackage", // 红包雨
+        component: () => import("@/views/operate/rainPackage/index"),
+        name: "rainPackage",
+        meta: { title: "rainPackage", noCache: true }
+      },
+      {
+        path: "freight", // 运费 
+        component: () => import("@/views/operate/freight/index"),
+        name: "freight",
+        meta: { title: 'freight', noCache: true }
+      },
+      {
         path: "groupBuying",
         component: () => import("@/views/groupBuying/groupBuying"),
         name: "groupBuying",

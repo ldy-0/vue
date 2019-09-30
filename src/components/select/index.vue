@@ -7,7 +7,7 @@
   <el-form-item :label="obj.titleKey ? obj[obj.titleKey] : obj.title">
 
       <el-select placeholder="请选择" v-model='obj.value' @change='search'> <!-- multiple  -->
-        <el-option v-for="item in obj.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
+        <el-option v-for="item in obj.list || obj.categories" :key="item.id" :label="item.title || item.name || item.label" :value="item.id"></el-option>
       </el-select>
 
       <el-alert type='error' show-icon :title='obj.alert' :closable='false' v-if='obj.alert'></el-alert>

@@ -4,32 +4,21 @@
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt>
     </el-dialog>
-    <!--预览图片结束 -->
+
     <!--顶部菜单开始 -->
     <div class="filter-container">
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px;"
-        type="primary"
-        icon="el-icon-edit"
-        @click="CreateItem"
-      >添加图片</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="CreateItem">添加图片</el-button>
     </div>
-    <!--顶部菜单结束 -->
+
     <!--中间表格开始 -->
     <el-table :data="tableData" style="width: 100%">
       <el-table-column type="index" width="50"></el-table-column>
       <el-table-column label="图片">
         <template slot-scope="scope">
-          <img
-            @click="handlePictureCardPreview(scope.row)"
-            :src="scope.row.banner_pic"
-            style="width:100px;height:100px;"
-          >
+          <img @click="handlePictureCardPreview(scope.row)" :src="scope.row.banner_pic" style="width:100px; height:100px;" />
         </template>
       </el-table-column>
-      <!-- 	<el-table-column label="标题" prop='banner_title'>
-      </el-table-column>-->
+      <!-- 	<el-table-column label="标题" prop='banner_title'></el-table-column>-->
       <el-table-column label="跳转类型" prop="label"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
@@ -38,45 +27,42 @@
         </template>
       </el-table-column>
     </el-table>
-    <!--中间表格结束 -->
+
     <!--内容弹框开始 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form :rules="rules" ref="form" :model="form" label-width="120px">
-          <custom-img :obj="img"></custom-img>
+        <custom-img :obj="img"></custom-img>
+
         <el-form-item label="排序序号" prop="banner_order">
           <el-input v-model="form.banner_order" placeholder="请输入排序序号0为最前，以此类推"></el-input>
         </el-form-item>
+
         <el-form-item label="跳转类型">
           <el-select v-model="category" placeholder="请选择" @change="handleSelect">
-            <el-option
-              v-for="item in categoryStateOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
+            <el-option v-for="item in categoryStateOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
           </el-select>
         </el-form-item>
 
         <custom-img :obj='detailImg' v-if="form.banner_type == 1 "></custom-img>
 
-        <el-form-item label="跳转商品" prop="banner_url" v-if="form.banner_type == 2 ">
+        <el-form-item label="跳转商品" prop="banner_url" v-if="form.banner_type == 2">
           <div>跳转商品ID：{{form.banner_url}}</div>
           <el-button type="primary" @click="chooseGoods">选择商品</el-button>
         </el-form-item>
-        <el-form-item label="跳转公众号文章" prop="banner_url" v-if="form.banner_type == 3 ">
+
+        <el-form-item label="跳转公众号文章" prop="banner_url" v-if="form.banner_type == 3">
           <el-input v-model="form.banner_url" placeholder="请输入跳转公众号文章链接"></el-input>
         </el-form-item>
+
+        <custom-select :obj='activity' v-if='form.banner_type == 4'></custom-select>
+
         <el-form-item>
-          <el-button
-            type="primary"
-            @click="onSubmit('form')"
-            :disabled="isUpimg"
-            :loading="isloading"
-          >保存</el-button>
+          <el-button type="primary" @click="onSubmit('form')" :disabled="isUpimg" :loading="isloading">保存</el-button>
           <el-button @click="dialogFormVisible = false">取消</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="showGoodsList">
       <el-table :data="goodList" style="width: 100%">
         <el-table-column type="index" width="50"></el-table-column>
@@ -124,6 +110,7 @@ import {
 import uploadFn from "@/utils/tencent_cos";
 import commonReq from '@/api/common' 
 import customImg from '@/components/customImg'
+import customSelect from '@/components/select'
 
 //初始化常量
 const form = {
@@ -135,7 +122,8 @@ const form = {
 };
 export default {
   components:{
-    customImg
+    customImg,
+    customSelect,
   },
   created() {
     //获取首页列表
@@ -218,7 +206,11 @@ export default {
         {
           value: 3,
           label: "公众号文章 "
-        }
+        },
+        {
+          value: 4,
+          label: "活动板块"
+        },
       ],
       category: "",
       //正在上传图片
@@ -232,7 +224,14 @@ export default {
       //商品总数
       total_Goods: 0,
       goodList: [],
-      showGoodsList: false
+      showGoodsList: false,
+      activity: { title: '活动板块', value: '', list: [], alert: null, },
+      activityList: [
+        { id: 0, title: '秒杀', url: 'seckill' },
+        { id: 1, title: '团购', url: 'group' },
+        { id: 2, title: '砍价', url: 'bargain' },
+        { id: 3, title: 'VIP特惠', url: 'special' },
+      ],
     };
   },
   methods: {
@@ -241,8 +240,18 @@ export default {
       this.category = "";
       this.form = Object.assign({}, form);
       this.category = 0;
+
       this.img.value = [];
+      this.img.alert = null;
+
       this.detailImg.value = [];
+      this.detailImg.value = null;
+
+      // 活动板块
+      this.activity.list = this.activityList;
+      this.activity.value = '';
+      this.activity.alert = null;
+
       this.dialogFormVisible = true; //打开内容弹框
       this.dialogStatus = "create";
     },
@@ -314,6 +323,13 @@ export default {
           this.detailImg.value = [{url:row.banner_url}] ||[];
         }
       });
+
+      // 活动板块
+      if(row.banner_type == 4){
+        this.activity.list = this.activityList;
+        this.activity.value = this.activityList.filter(v => v.url == row.banner_url)[0].id;
+      }
+
       this.$nextTick(() => {
         this.$refs["form"].clearValidate();
       });
@@ -365,6 +381,7 @@ export default {
       sendData.banner_pic = img[0];
 
       sendData.banner_order = this.form.banner_order;
+
       if (this.form.banner_type == 1) {
         let detailImg = this.detailImg.value.map(v => { return v.raw ? `${this.detailImg.cdnUrl}/${v.response.key}` : v.url });
         if(!detailImg[0]) return console.error('img value :', detailImg);
@@ -372,17 +389,21 @@ export default {
       } else {
         sendData.banner_url = this.form.banner_url;
       }
+
+      if(this.form.banner_type == 4){
+        this.activity.alert = typeof this.activity.value != 'number' ? `${this.activity.title}不能为空!` : null;
+        if(this.activity.alert) return ;
+
+        sendData.banner_url = this.activityList[this.activity.value].url;
+      }
+
       this.isloading = true;
+
       addBanner_api(sendData).then(res => {
         if (res.status == 0) {
           this.dialogFormVisible = false;
           this.isloading = false;
-          this.$notify({
-            title: "成功",
-            message: "保存成功",
-            type: "success",
-            duration: 2000
-          });
+          this.$notify({ title: "成功", message: "保存成功", type: "success", duration: 2000 });
           this.getBannerList();
         }
       });
@@ -404,6 +425,10 @@ export default {
         sendData.banner_url = detailImg[0];
       } else {
         sendData.banner_url = this.form.banner_url;
+      }
+
+      if(this.form.banner_type == 4){
+        sendData.banner_url = this.activityList[this.activity.value].url;
       }
 
       sendData.banner_type = this.form.banner_type;
@@ -452,6 +477,8 @@ export default {
         this.form.banner_url = [];
       }
       this.form.banner_type = e;
+
+      
     },
     chooseGoods() {
       this.showGoodsList = true; //打开内容弹框

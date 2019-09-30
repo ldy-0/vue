@@ -58,11 +58,119 @@ async function getGoodsList(data) {
 	return res;
 }
 
+/**
+ * 
+ * vip特惠
+ * 
+ */
+
+async function getVipSpecialList(data) {
+	let res = await request({
+				url: '/api/v2/seller/bargains',
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
+async function addSpecial(data) {
+	return request({
+		url: '/api/v2/seller/bargains',
+		method: 'post',
+		data
+	})
+}
+
+async function deleteSpecial(id, data) {
+	let res = await request({
+				url: `/api/v2/seller/bargains/${id}`,
+				method: 'delete',
+				data
+			});
+
+	return res;
+}
+
+async function setSpecial(id, data) {
+	let res = await request({
+				url: `/api/v2/seller/bargains/${id}`,
+				method: 'put',
+				data
+			});
+
+	return res;
+}
+
+async function changeSpecial(data) {
+	let res = await request({
+				url: `/api/v2/seller/bargains/setting`,
+				method: 'put',
+				data
+			});
+	return res;
+}
+
+/**
+ * 
+ * VIP解读
+ * 
+ */
+
+async function getVipReadList(data) {
+	let res = await request({
+				url: '/api/v2/seller/goodsexplain',
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
+async function addRead(data) {
+	return request({
+		url: '/api/v2/seller/goodsexplain',
+		method: 'post',
+		data
+	})
+}
+
+async function setRead(id, data) {
+	let res = await request({
+				url: `/api/v2/seller/goodsexplain/${id}`,
+				method: 'put',
+				data
+			});
+
+	return res;
+}
+
+async function deleteRead(id, data) {
+	let res = await request({
+				url: `/api/v2/seller/goodsexplain/${id}`,
+				method: 'delete',
+				data
+			});
+
+	return res;
+}
+
 export default {
 	addGoods,
 	setGoods,
 	getGoods,
 	deleteGoods,
 	getGoodsList,
-	UpDownGoods
+  UpDownGoods,
+
+  getVipSpecialList,
+  addSpecial,
+  setSpecial,
+  deleteSpecial,
+  changeSpecial,
+
+  getVipReadList,
+  addRead,
+  setRead,
+  deleteRead,
 }

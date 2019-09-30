@@ -1,7 +1,7 @@
 <template>
   <div class="tinymce-container editor-container" :class="{fullscreen:fullscreen}">
     <textarea class="tinymce-textarea" :id="tinymceId"></textarea>
-    <div class="editor-custom-btn-container">
+    <div class="editor-custom-btn-container" v-if="!disabled">
       <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK"></editorImage>
     </div>
   </div>
@@ -37,8 +37,14 @@ export default {
       type: Number,
       required: false,
       default: 360
-    }
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
+
   data() {
     return {
       hasChange: false,
@@ -47,6 +53,7 @@ export default {
       fullscreen: false
     }
   },
+
   watch: {
     value(val) {
       if (!this.hasChange && this.hasInit) {
@@ -55,6 +62,7 @@ export default {
       }
     }
   },
+
   mounted() {
     this.initTinymce()
   },
@@ -66,8 +74,9 @@ export default {
   },
   methods: {
     initTinymce() {
-      const _this = this
-      window.tinymce.init({
+      const _this = this;
+
+      let option = {
         selector: `#${this.tinymceId}`,
         height: this.height,
         body_class: 'panel-body ',
@@ -133,7 +142,11 @@ export default {
         //     failure('出现未知问题，刷新页面，或者联系程序员')
         //   });
         // },
-      })
+      };
+
+      option.readonly = this.disabled;
+
+      window.tinymce.init(option)
     },
     destroyTinymce() {
       if (window.tinymce.get(this.tinymceId)) {

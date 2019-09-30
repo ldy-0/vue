@@ -66,10 +66,24 @@ function changeSeckillSale(data){
   });
 }
 
+// 获取行政区
+function getArea(data) {
+  let param = {
+				url: '/api/v2/common/area',
+				method: 'get',
+				params: data
+      };
+
+	return request(param);
+}
+
 // export 
 export default {
-  getUploadToken,
   changeBargainSale,
   changeGroupSale,
   changeSeckillSale,
+
+  getUploadToken,
+
+  getArea,
 }

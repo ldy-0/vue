@@ -200,6 +200,7 @@ export default {
 
         let match = skus.filter(v => v.name === sku.name)[0];
         if(match){
+          sku.goods_id = match.goods_id;
           sku.sku = match.sku;
           sku.price = match.price;
           sku.marketprice = match.marketprice;
@@ -216,6 +217,7 @@ export default {
 
         // handle modify sku name
         if(skus.length === length){
+          sku.goods_id = skus[i].goods_id;
           sku.sku = skus[i].sku;
           sku.price = skus[i].price;
           sku.marketprice = skus[i].marketprice;

@@ -194,7 +194,6 @@ export default {
       // item.recommend = item.sort==1?'是':'否';
     },
 
-    //========================================================
     updateForm(status) {
       this.dialogConfig.status = typeof status === "number" ? status : 2;
 
@@ -204,7 +203,7 @@ export default {
       this.title.value = status.information_title || "";
       this.desc.value = status.information_desc || '';
 
-      this.classify.value = status.classify_id || 1;
+      this.classify.value = this.classify.categories.some(v => v.id == status.classify_id) ? status.classify_id : '';
       this.recommend.value = status.sort || 1;
       this.newsType.value = status.type || 1;
       this.newsType.value != 1 ? this.contentFile.value = JSON.parse(status.information_content) : this.content.value = status.information_content || '';
@@ -303,7 +302,7 @@ export default {
     },
 
     // 获取新闻分类列表
-    async getNewsClassList() { 
+    async getNewsClassList() {
       let selectClassList = this.headConfig.selectList[0];
       
       let res = await classApi.getNewsClassList({}, this);

@@ -31,6 +31,7 @@
   margin-bottom: 10px;
   cursor: pointer;
 }
+
 </style>
 
 <template>
@@ -63,6 +64,9 @@
 
       </el-form>
     </div>
+
+    <copyRight :obj='copyRightConfig'></copyRight>
+
     <el-dialog
         title="重置密码"
         :visible.sync="centerDialogVisible"
@@ -97,8 +101,14 @@
 import { isvalidUsername } from "@/utils/validate";
 import LangSelect from "@/components/LangSelect";
 import { getVerificationCode, resetPassword } from "@/api/login";
+import copyRight from '@/components/copyRight';
+
 export default {
-  components: { LangSelect },
+  components: { 
+    LangSelect,
+    copyRight,
+  },
+
   name: "login",
   data() {
     const validateUsername = (rule, value, callback) => {
@@ -145,7 +155,14 @@ export default {
       codetimeShow: false,
       codetime: 60,
       ITEM_NAME: process.env.ITEM_NAME,
-      SMS_close: process.env.SMS_close
+      SMS_close: process.env.SMS_close,
+
+      copyRightConfig: {
+        year: 2019,
+        company: '武汉健德生态科技有限公司',
+        province: '鄂',
+        record: '42010202002228',
+      },
     };
   },
   methods: {

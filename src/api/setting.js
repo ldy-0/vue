@@ -37,6 +37,24 @@ async function getGif(data) {
 	return res;
 }
 
+async function addApk(data){
+	return request({
+		url: '/api/v2/seller/androidversion',
+		method: 'post',
+		data
+	})
+}
+
+async function getApk(data) {
+	let res = await request({
+				url: '/api/v2/common/androidversion',
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
 // async function editClassList(data) {
 // 	let res = await request({
 // 				url: '/api/v2/seller/storegc/'+data.storegc_id,
@@ -62,4 +80,6 @@ export default {
   getVisitor,
   addGif,
   getGif,
+  addApk,
+  getApk,
 }

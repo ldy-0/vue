@@ -1,6 +1,7 @@
 <template>
   <el-form-item :label="obj.title" :label-width="obj.width || '100px'">
         <el-upload list-type="picture-card"
+              :class="{disabled:showCard}"
               :action='obj.url' 
               :data='obj.body'
               :limit='obj.limit'
@@ -9,9 +10,9 @@
               :on-change="changeImgs" 
               :on-preview='preview'
               :on-success='success'
+              :disabled="obj.disabled"
               multiple
-              v-if='obj.url'
-              :class="{disabled:showCard}">
+              v-if='obj.url'>
               <i class="el-icon-plus"></i>
         </el-upload>
         <el-upload action='' list-type="picture-card" :auto-upload="false"
@@ -21,6 +22,7 @@
               :on-change="changeImgs"
               :on-preview='preview'
               :class="{disabled:showCard}"
+              :disabled="obj.disabled"
                v-else>
 
               <i class="el-icon-plus"></i>
@@ -46,9 +48,9 @@ export default {
     }
   },
   computed:{
-      showCard(){
-          return  this.obj.value.length>=Number(this.obj.limit);
-      }
+    showCard(){
+      return  this.obj.value.length>=Number(this.obj.limit);
+    }
   },
   watch: {
     // obj(v1, v2){ console.error('watch'); },

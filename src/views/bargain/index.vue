@@ -83,9 +83,16 @@
         <el-form-item label="库存" :label-width="formLabelWidth" prop="goods_storage">
           <el-input type="number" min="0" v-model.number="QformForNotive.goods_storage" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="运费" :label-width="formLabelWidth" prop="goods_freight">
+
+        <!-- 运费 -->
+        <c-radio :obj='freightType'></c-radio>
+
+        <custom-input :obj='freight' v-if="freightType.value == 1"></custom-input>
+        <c-select :obj='freightTemp' v-if="freightType.value == 2"></c-select>
+        <!-- <el-form-item label="运费" :label-width="formLabelWidth" prop="goods_freight">
           <el-input type="number" min="0" v-model.number="QformForNotive.goods_freight" auto-complete="off"></el-input>
-        </el-form-item>
+        </el-form-item> -->
+
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="QaddNewShow=false">取消</el-button>
@@ -224,6 +231,11 @@ import customImg from '@/components/customImg';
 import classAPI from '@/api/classify';
 import commonReq from '@/api/common' ;
 import sale from './sale';
+import cSelect from "@/components/customSelect";
+import cRadio from "@/components/customRadio";
+import transport from './transport';
+
+
 const QformForNotive = {
   dateRange: [],
   cutprice_type: 1,
@@ -231,12 +243,16 @@ const QformForNotive = {
   goods_storage: 0
 };
 export default {
-  mixins: [config, sale],
+  mixins: [config, sale, transport],
+
   components:{
     multiSelect,
     customInput,
     customImg,
+    cRadio,
+    cSelect,
   },
+
   data() {
     return {
       //本页参数
@@ -406,6 +422,11 @@ export default {
       this.addNewShow = true;
       this.QformForNotive = Object.assign({},QformForNotive);
 
+      // init freight
+      this.freightType.value = 1;
+      this.freightTemp.value = '';
+      this.freight.value = '';
+
       this.getList2();
     },
     choiceThis(index, row) {
@@ -465,6 +486,10 @@ export default {
       if(!this.img.value.length) return this.img.alert = `${this.img.title}不能为空!`;
       if(!this.ruleName.value) return this.ruleName.alert = `${this.ruleName.title}不能为空!`;
 
+      // freight
+      if (this.freightType.value == 1 && !this.freight.value) return (this.freight.alert = `请选择${this.freight.title}`);
+      if (this.freightType.value == 2 && !this.freightTemp.value) return this.freightTemp.alert = `请选择${this.freightTemp.title}`;
+
       this.QwaitAddNotice = true;
       let send = {
         goods_id: this.choiceGoodsId,
@@ -472,7 +497,7 @@ export default {
         outime: this.QformForNotive.outime,
         start_time: this.QformForNotive.dateRange[0]/1000,
         end_time: this.QformForNotive.dateRange[1]/1000,
-        goods_freight: this.QformForNotive.goods_freight,
+        // goods_freight: this.QformForNotive.goods_freight,
         goods_storage: this.QformForNotive.goods_storage,
         cutprice_type: this.QformForNotive.cutprice_type,
         rule_name: this.ruleName.value, 
@@ -484,6 +509,11 @@ export default {
         send.cutprice_few = this.QformForNotive.cutprice_few;
         send.cutprice_more = this.QformForNotive.cutprice_more;
       }
+
+      // freight
+      send.goods_freight = this.freightType.value == 1 ? this.freight.value : '0';
+      send.transport_id = this.freightType.value == 2 ? this.freightTemp.value : '0';
+
       addCutprice_api(send).then(res => {
         this.QwaitAddNotice = false;
         this.addNewShow = false;

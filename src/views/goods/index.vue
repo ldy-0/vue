@@ -53,11 +53,20 @@
           </el-form-item>
         </div>
 
-        <number :obj='freight'></number>
+        <!-- 运费 -->
+        <c-radio :obj='freightType'></c-radio>
+
+        <number :obj='freight' v-if="freightType.value == 1"></number>
+        <c-select :obj='freightTemp' v-if="freightType.value == 2"></c-select>
+
+        <!-- 排序权重 -->
         <custom-input :obj='goods_sort'></custom-input>
 
         <!-- 促销活动描述 -->
         <custom-input :obj='activityDesc'></custom-input>
+
+        <!-- 返还积分 -->
+        <custom-input :obj='integral' v-if='category.value == 0'></custom-input>
 
         <!-- 对接人 -->
         <custom-radio :obj='owner' @change='changeOwner'></custom-radio>
@@ -89,8 +98,10 @@ import customTable from "@/components/customTable";
 import customHead from "@/components/customHead";
 import customInput from "@/components/customInput";
 import customSelect from "@/components/select";
+import cSelect from "@/components/customSelect";
 import multiSelect from "@/components/multiSelect";
 import customRadio from "@/components/radio";
+import cRadio from "@/components/customRadio";
 import number from "@/components/number";
 import integer from "@/components/integer";
 import dateTimeRange from "@/components/dateTimeRange";
@@ -101,17 +112,20 @@ import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
 import owner from './owner';
+import transport from './transport';
 
 export default {
-  mixins: [owner],
+  mixins: [owner, transport],
 
   components: {
     customHead,
     customTable,
     customInput,
     customSelect,
+    cSelect,
     multiSelect,
     customRadio,
+    cRadio,
     number,
     integer,
     dateTimeRange,
@@ -142,9 +156,10 @@ export default {
       marketprice: { title: "原价", value: "", alert: null },
       price: { title: "售价", value: "", alert: null },
       amount: { title: "库存", value: "", alert: null },
-      freight: { title: "运费", value: "", alert: null, isZero: true },
-      goods_sort: { title: "排序序号", value: "", alert: null },
+
+      goods_sort: { title: "排序权重", value: "", alert: null },
       activityDesc: { type: 'string', title: "促销活动描述", value: "", alert: null, preventValidate: true, },
+      integral: { type: 'integer', title: "返还积分", value: "", alert: null },
 
       profit: { title: "平台利润", value: 0, alert: null },
       vip0_commission: { title: "体验代理奖金", value: "", alert: null },
@@ -260,10 +275,18 @@ export default {
       this.name.value = goods ? goods.goods_name : "";
       this.category.value = goods && "is_vip" in goods ? goods.is_vip : "";
       this.classify.value = goods ? [goods.gc_id_1, goods.gc_id_2, goods.gc_id_3] : [];
+
+      // freight
+      if(goods && this.freightTemp.list.every(v => v.value != goods.transport_id)) goods.transport_id = null;
       this.freight.value = goods ? goods.goods_freight : "";
-      this.content.value = goods ? goods.goods_body : "";
+      this.freightTemp.value = goods ? goods.transport_id || '' : '';
+      this.freightType.value = goods && goods.transport_id ? 2 : 1;
+
       this.goods_sort.value = goods ? goods.goods_sort : '';
       this.activityDesc.value = goods ? goods.goods_advword : '';
+      this.integral.value = goods ? goods.goods_integral : '';
+
+      this.content.value = goods ? goods.goods_body : "";
 
       this.spec.value = goods && goods.spec_value ? 2 : 1;
       if (!(goods && goods.spec_value)) {
@@ -305,6 +328,7 @@ export default {
         v.marketprice = Number(v.goods_marketprice);
         v.count = Number(v.goods_storage);
         v.sku = v.goods_serial;
+        v.goods_id = v.goods_id;
       });
       this.skuList = goods.SKUList;
     },
@@ -317,7 +341,7 @@ export default {
     },
     // Update multi sku goods
     updateMultiSku(classList, skus) {
-      console.log("update", classList, skus);
+      // console.log("update", classList, skus);
       this.classList = classList;
       this.specList = skus;
     },
@@ -373,7 +397,8 @@ export default {
 
     encodeMultiSku(skuPropArr){
       let spec_name = {},
-        spec_value = {};
+        spec_value = {},
+        status = this.dialogConfig.status;
 
       this.classList.forEach((v, i) => {
         let o = {};
@@ -387,9 +412,12 @@ export default {
 
         skuPropArr.forEach(prop => (o[prop] = v[prop]));
 
-        (o.spec_attr = v.index.join("_")),
-          (o.sp_value = this.formatName(v.name));
+        o.spec_attr = v.index.join("_");
+        o.sp_value = this.formatName(v.name);
         o.stock = v.count;
+
+        if(status == 2) o.goods_id = v.goods_id;
+
         return o;
       });
 
@@ -421,7 +449,8 @@ export default {
       }
 
       // freight
-      if (!this.freight.value) return (this.freight.alert = `请选择${this.freight.title}`);
+      if (this.freightType.value == 1 && !this.freight.value) return (this.freight.alert = `请选择${this.freight.title}`);
+      if (this.freightType.value == 2 && !this.freightTemp.value) return this.freightTemp.alert = `请选择${this.freightTemp.title}`;
 
       // activityDesc
       if(this.category.value == 0 && this.activityDesc.value.length > 4) return this.$message.error(`普通商品促销活动描述不能超过4个字!`);
@@ -443,12 +472,12 @@ export default {
         gc_id_2: this.classify.value[1],
         gc_id_3: this.classify.value[2],
         gc_id: this.classify.value[2],
-        goods_freight: this.freight.value,
-        goods_sort: this.goods_sort.value,
-        goods_body: this.content.value,
         goods_price: spec.value == 2 ? firstSpec.price : this.price.value,
         goods_marketprice: spec.value == 2 ? firstSpec.marketprice : this.marketprice.value,
+        goods_sort: this.goods_sort.value,
         goods_advword: this.activityDesc.value,
+        goods_integral: this.integral.value,
+        goods_body: this.content.value,
       };
 
       let skuPropArr = ["sku", "price", "marketprice", "profit", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission"];
@@ -461,11 +490,17 @@ export default {
 
         skuPropArr.forEach(prop => (o[prop] = this[prop].value));
 
+        if(this.dialogConfig.status == 2) o.goods_id = this.detail.SKUList[0].goods_id;
+
         param.spec_name = param.spec_value = null;
         param.spec = [o];
       } else {
         [param.spec_name, param.spec_value, param.spec] = this.encodeMultiSku(skuPropArr);
       }
+
+      // freight
+      param.goods_freight = this.freightType.value == 1 ? this.freight.value : '';
+      param.transport_id = this.freightType.value == 2 ? this.freightTemp.value : '';
 
       // owner
       if(this.owner.value == 1){
@@ -570,6 +605,7 @@ export default {
     async save(param) {
       let status = this.dialogConfig.status;
       console.log("save: ", param, status);
+
       let res = status == 1 ? await api.addGoods(param) : await api.setGoods(this.detail.goods_commonid, param);
 
       if(typeof res == 'string' || res.error) this.$message.error(res.error || res);
@@ -623,6 +659,7 @@ export default {
         this.$message.error("操作失败，请刷新重试");
       }
     },
+
     async getUploadToken() {
       let res = await commonReq.getUploadToken();
 
@@ -668,7 +705,9 @@ export default {
 
   async created() {
     this.getList();
+
     this.getUploadToken();
+
     let classRes = await classAPI.getClassList({ parent_id: 0 });
     classRes.data.forEach(v => {
       v.label = v.storegc_name;

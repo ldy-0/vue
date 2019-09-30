@@ -52,6 +52,10 @@ export default {
     evaluation : '评价管理',
     authorityManagement:'权限管理',
     business: '招商申请',
+    special: 'VIP特惠',
+    read: 'VIP解读',
+    rainPackage: '红包雨活动',
+    freight: '运费模板',
 
     //平台
     home: '首页',

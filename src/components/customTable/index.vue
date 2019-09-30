@@ -108,7 +108,7 @@ export default {
     showPagination:{
       type:Boolean,
       default:true
-    }
+    },
   },
 
   data() {

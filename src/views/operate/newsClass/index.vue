@@ -91,7 +91,6 @@ export default {
 
   computed: {
     showDialog(){ return Boolean(this.dialogConfig.status); },
-    twoShowDialog(){ return Boolean(this.twoDialogConfig.status); },
   },
 
   data() {
@@ -172,14 +171,14 @@ export default {
 
       config.status = 0;
 
-      this.twoQuery.page = 1;
-      this.twoQuery.limit = 10;
+      // this.twoQuery.page = 1;
+      // this.twoQuery.limit = 10;
     },
     
 
     async submit(){
       let paramArr = ['name',],
-          status = this.twoDialogConfig.status || this.dialogConfig.status,
+          status = this.dialogConfig.status,
           imgList = this.img.value,
           param;
       // if(!imgList.length) return this.img.alert = '请选择图片作为主图';
@@ -203,7 +202,7 @@ export default {
     },
     // 
     async save(param){
-      let status = this.twoDialogConfig.status || this.dialogConfig.status;
+      let status = this.dialogConfig.status;
       let res = null;
 
       if(status ==2||status ==5 ||status ==8){

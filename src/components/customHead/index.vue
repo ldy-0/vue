@@ -10,7 +10,7 @@
 
         <!-- btnList -->
         <el-form-item v-if='config.btnList'>
-          <el-button type="primary" icon="el-icon-edit-outline" @click="emit(index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
+          <el-button class='btn_wrap' type="primary" @click="emit(index, $event)" v-for='(item, index) in config.btnList' :key='index'>{{item.titleKey ? item[item.titleKey] : item.title}}</el-button>
         </el-form-item>
 
         <el-form-item v-if='config.showKeywordSearch || config.placeHolder'>
@@ -43,6 +43,15 @@
         <el-form-item label="" v-if='config.showExport'>
           <el-button  type="primary" icon="document" @click="exportFile">导出Excel</el-button>
           <!-- <span class="hbs-inline-tips">导出所有数据，这个过程可能会需要花费  <span class="hbs-hot">几分钟</span> 的时间，请耐心等待</span> -->
+        </el-form-item>
+
+        <!-- switch -->
+        <el-form-item label="" v-if="'switchList' in config">
+          <el-switch v-model="item.value" 
+                     v-for="(item, index) in config.switchList" :key="index"
+                     :disabled="item.disabled"
+                     :active-text="item.title || item.activeText || '开关'"
+                     :active-color="item.color || item.activeColor || '#13ce66'" :inactive-color="item.inactiveColor || '#C0CCDA'" @change="change('switch', index, $event)"></el-switch>
         </el-form-item>
 
       </el-form>
@@ -125,6 +134,10 @@ export default {
       this.$emit('search', param);
     },
 
+    change(type, index, e){
+      this.$emit('change', type, index, e);
+    },
+
     async exportFile() {
       let loading = this.$loading({ fullscreen: true })
 
@@ -151,5 +164,7 @@ export default {
 </script>
 
 <style scoped>
-  
+.btn_wrap{
+  margin-right: 20px;
+}
 </style>

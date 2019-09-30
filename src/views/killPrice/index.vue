@@ -45,9 +45,16 @@
           <el-form-item label="每人限购" :label-width="formLabelWidth" prop="limit_buy">
             <el-input v-model.number="QformForNotive.limit_buy" auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="运费" :label-width="formLabelWidth" prop="goods_freight">
+
+          <!-- 运费 -->
+          <c-radio :obj='freightType'></c-radio>
+
+          <custom-input :obj='freight' v-if="freightType.value == 1"></custom-input>
+          <c-select :obj='freightTemp' v-if="freightType.value == 2"></c-select>
+          <!-- <el-form-item label="运费" :label-width="formLabelWidth" prop="goods_freight">
             <el-input v-model.number="QformForNotive.goods_freight" auto-complete="off"></el-input>
-          </el-form-item>
+          </el-form-item> -->
+
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="QaddNewShow=false">取消</el-button>
@@ -178,6 +185,11 @@ import commonReq from '@/api/common' ;
 import multiSelect from '@/components/multiSelect';
 import classAPI from '@/api/classify';
 import sale from './sale';
+import customInput from "@/components/customInput";
+import cSelect from "@/components/customSelect";
+import cRadio from "@/components/customRadio";
+import transport from './transport';
+
 const QformForNotive = {
   dateRange: [],
   limit_buy:1,
@@ -185,11 +197,16 @@ const QformForNotive = {
   fileList:[]
 };
 export default {
-  mixins: [config, sale],
+  mixins: [config, sale, transport],
+
   components:{
     customImg,
-    multiSelect
+    multiSelect,
+    customInput,
+    cRadio,
+    cSelect,
   },
+
   data() {
     return {
       multiSelect:{ title: '分类', source: [], value: [], alert: null, search:true},
@@ -255,7 +272,7 @@ export default {
         page: 1,
         limit: 10,
       },
-      total: 1
+      total: 1,
     };
   },
   async created() {
@@ -311,7 +328,7 @@ export default {
                 name: aData.goods.goods_name,
                 goodsprice: aData.goods.goods_marketprice,
                 killPrice: aData.goods_price,
-                limit_num: aData.limit_num,
+                limit_num: aData.goods.goods_storage,
                 limit_buy: aData.limit_buy,
                 active_time:
                   aData.end_time == "2038-01-19 11:14:07"
@@ -389,6 +406,12 @@ export default {
     addItem() {
       this.isAddItem = true;
       this.addNewShow = true;
+
+      // init freight
+      this.freightType.value = 1;
+      this.freightTemp.value = '';
+      this.freight.value = '';
+
       this.getList2();
     },
     choiceThis(index, row) {
@@ -434,6 +457,10 @@ export default {
       let img = this.img.value.map(v => { return v.raw ? `${this.img.cdnUrl}/${v.response.key}` : v.url });
       if(!img[0]) return console.error('img value :', img);
 
+      // freight
+      if (this.freightType.value == 1 && !this.freight.value) return (this.freight.alert = `请选择${this.freight.title}`);
+      if (this.freightType.value == 2 && !this.freightTemp.value) return this.freightTemp.alert = `请选择${this.freightTemp.title}`;
+
       this.QwaitAddNotice = true;
 
       let send = {
@@ -444,9 +471,14 @@ export default {
         limit_num:this.QformForNotive.limit_num,
         limit_buy:this.QformForNotive.limit_buy,
         images:img,
-        goods_freight:this.QformForNotive.goods_freight,
+        // goods_freight:this.QformForNotive.goods_freight,
         rule_name:this.QformForNotive.rule_name
       }
+
+      // freight
+      send.goods_freight = this.freightType.value == 1 ? this.freight.value : '0';
+      send.transport_id = this.freightType.value == 2 ? this.freightTemp.value : '0';
+
       addSecKill_api(send).then(res=>{
         this.QwaitAddNotice = false;
         this.addNewShow = false;
