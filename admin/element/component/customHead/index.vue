@@ -16,8 +16,8 @@
 
         <!-- btnList -->
         <el-form-item v-if='config.btnList'>
-          <el-button class='btn_wrap' type="primary" @click="click('emit', index, $event)" 
-                     v-for='(item, index) in config.btnList' :key='index'>
+          <el-button class='btn_wrap' type="primary" @click="click('emit', btnIndex, $event)" 
+                     v-for='(item, btnIndex) in config.btnList' :key='btnIndex'>
 
                      <el-upload class='clear_upload' :action='item.url' :headers='item.header' :data='item.body' :limit='item.limit' :file-list='item.value' :show-file-list='false' multiple
                                 :before-upload='beforeUpload'
@@ -35,11 +35,33 @@
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
         </el-form-item>
 
+        <!-- inputList -->
+        <el-form-item v-for='(inputItem, inputIndex) in config.inputList' :key='inputItem.placeholder'
+                      :label="inputItem.title || inputItem.name || inputItem.label" 
+                      :label-width="config.inputLabelWidth" 
+                      v-if='config.inputList'>
+            <el-input :style="{ width: inputItem.width || config.width || '300px' }" :placeholder="inputItem.placeholder || config.placeholder" v-model="inputList[inputIndex]"></el-input>
+            <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
+        </el-form-item>
+
         <!-- Date -->
         <el-form-item label="日期查询" v-if='config.dateWidth'>
             <el-date-picker :style="{ width: config.dateWidth }" value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" v-model="date">
             </el-date-picker>
             <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
+        </el-form-item>
+
+        <!-- DateList -->
+        <el-form-item v-for='(dateItem, dateIndex) in config.dateList' :key='dateItem.title'
+                      :label="dateItem.title || dateItem.name || dateItem.label" 
+                      :label-width="config.dateLabelWidth" 
+                      v-if='config.dateList'>
+
+            <el-date-picker value-format="timestamp" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                            :style="{ width: dateItem.width || config.dateWidth }" v-model="dateList[dateIndex]">
+            </el-date-picker>
+            <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
+
         </el-form-item>
 
         <!-- select -->
@@ -106,11 +128,15 @@ export default {
   data() {
     return {
       keyword: '',
+      inputList: [],
       date: '',
+      dateList: [],
       status: '',
       statusList: [],
+
       param: {
         statusList: [],
+        dateList: [],
       },
     }
   },
@@ -135,6 +161,7 @@ export default {
 
   mounted(){
     let selectList = this.config.selectList,
+        dateList = this.config.dateList,
         status = this.config.status,
         statusList = this.config.statusList || [];
     // console.error(JSON.stringify(this.config.selectList));
@@ -144,6 +171,9 @@ export default {
 
     // init statusList
     if(selectList && selectList[0].list) this.statusList = selectList.map((v, i) => statusList[i] || '');
+
+    // init dateList
+    // if(dateList) this.dateList = dateList.map((v, i) => '');
   },
   
   methods: {
@@ -177,11 +207,14 @@ export default {
           date = this.date;
 
       param.search = this.keyword;
+      param.inputList = this.inputList;
 
       // date search
       param.date = this.date 
       ? { startDate: new Date(this.date[0]).toLocaleDateString(), endDate: new Date(this.date[1]+86400000).toLocaleDateString(), }
       : null;
+
+      param.dateList = this.dateList;
 
       // single status search
       param.status = typeof index === 'number' && typeof selectIndex !== 'number' ? index || 0 : null;
@@ -205,6 +238,10 @@ export default {
 
 </style>
 <style>
+.el-header{
+  height: auto!important;
+}
+
 .el-upload:focus{
   color: #fff!important;
 }

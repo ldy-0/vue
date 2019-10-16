@@ -77,7 +77,10 @@ vue + element
       showExport: `显示声明导出按钮显示`  
       btnList: `[ { titleKey: xx, title: xx, } ], 显示声明按钮显示`  
       placeHolder: `文本输入占位符,显示声明input组件显示`  
+      inputList: `[ { title(name|label): '', placeholder: '', width: '100rpx' } ]`  
       dateWidth: `日期组件宽度，显示声明日期组件显示`  
+      dateLabelWidth: `日期组件标签宽度(仅支持dateList)`  
+      dateList: `[ { title(name|label): '', width: '100rpx', } ]`  
       status: `状态值(单select)`  
       statusList: `状态值(多select)`  
       selectTitle: `标题(单select)`  
