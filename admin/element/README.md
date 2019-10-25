@@ -73,19 +73,19 @@ vue + element
     |  config |Object|  |
 
     - config  
-      title: `编辑标题, 显示声明编辑按钮显示`  
-      showExport: `显示声明导出按钮显示`  
-      btnList: `[ { titleKey: xx, title: xx, } ], 显示声明按钮显示`  
-      placeHolder: `文本输入占位符,显示声明input组件显示`  
-      inputList: `[ { title(name|label): '', placeholder: '', width: '100rpx' } ]`  
-      dateWidth: `日期组件宽度，显示声明日期组件显示`  
-      dateLabelWidth: `日期组件标签宽度(仅支持dateList)`  
-      dateList: `[ { title(name|label): '', width: '100rpx', } ]`  
-      status: `状态值(单select)`  
-      statusList: `状态值(多select)`  
-      selectTitle: `标题(单select)`  
-      selectList: `1. 单select(每项为select item) [ { title: xx, value: xx } ] 2. 多select [ {title: xx, width: xx, list: [ { title: xx, value: xx, } ] } ], `  
-      selectWidth: `select组件宽度`  
+      title: `编辑标题, 编辑按钮显示`  
+      showExport: `导出按钮显示`  
+      btnList: `每项为按钮配置[ { titleKey: xx, title: xx, } ](仅多btn)`  
+      placeHolder: `文本输入占位符(仅单input)`  
+      inputList: `每项为输入框配置[ { title(name|label): '', placeholder: '', width: '100px' } ](仅多input)`  
+      dateWidth: `日期组件宽度(仅单date)`  
+      dateLabelWidth: `日期组件标签宽度(仅dateList)`  
+      dateList: `[ { title(name|label): String, width: '100px'(日期组件宽度), } ](仅dateList)`  
+      selectList: Array `select组件数据配置`  
+      selectWidth: 'xxpx' `select组件宽度`  
+      selectTitle: String `标题(仅单select)`  
+      status: String|Number `指定状态值(仅单select)`  
+      statusList: Array `每项为每个select的状态值(仅多select)`  
       switchList: `[ { title: '', value: '', color: '#13ce66', inactiveColor: '#c0ccda', disabled: false } ]`
   
     - btnList项  
@@ -96,6 +96,12 @@ vue + element
       header: `上传请求头信息(仅type=import有效)`  
       body: `上传请求体信息(仅type=import有效)`  
       limit: `上传数量限制(仅type=import有效)`  
+
+    - selectList项  
+      title(name|label): xx `单select表示select中每项的标题，多select表示每个select的标题`  
+      value(id): Number|String `单select表示select中每项的值`  
+      list: [] `有表示多select, 没有表示单select`  
+      width: 'xxpx' `多select表示每个select的宽度(覆盖config.selectWidth)`
 
   + Methods
     

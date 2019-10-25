@@ -134,10 +134,7 @@ export default {
       status: '',
       statusList: [],
 
-      param: {
-        statusList: [],
-        dateList: [],
-      },
+      param: {},
     }
   },
 
@@ -170,7 +167,7 @@ export default {
     this.status = status || '';
 
     // init statusList
-    if(selectList && selectList[0].list) this.statusList = selectList.map((v, i) => statusList[i] || '');
+    if(selectList && selectList[0].list) this.statusList = statusList;
 
     // init dateList
     // if(dateList) this.dateList = dateList.map((v, i) => '');
@@ -219,9 +216,7 @@ export default {
       // single status search
       param.status = typeof index === 'number' && typeof selectIndex !== 'number' ? index || 0 : null;
 
-      if(typeof selectIndex === 'number'){
-        param.statusList[selectIndex] = index || 0; // when value is 0, return undefined
-      }
+      param.statusList = this.statusList;
 
       this.$emit('search', param);
     },
