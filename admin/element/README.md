@@ -132,7 +132,7 @@ vue + element
       loading: `加载状态`  
       classList: `[ { key: xx, value: xx(identifiers), isImg|isAvatar|isRadio|isRate|isMulti| } ], 内容列表`  
       showOperate: `是否显示按钮`  
-      btnList: `[ [ { key: xx(identifiers), value: xx, type: 'primary'|'danger'|'warning' } ] ], 按钮列表`  
+      btnList: `[ [ { key: xx(identifiers), value(title|name|label): xx, type: 'primary'|'danger'|'warning' } ] ], 按钮列表`  
       showPagination: `是否显示分页`
       flag: `标记table`
 
@@ -175,6 +175,25 @@ vue + element
     |  change | (item, flag) | value值修改回调 |
     |  show   | null     |  显示下拉框回调(仅customSelect)   |
     |  hide   | null     |  隐藏下拉框回调(仅customSelect)   |
+
+***
+
+- copyRight
+> 版权组件
+
+  + property
+
+    | props | type | desc |
+    |-------|------|------|
+    | obj   |Object|  |
+
+    - obj
+      
+      year: '年份'
+      company: '公司名称'
+      province: '省简称'
+      record: '备案号'
+
 ***
 
 

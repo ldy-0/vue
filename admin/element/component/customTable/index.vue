@@ -1,3 +1,8 @@
+<style>
+.mr5{
+  margin-right: 5px;
+}
+</style>
 <template>
   <div>
 
@@ -42,8 +47,8 @@
 
           <el-button size="mini" type="primary" @click="emit(scope.$index, scope.row, 'look')" v-if='config.lookTitle' v-text='config.lookTitle'></el-button>
 
-          <el-button size='mini' :type="item.type || 'primary'" @click="show(scope.$index, scope.row, index, item)" 
-              v-for='(item, index) in config.btnList' :key='index' v-if='scope.row[item.key]'>{{item.value}}</el-button>
+          <el-button class='mr5' size='mini' :type="item.type || 'primary'" @click="show(scope.$index, scope.row, index, item)" 
+              v-for='(item, index) in config.btnList' :key='index' v-if='scope.row[item.key]'>{{item.title || item.value || item.name || item.label}}</el-button>
 
           <!-- auth status -->
           <el-button size="mini" type="success" @click="showAuth(scope.$index, scope.row, 1)" v-if='config.showAuth && scope.row.state == 0'>同意</el-button>
