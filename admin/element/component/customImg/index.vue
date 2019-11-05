@@ -1,6 +1,7 @@
 <template>
   <el-form-item :label="obj.title" :label-width="obj.width || '100px'">
         <el-upload list-type="picture-card"
+              :class="{disabled:showCard}"
               :action='obj.url' 
               :data='obj.body'
               :limit='obj.limit'
@@ -11,8 +12,7 @@
               :on-success='success'
               :disabled="obj.disabled"
               multiple
-              v-if='obj.url'
-              :class="{disabled:showCard}">
+              v-if='obj.url'>
               <i class="el-icon-plus"></i>
         </el-upload>
         <el-upload action='' list-type="picture-card" :auto-upload="false"
@@ -28,6 +28,9 @@
               <i class="el-icon-plus"></i>
 
         </el-upload>
+
+        <!-- tip -->
+        <div class='tip' v-if='obj.tip'>{{obj.tip}}</div>
 
         <el-alert :title='obj.alert' :closable='false' type='error' show-icon v-if='obj.alert'></el-alert>
 
@@ -47,15 +50,13 @@ export default {
       type: Object
     }
   },
-
   computed:{
     showCard(){
       return  this.obj.value.length>=Number(this.obj.limit);
     }
   },
-
   watch: {
-    // obj(v1, v2){ console.error('watch'); }
+    // obj(v1, v2){ console.error('watch'); },
   },
 
   data() {
@@ -107,5 +108,9 @@ export default {
   height: 600px;
   margin: 40px 0 0;
   background: #fff;
+}
+
+.tip{
+  color: #f00; 
 }
 </style>
