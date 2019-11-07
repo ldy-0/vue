@@ -55,6 +55,49 @@ async function getApk(data) {
 	return res;
 }
 
+// app share
+async function getShareList(data) {
+	let res = await request({
+				url: '/api/v2/seller/appactivity',
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
+async function addShare(data){
+	return request({
+		url: '/api/v2/seller/appactivity',
+		method: 'post',
+		data
+	})
+}
+
+async function setShare(id, data){
+	return request({
+		url: `/api/v2/seller/appactivity/${id}`,
+		method: 'put',
+		data
+	})
+}
+
+async function deleteShare(id, data){
+	return request({
+		url: `/api/v2/seller/appactivity/${id}`,
+		method: 'delete',
+		data
+	})
+}
+
+async function changeShare(id, data){
+	return request({
+		url: `/api/v2/seller/appactivity/${id}/edit`,
+		method: 'get',
+		data
+	})
+}
+
 // async function editClassList(data) {
 // 	let res = await request({
 // 				url: '/api/v2/seller/storegc/'+data.storegc_id,
@@ -82,4 +125,10 @@ export default {
   getGif,
   addApk,
   getApk,
+
+  getShareList,
+  addShare,
+  setShare,
+  deleteShare,
+  changeShare,
 }

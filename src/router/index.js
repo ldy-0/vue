@@ -353,6 +353,12 @@ export let asyncRouterMapSeller = [
       	name: 'setting',
       	meta: { title: 'setting', noCache: true }
       },
+      {
+      	path: 'share', //  app分享活动
+      	component: () => import('@/views/operate/setting/common'),
+      	name: 'share',
+      	meta: { title: 'share', noCache: true }
+      },
     ]
   },
 
@@ -376,4 +382,24 @@ export let asyncRouterMapSeller = [
       }
     ]
   },
+
+  {
+    path: '/finance',
+    component: Layout,
+    meta: { title: 'finance', roles: 'finance', icon: 'money',  },
+    children: [
+      {
+        path: 'deal',
+        name: 'deal',
+        component: () => import('@/views/finance'),
+        meta: { title: 'deal', noCache: true,  },
+      },
+      {
+        path: 'reward',
+        name: 'reward',
+        component: () => import('@/views/finance'),
+        meta: { title: 'reward', noCache: true,  },
+      },
+    ]
+  }
 ];

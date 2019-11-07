@@ -56,6 +56,10 @@ export default {
     read: 'VIP解读',
     rainPackage: '红包雨活动',
     freight: '运费模板',
+    finance: '财务管理',
+    deal: '交易明细',
+    reward: '奖励明细',
+    share: 'app分享活动',
 
     //平台
     home: '首页',

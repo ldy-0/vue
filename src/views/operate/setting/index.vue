@@ -55,7 +55,6 @@
 <script>
 
 import api from '@/api/setting'
-// import base from './base.js'
 import customFile from '@/components/customFile'
 import customInput from '@/components/customInput'
 import customSelect from '@/components/select'
@@ -64,7 +63,7 @@ import uploadFn from "@/utils/tencent_cos";
 import commonReq from '@/api/common' 
 
 export default {
-  // mixins: [base],
+  mixins: [],
 
   components: {
     customFile,

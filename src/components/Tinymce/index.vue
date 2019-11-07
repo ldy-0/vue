@@ -38,11 +38,7 @@ export default {
       required: false,
       default: 360
     },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+    disabled: { type: Boolean, required: false, default: false, },
   },
 
   data() {
@@ -95,6 +91,8 @@ export default {
         link_title: false,
         resize: false,
         language: 'zh_CN',
+        branding: false,
+        // fontsize_formats: '11px 12px',
         init_instance_callback: editor => {
           if (_this.value) {
             editor.setContent(_this.value)

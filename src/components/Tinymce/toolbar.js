@@ -1,6 +1,10 @@
 // Here is a list of the toolbar
 // Detail list see https://www.tinymce.com/docs/advanced/editor-control-identifiers/#toolbarcontrols
 
-const toolbar = ['bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo removeformat subscript superscript code codesample', 'hr bullist numlist link image charmap	 preview anchor pagebreak insertdatetime media table emoticons forecolor backcolor fullscreen']
+// emoticons fontselect fontsizeselect 
+const toolbar = [
+  'bold italic underline strikethrough | alignleft aligncenter alignright outdent indent | blockquote code  subscript superscript codesample removeformat | undo redo', 
+  'forecolor backcolor | hr bullist numlist link image charmap anchor pagebreak insertdatetime media table | preview  fullscreen'
+];
 
 export default toolbar

@@ -19,7 +19,7 @@ async function setGoods(id, data) {
 	return res;
 }
 
-async function UpDownGoods(data) {
+async function changeGoods(data) {
 	let res = await request({
 				url: `/api/v2/seller/goodscommon/setting`,
 				method: 'put',
@@ -161,7 +161,7 @@ export default {
 	getGoods,
 	deleteGoods,
 	getGoodsList,
-  UpDownGoods,
+  changeGoods,
 
   getVipSpecialList,
   addSpecial,

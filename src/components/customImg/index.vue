@@ -29,6 +29,9 @@
 
         </el-upload>
 
+        <!-- tip -->
+        <div class='tip' v-if='obj.tip'>{{obj.tip}}</div>
+
         <el-alert :title='obj.alert' :closable='false' type='error' show-icon v-if='obj.alert'></el-alert>
 
         <!-- preview -->
@@ -105,5 +108,9 @@ export default {
   height: 600px;
   margin: 40px 0 0;
   background: #fff;
+}
+
+.tip{
+  color: #f00; 
 }
 </style>

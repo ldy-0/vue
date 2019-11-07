@@ -15,7 +15,7 @@
       </el-form>
     </el-header>
 
-    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @update='updateForm' @delete='deleteItem' @judge="judgeItem" @change='change'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @update='updateForm' @delete='deleteItem' @change='change' @modify='handleTableEvent'></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-form label-width='120px'>
@@ -200,7 +200,12 @@ export default {
         showOperate: true,
         updateTitle: "编辑",
         showDelete: true,
-        judge: ["goods_state", "下架", "上架"],
+        btnList: [
+          { key: 'isDown', value: '上架' },
+          { key: 'goods_state', value: '下架' },
+          { key: 'isWxShow', value: '隐藏' },
+          { key: 'isWxHidden', value: '显示' },
+        ],
         classList: [
           { key: "排序序号", value: "goods_sort" },
           { key: "图片", value: "goods_image", isImg: true },
@@ -240,6 +245,17 @@ export default {
       this.query.page = 1;
       this.query.gc_id = param[2];
       this.getList();
+    },
+
+    handleTableEvent(item, index){
+      // up
+      if(index == 0) return this.changeGoods(item, 'online');
+      // down
+      if(index == 1) return this.changeGoods(item, 'offline');
+      // wx show
+      if(index == 2) return this.changeGoods(item, 'only_app');
+      // wx hidden
+      if(index == 3) return this.changeGoods(item, 'all_end');
     },
 
     async updateForm(status) {
@@ -377,7 +393,7 @@ export default {
           { key: "库存数量", value: "count" },
           { key: "价格", value: "price" },
           { key: "商品标价", value: "marketprice" },
-          { key: "商品编号", value: "sku" },
+          { key: "商品编号", value: "sku", custom: /^\w+$/ },
         ];
 
         if(this.category.value){
@@ -386,7 +402,12 @@ export default {
         }
 
         arr.forEach((v, i) => {
-          if (!(item[v.value] >= 0)) err = `${v.key}必须为大于零的数字`;
+          if(v.custom){
+            if(!v.custom.test(item[v.value])) err = `${v.key}必须为字母或数字`;
+          }else{
+            if(!(item[v.value] >= 0)) err = `${v.key}必须为大于零的数字`;
+          }
+
         });
 
         return err;
@@ -525,11 +546,7 @@ export default {
         classify;
 
       item.img = [{ url: item.goods_image }];
-      item.detailImg = item.detailImg
-        ? item.detailImg.map(v => {
-            return { url: v };
-          })
-        : [];
+      item.detailImg = item.detailImg ? item.detailImg.map(v => { return { url: v }; }) : [];
 
       // get match
       matcher = this.exchange(selectList, arr.map(v => item[v]), "id", "name");
@@ -551,6 +568,10 @@ export default {
           item.gc_name_3 = v.storegc_name;
         }
       });
+
+      // 
+      item.isDown = item.goods_state == 0;
+      item.only_app == 0 ? item.isWxShow = true : item.isWxHidden = true;
     },
     exchange(sourceList, valueList, filterProperty, destProperty) {
       let res,
@@ -641,23 +662,21 @@ export default {
       this.getList();
     },
 
-    async judgeItem(item) {
-      let send = {
-        goods_commonid: [item.goods_commonid]
-      };
-      if (item.goods_state == 1) {
-        send.type = "offline";
-      } else {
-        send.type = "online";
-      }
+    async changeGoods(item, type){
+      let loading = this.$loading({ text: '正在更新状态...', });
 
-      let res = await api.UpDownGoods(send);
-      if (res.status == 0) {
-        this.$message.success("操作成功");
-        this.getList();
-      } else {
-        this.$message.error("操作失败，请刷新重试");
-      }
+      let send = {
+        goods_commonid: ['online', 'offline'].indexOf(type) !== -1 ? [item.goods_commonid] : item.goods_commonid,
+        type,
+      };
+
+      let res = await api.changeGoods(send);
+
+      if(typeof res === 'string' || !res || res.error) return this.handleError(res ? res.error || res : '修改失败', loading);
+
+      this.$message.success("操作成功");
+      loading.close();
+      this.getList();
     },
 
     async getUploadToken() {
@@ -666,8 +685,7 @@ export default {
       if (res.error) return this.$message.error(`getUploadToken: ${res.error}`);
 
       this.detailImg.body.token = this.img.body.token = res.data;
-      this.detailImg.body.config = this.img.body.config =
-        "{ useCdnDomain: true }";
+      this.detailImg.body.config = this.img.body.config = "{ useCdnDomain: true }";
     },
 
     // utils
@@ -685,6 +703,12 @@ export default {
         .forEach((v, i) => (o[this.classList[i].name] = v));
 
       return o;
+    },
+
+    handleError(text, loading){
+      if(loading) loading.close();
+
+      this.$message.error(text);
     },
 
     mockData(){
