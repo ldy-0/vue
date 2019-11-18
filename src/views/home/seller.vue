@@ -1,19 +1,4 @@
-<style lang="stylus">
-.dashboard-hbs {
-  margin-left: 0 !important;
-}
-
-.notice-time {
-  text-align: right;
-  color: #999999;
-  font-size: 10px;
-}
-
-.notice-content {
-  text-align: center;
-  font-size: 15px;
-  min-min-height: 50px;
-}
+<style lang="css">
 </style>
 <template>
   <div class="page-bagColor">

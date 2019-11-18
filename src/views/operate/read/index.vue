@@ -1,11 +1,4 @@
-<style lang="stylus">
-  .header
-    margin-top 20px
-
-  .dialog-footer{
-    display:block;
-    margin-left 10%;
-  }
+<style lang="css">
 </style>
 
 <template>

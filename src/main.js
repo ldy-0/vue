@@ -17,9 +17,6 @@ import './errorLog'// error log
 import './permission' // permission control
 // import './mock' // simulation data
 
-//hbs css
-import '@/viewscss/s_reset.styl'
-
 import * as filters from './filters' // global filters
 
 Vue.use(Element, {

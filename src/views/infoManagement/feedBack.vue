@@ -1,4 +1,4 @@
-<style lang="stylus">
+<style lang="scss">
 .notice {
   .header {
     margin-top: 20px;

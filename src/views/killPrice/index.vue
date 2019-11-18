@@ -1,9 +1,4 @@
-<style lang="stylus">
-.notice {
-  .header {
-    margin-top: 20px;
-  }
-}
+<style lang="css">
 </style>
 
 <template>

@@ -32,12 +32,19 @@ module.exports = {
       ? config.build.assetsPublicPath
       : config.dev.assetsPublicPath
   },
+
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
       '@': resolve('src'),
     }
   },
+
+  externals: {
+    'echarts': 'echarts',
+    'xlsx': 'XLSX',
+  },
+
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),

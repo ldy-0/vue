@@ -1,20 +1,5 @@
-<style lang="stylus">
-.notice {
-  .header {
-    margin-top: 20px;
-  }
+<style lang="css">
 
-  .big-icon {
-    font-size: 30px;
-    color: #409EFF;
-  }
-
-  .big-icon-no {
-    font-size: 30px;
-    color: #b19999;
-    // color #F56C6C
-  }
-}
 </style>
 
 <template>

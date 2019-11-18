@@ -1,22 +1,4 @@
-<style lang="stylus">
-  .notice
-    .header
-      margin-top 20px
-    .big-icon
-      font-size 30px
-      color #409EFF
-    .big-icon-no
-      font-size 30px
-      color #b19999
-
-  .close{
-    position: relative;
-    left: calc(100% - 30px);
-  }
-  .dialog-footer{
-    display:block;
-    margin-left 10%;
-  }
+<style lang="css">
 </style>
 
 <template>

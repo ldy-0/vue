@@ -401,5 +401,26 @@ export let asyncRouterMapSeller = [
         meta: { title: 'reward', noCache: true,  },
       },
     ]
-  }
+  },
+
+  {
+    path: '/store',
+    component: Layout,
+    meta: { title: 'store', roles: 'store', icon: 'money',  },
+    children: [
+      {
+        path: 'store',
+        name: 'store',
+        component: () => import('@/views/store/common'),
+        meta: { title: 'store', noCache: true,  },
+      },
+      // {
+      //   path: 'reward',
+      //   name: 'reward',
+      //   component: () => import('@/views/finance'),
+      //   meta: { title: 'reward', noCache: true,  },
+      // },
+    ]
+  },
+
 ];

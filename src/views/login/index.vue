@@ -1,29 +1,4 @@
-<style lang="stylus">
-.login-container {
-  .hbs-login-switch {
-    text-align: right;
-    box-sizing: border-box;
-    height: 40px;
-    padding-right: 20px;
-
-    .el-switch__label {
-      color: #aaaaaa;
-
-      & * {
-        font-size: 16px;
-      }
-    }
-
-    .el-switch__label.is-active {
-      color: #ffffff;
-
-      & * {
-        font-size: 18px;
-      }
-    }
-  }
-}
-
+<style lang="css">
 .forget-password {
   font-size: 10px;
   color: #ffffff;

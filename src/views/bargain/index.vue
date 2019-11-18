@@ -1,23 +1,8 @@
-<style lang="stylus">
-.notice {
-  .header {
-    margin-top: 20px;
-  }
-}
-
-.test{
-  width: 200px;
-  height: 200px;
-  background: #000;
-  transform: translateX(600px);
-  transition: transform 10s;
-}
+<style lang="css">
 </style>
 
 <template>
   <div>
-    <!-- <div class='test' @click='transitionEnd'>1</div> -->
-
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt>
     </el-dialog>
@@ -354,14 +339,6 @@ export default {
     }
   },
   methods: {
-    transitionEnd(e){
-      // realm: { globalObj, globalEnv, }
-      // globalEnvRec: { objEnvRec, declarationEnvRec, varName: [] }
-      // Job: { job, realm, scirptOrModal }
-
-      // instantiateRealm, initRealm->intantiateLexicalEnv->instantiateGlobalEnvRec
-      // instantiateExecEnv initExecEnv 
-    },
     //get data============================================
     getList() {
       this.listLoading = true;

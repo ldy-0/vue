@@ -1,11 +1,4 @@
-<style lang="stylus">
-.dashboard-container
-  .dashboard-hbs
-    color #555
-    margin-left 20%
-    transition all 1s 
-  .hbs-down
-    transform translateY(60px)
+<style lang="css">
 </style>
 
 <template>
