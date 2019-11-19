@@ -406,20 +406,26 @@ export let asyncRouterMapSeller = [
   {
     path: '/store',
     component: Layout,
-    meta: { title: 'store', roles: 'store', icon: 'money',  },
+    meta: { title: 'sellerStore', roles: 'store', icon: 'money',  },
     children: [
       {
-        path: 'store',
-        name: 'store',
+        path: 'list',
+        name: 'all',
         component: () => import('@/views/store/common'),
-        meta: { title: 'store', noCache: true,  },
+        meta: { title: 'storeList', noCache: true,  },
       },
-      // {
-      //   path: 'reward',
-      //   name: 'reward',
-      //   component: () => import('@/views/finance'),
-      //   meta: { title: 'reward', noCache: true,  },
-      // },
+      {
+        path: 'check',
+        name: 'check',
+        component: () => import('@/views/store/common'),
+        meta: { title: 'storeCheck', noCache: true,  },
+      },
+      {
+        path: 'recommend',
+        name: 'recommend',
+        component: () => import('@/views/store/common'),
+        meta: { title: 'storeRecommend', noCache: true,  },
+      },
     ]
   },
 

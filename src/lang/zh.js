@@ -2,9 +2,6 @@ export default {
   route: {
     information:'咨询列表',
     sellerUser:'用户列表',
-    sellerSales:'销售',
-    creditShop:'积分商城',
-    creditSection:'积分商城分段',
     setting:'设置',
     settingPay:'付款方式',
     settingGoodsType:'商品类型',
@@ -21,16 +18,14 @@ export default {
     record:'提现记录',
     statistics:'分销统计',
     rReturn:'售后订单',
-    feedBack: '评价管理',
-    videos: '视频列表',
     groupBuying: '团购管理',
     coupon: '优惠券',
     killPrice:'秒杀管理',
     groupBuyOrder:'团购订单',
     bargainOrder:'砍价订单',
     seckillOrder:'秒杀订单',
-    // --------------------
-    //卖家
+
+    goods: '商品列表',
     commodityManagement:'商品管理',
     orderManagement:'订单管理',
     bargain:'砍价管理',
@@ -54,64 +49,37 @@ export default {
     business: '招商申请',
     special: 'VIP特惠',
     read: 'VIP解读',
+
     rainPackage: '红包雨活动',
+
     freight: '运费模板',
+
     finance: '财务管理',
     deal: '交易明细',
     reward: '奖励明细',
+
     share: 'app分享活动',
+
+    sellerStore: '商家入驻',
+    storeList: '商家列表',
+    storeCheck: '入驻审核',
+    storeRecommend: '商家推荐',
 
     //平台
     home: '首页',
-    goods: '商品列表',
     notice: '公告',
-    manageShop: '店铺管理',
-
-    manageSevice: '运营管理',
-    shopServer:'店铺运营',
-    industryList:'行业列表',
 
     auth: '授权管理',
-    dashboard: '面板',
-    introduction: '简述',
-    documentation: '文档',
-    guide: '引导页',
-    permission: '权限测试页',
-    pagePermission: '页面权限',
-    directivePermission: '指令权限',
     icons: '图标',
-    components: '组件',
-    componentIndex: '介绍',
-    tinymce: '富文本编辑器',
-    markdown: 'Markdown',
-    jsonEditor: 'JSON编辑器',
-    dndList: '列表拖拽',
-    splitPane: 'Splitpane',
     avatarUpload: '头像上传',
-    dropzone: 'Dropzone',
-    sticky: 'Sticky',
-    countTo: 'CountTo',
-    componentMixin: '小组件',
     backToTop: '返回顶部',
     dragDialog: '拖拽 Dialog',
     dragKanban: '可拖拽看板',
     charts: '图表',
     keyboardChart: '键盘图表',
     lineChart: '折线图',
-    mixChart: '混合图表',
-    example: '综合实例',
-    nested: '路由嵌套',
-    bar: 'Bar',
-    barProfile: 'Profile',
-    barPosts: 'Posts',
-    Table: 'Table',
-    dynamicTable: '动态Table',
-    dragTable: '拖拽Table',
-    inlineEditTable: 'Table内编辑',
-    complexTable: '综合Table',
     treeTable: '树形表格',
     customTreeTable: '自定义树表',
-    tab: 'Tab',
     form: '表单',
     createArticle: '创建文章',
     editArticle: '编辑文章',
@@ -120,14 +88,7 @@ export default {
     page401: '401',
     page404: '404',
     errorLog: '错误日志',
-    excel: 'Excel',
-    exportExcel: 'Export Excel',
-    selectExcel: 'Export Selected',
-    uploadExcel: 'Upload Excel',
-    zip: 'Zip',
-    exportZip: 'Export Zip',
     theme: '换肤',
-    clipboardDemo: 'Clipboard',
     i18n: '国际化'
   },
   navbar: {
@@ -148,30 +109,19 @@ export default {
     thirdparty: '第三方登录',
     thirdpartyTips: '本地不能模拟，请结合自己业务进行模拟！！！'
   },
-  documentation: {
-    documentation: '文档',
-    github: 'Github 地址'
-  },
   permission: {
     roles: '你的权限',
     switchRoles: '切换权限'
   },
-  guide: {
-    description: '引导页对于一些第一次进入项目的人很有用，你可以简单介绍下项目的功能。本 Demo 是基于',
-    button: '打开引导'
-  },
   components: {
     documentation: '文档',
     tinymceTips: '富文本是管理后台一个核心的功能，但同时又是一个有很多坑的地方。在选择富文本的过程中我也走了不少的弯路，市面上常见的富文本都基本用过了，最终权衡了一下选择了Tinymce。更详细的富文本比较和介绍见',
-    dropzoneTips: '由于我司业务有特殊需求，而且要传七牛 所以没用第三方，选择了自己封装。代码非常的简单，具体代码你可以在这里看到 @/components/Dropzone',
     stickyTips: '当页面滚动到预设的位置会吸附在顶部',
     backToTopTips1: '页面滚动到指定位置会在右下角出现返回顶部按钮',
     backToTopTips2: '可自定义按钮的样式、show/hide、出现的高度、返回的位置 如需文字提示，可在外部使用Element的el-tooltip元素',
     imageUploadTips: '由于我在使用时它只有vue@1版本，而且和mockjs不兼容，所以自己改造了一下，如果大家要使用的话，优先还是使用官方版本。'
   },
   table: {
-    dynamicTips1: '固定表头, 按照表头顺序排序',
-    dynamicTips2: '不固定表头, 按照点击顺序排序',
     dragTips1: '默认顺序',
     dragTips2: '拖拽后顺序',
     title: '标题',
@@ -204,10 +154,6 @@ export default {
     export: '导出',
     selectedExport: '导出已选择项',
     placeholder: '请输入文件名(默认excel-list)'
-  },
-  zip: {
-    export: '导出',
-    placeholder: '请输入文件名(默认file)'
   },
   theme: {
     change: '换肤',

@@ -4,7 +4,7 @@ import commonReq from '@/api/common'
 export default {
   data(){
     return {
-      checkHeadConfig: {
+      recommendHeadConfig: {
         btnList: [
           // { title: '上传活动' },
         ],
@@ -24,11 +24,11 @@ export default {
 
       },
 
-      checkImg: { title: '活动图片', value: [], alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {}, limit: 1, tip: '*活动图片不超过100Kb' },
-      checkTitle: { type: 'string', title: '活动标题', value: '', alert: null, },
-      checkDesc: { title: '活动内容', value: '', alert: null, },
+      recommendImg: { title: '活动图片', value: [], alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {}, limit: 1, tip: '*活动图片不超过100Kb' },
+      recommendTitle: { type: 'string', title: '活动标题', value: '', alert: null, },
+      recommendDesc: { title: '活动内容', value: '', alert: null, },
 
-      checkTableConfig: {
+      recommendTableConfig: {
         loading: false,
         showOperate: true,
         classList: [
@@ -46,8 +46,9 @@ export default {
         ],
         btnList: [
           { key: 'store_id', value: '详情' },
-          { key: 'isAuthing', value: '同意' },
-          { key: 'isAuthing', value: '拒绝', type: 'danger' },
+          { key: 'isPublic', value: '推荐' },
+          { key: 'store_recommend', value: '撤销', type: 'danger' },
+          { key: 'store_id', value: '指定' },
         ],
       },
       store: {
@@ -64,9 +65,9 @@ export default {
         goodsLicenseImg: { title: '其他证件', value: [], from: 'goodsLicenseImg', alert: null, },
       },
 
-      refuse: {
-        title: '确认拒绝商家？',
-        refuse:          { title: '拒绝原因', value: '', type: 'text', alert: null, },
+      sort: {
+        title: '选择店铺排序',
+        sort: { title: '输入序号', value: '', type: 'integer', alert: null, },
       },
 
       stateMap: {
@@ -82,7 +83,7 @@ export default {
   },
 
   methods: {
-    async exportCheck(){
+    async exportRecommend(){
       let header, data, list, 
           classList = this.tableConfig.classList,
           filename = `奖励列表`,
@@ -90,9 +91,9 @@ export default {
       
       let query = JSON.parse(JSON.stringify(this.query));
       query.limit = this.total;
-      let res = await api.getCheckList(query);
+      let res = await api.getRecommendList(query);
 
-      if(typeof res === 'string' || !res || res.error) return this.handleCheckError(res ? res.moreInfo || res : '获取奖励列表失败', loading);
+      if(typeof res === 'string' || !res || res.error) return this.handleRecommendError(res ? res.moreInfo || res : '获取奖励列表失败', loading);
 
       if(res && res.data){
         list = res.data.list;
@@ -109,27 +110,30 @@ export default {
       loading.close();
     },
 
-    handleCheckHeadEmit(index){
+    handleRecommendHeadEmit(index){
       // add
       if(index == 0) this.openDialog(1);
     },
 
-    handleCheckTableEmit(item, index){
+    handleRecommendTableEmit(item, index){
       this.detail = item;
 
       // detail 
       if(index == 0) this.openDetailDialog();
 
-      // agree
-      if(index == 1) this.changeCheckStatus(item, index);
-      // refuse
-      if(index == 2) this.openRefuseDialog();
+      // recommend
+      if(index == 1) this.changeRecommendStatus(item, index);
+      // cancel
+      if(index == 2) this.changeRecommendStatus(item, index);
+
+      // sort
+      if(index == 3) this.openSortDialog();
     },
 
     openDetailDialog(){ this.dialogConfig.status = 3; this.initRecommendDialog(this.detail); },
-    openRefuseDialog(){ this.dialogConfig.status = 4; },
+    openSortDialog(){ this.dialogConfig.status = 7; },
 
-    initCheckDialog(item){
+    initRecommendDialog(item){
       let arr = this.editArr,
           store = this.store;
       this.getUploadToken();
@@ -147,37 +151,37 @@ export default {
 
     },
 
-    async submitCheck(){
+    async submitRecommend(){
       let status = this.dialogConfig.status,
-          imgList = this.checkImg.value,
+          imgList = this.recommendImg.value,
           param;
 
-      // refuse 
-      if(status == 4) return this.changeCheckStatus(this.detail, 2);
+      // sort 
+      if(status == 7) return this.changeRecommendStatus(this.detail, 'sort');
 
-      if(this.validCheckError()) return ;
+      if(this.validRecommendError()) return ;
 
       let loading = this.$loading({ text: '提交中...', });
 
-      let img = imgList.map(v => { return v.raw ? `${this.checkImg.cdnUrl}/${v.response.key}` : v.url });
+      let img = imgList.map(v => { return v.raw ? `${this.recommendImg.cdnUrl}/${v.response.key}` : v.url });
       if(!img[0]) return console.error('img value :', img);
 
       param = {
-        activity_title: this.checkTitle.value,
+        activity_title: this.recommendTitle.value,
         activity_image: img[0],
-        activity_content: this.checkDesc.value,
+        activity_content: this.recommendDesc.value,
       };
 
-      this.saveCheck(param, loading);
+      this.saveRecommend(param, loading);
     },
 
-    async saveCheck(param, loading){
+    async saveRecommend(param, loading){
       let status = this.dialogConfig.status;
       let res = null;
 
-      res = status == 1 ? await api.addCheck(param) : await api.setCheck(this.detail.activity_id, param);
+      res = status == 1 ? await api.addRecommend(param) : await api.setRecommend(this.detail.activity_id, param);
 
-      if(typeof res == 'string' || !res || res.error) return this.handleCheckError(res ? res.error || res : '提交分享信息失败', loading);
+      if(typeof res == 'string' || !res || res.error) return this.handleRecommendError(res ? res.error || res : '提交分享信息失败', loading);
 
       if(res.status == 0) this.$message.success('操作成功');
 
@@ -187,8 +191,8 @@ export default {
       loading.close();
     },
 
-    validCheckError(){
-      let arr = ['checkDesc', 'checkTitle', 'checkImg'];
+    validRecommendError(){
+      let arr = ['recommendDesc', 'recommendTitle', 'recommendImg'];
 
       for(let i = arr.length - 1; i >= 0; i--){
         let item = this[arr[i]];
@@ -202,45 +206,45 @@ export default {
     },
 
     /* api */
-    async changeCheckStatus(item, index){
-      let param = { store_state: index == 1 ? 1 : 3 },
-          refuse = this.refuse.refuse;
-      // refuse
-      if(index == 2){
-        if(!refuse.value) return refuse.alert = `${refuse.title}不能为空!`;
+    async changeRecommendStatus(item, index){
+      let param = { store_recommend: index == 1 ? 1 : 0 },
+          sort = this.sort.sort;
 
-        param.store_refuse_info = this.refuse.refuse.value;
+      // sort
+      if(index == 'sort'){
+        if(!sort.value) return sort.alert = `${sort.title}不能为空!`;
+
+        param = { store_sort: sort.value };
       }
 
       let loading = this.$loading({ text: '正在更新状态...' });
 
-      let res = await api.changeCheck(item.store_id, param);
+      let res = await api.changeAll(item.store_id, param);
 
-      res.status == 0 ? this.$message.success(this.successTip) : this.handleCheckError(res ? res.error || res : '修改状态失败');
+      res.status == 0 ? this.$message.success(this.successTip) : this.handleRecommendError(res ? res.error || res : '修改状态失败');
 
       this.dialogConfig.status = 0;
       this.getList();
       loading.close();
     },
 
-    async deleteCheck(item){
+    async deleteRecommend(item){
       let loading = this.$loading({ text: '删除中...' });
 
-      let res = await api.deleteCheck(item.activity_id);
+      let res = await api.deleteRecommend(item.activity_id);
 
-      res.status == 0 ? this.$message.success(this.successTip) : this.handleCheckError(res ? res.error || res : '删除失败', loading);
+      res.status == 0 ? this.$message.success(this.successTip) : this.handleRecommendError(res ? res.error || res : '删除失败', loading);
 
       loading.close();
       this.getList();
     },
 
-    async getCheckList() {
+    async getRecommendList() {
       this.tableConfig.loading = true;
 
-      this.query.store_state = 2;
       let res = await api.getAllList(this.query);
 
-      if(typeof res == 'string' || !res || res.error) return this.handleCheckError(res ? res.error || res : '获取活动列表失败');
+      if(typeof res == 'string' || !res || res.error) return this.handleRecommendError(res ? res.error || res : '获取活动列表失败');
 
       if(res && res.data){
         res.data.forEach(this.format);
@@ -252,7 +256,7 @@ export default {
       this.tableConfig.loading = false
     },    
 
-    formatCheck(v){
+    formatRecommend(v){
       try{
         v.idImg = this.formatImg([v.store_id_card_behind, v.store_id_card_front]);
         v.logoImg = this.formatImg(v.store_avatar);
@@ -267,20 +271,22 @@ export default {
 
       v.stateStr = this.stateMap[v.store_state];
       v.isAuthing = v.store_state == 2;
+
+      v.isPublic = v.store_recommend == 0;
     },
 
     async getUploadToken(){
       let res = await commonReq.getUploadToken();
 
-      if(typeof res === 'string' || !res || res.error) return this.handleCheckError(res ? res.error || res : '获取上传图片token失败');
+      if(typeof res === 'string' || !res || res.error) return this.handleRecommendError(res ? res.error || res : '获取上传图片token失败');
 
-      this.checkImg.body.token = res.data;
-      this.checkImg.body.config = "{ useCdnDomain: true }";
+      this.recommendImg.body.token = res.data;
+      this.recommendImg.body.config = "{ useCdnDomain: true }";
 
     },
 
     // immutable
-    showCheck(item, index){
+    showRecommend(item, index){
       this.dialogConfig.status = index;
 
       this.detail = item;
@@ -289,14 +295,14 @@ export default {
     },
 
     // util
-    handleCheckError(err, loading){
+    handleRecommendError(err, loading){
       if(loading) loading.close(); 
       if(this.tableConfig.loading) this.tableConfig.loading = false;
       
       this.$message.error(err);
     },
 
-    mockCheck(){
+    mockRecommend(){
       let img = [ { url: 'https://cdn.health.healthplatform.xyz/Fj2MUuTZ5UvAG0LqSFBcI__J1U2D' } ],
           logo = [ { url: 'https://cdn.health.healthplatform.xyz/Fvs1CpRD8iU4nZ_lAcErHsdJ8fmY', }, ];
 
@@ -308,11 +314,20 @@ export default {
       this.list = list;
       this.total = list.length;
     },
-    
+
+    async createStore(){
+      let param = {
+
+      };
+
+      let res = await api.addStore(param);
+
+      console.error(res);
+    }
   },
 
   created(){
-    this.checkHeadConfig.selectList[0].list = [{ title: '全部', value: -1 }].concat(this.CLASSLIST);
+    this.recommendHeadConfig.selectList[0].list = [{ title: '全部', value: -1 }].concat(this.CLASSLIST);
   },
 
 }

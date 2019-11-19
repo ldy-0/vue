@@ -11,7 +11,7 @@
 <custom-table ref='table' :config='tableConfig' :data='list' :total='total' @modify='handleTableEmit' @change='change'></custom-table>
 
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
-  <div v-if="[1, 2].indexOf(dialogConfig.status) !== -1">
+  <div v-if="dialogConfig.status > 0">
     <!-- <el-form label-width='100px'>
 
       <el-form-item :label="checkDesc.title">
@@ -19,9 +19,17 @@
         <el-alert type='error' :title='checkDesc.alert' v-if='checkDesc.alert'></el-alert>
       </el-form-item>     
     </el-form> -->
-    <store :obj='store'></store> 
+    <store :obj='store' v-if='[1, 2, 3].indexOf(dialogConfig.status) !== -1'></store> 
 
-    <span slot="footer" class="dialog-footer">
+    <refuse :obj='refuse' v-if='dialogConfig.status == 4'></refuse>
+
+    <down :obj='down' v-if='dialogConfig.status == 5'></down>
+
+    <remark :obj='remark' v-if='dialogConfig.status == 6'></remark>
+
+    <sort :obj='sort' v-if='dialogConfig.status == 7'></sort>
+
+    <span slot="footer" class="dialog-footer" v-if='[3].indexOf(dialogConfig.status) === -1'>
       <el-button @click="closeDialog" >取消</el-button>
       <el-button type="primary" :disabled="submited" :loading="submited" @click="submit">确 定</el-button>
     </span>
@@ -38,8 +46,15 @@ import customInput from '@/components/customInput'
 import customImg from '@/components/customImg'
 import editor from '@/components/Tinymce'
 import check from './check';
-import { export_json_to_excel as toExcel } from "@/vendor/Export2Excel";
+import all from './all';
+import recommend from './recommend';
 import store from '@/components/form/store'
+import remark from '@/components/form/remark'
+import refuse from '@/components/form/refuse'
+import down from '@/components/form/down'
+import sort from '@/components/form/sort'
+import { export_json_to_excel as toExcel } from "@/vendor/Export2Excel";
+import { format } from 'url';
 
 export default {
   components: {
@@ -47,9 +62,13 @@ export default {
     customTable,
     editor,
     store,
+    remark,
+    refuse,
+    down,
+    sort,
   },
 
-  mixins: [check],
+  mixins: [check, all, recommend],
 
   computed: {
     showDialog(){ return Boolean(this.dialogConfig.status); },
@@ -57,13 +76,34 @@ export default {
 
   data() {
     return {
+      CLASSLIST: [
+        { title: '美妆饰品', value: 1, },
+        { title: '百货食品', value: 2, }, 
+        { title: '家用电器', value: 3, },
+        { title: '服饰鞋包', value: 4, },
+        { title: '母婴玩具', value: 5, },
+        { title: '蔬果生鲜', value: 6, },
+        { title: '手机数码', value: 7, },
+        { title: '家居生活', value: 8, },
+        { title: '运动户外', value: 9, },
+        { title: '其他/other', value: 10, },
+      ],
+
+      STATELIST: [
+        { title: '全部', value: -1, },
+        { title: '下架', value: 0, },
+        { title: '上架', value: 1, },
+        { title: '拒绝', value: 3, },
+        { title: '审核中', value: 2, },
+      ],
+
       type: null,
 
       headConfig: {},
 
       dialogConfig: {
         title: '',
-        status: 0, // 1: 添加，2：编辑
+        status: 0, // 1: 添加，2：编辑 3: 详情 4: 拒绝原因 5: 下架原因 6: 备注 7: 排序
       },
 
       tableConfig: {},
@@ -102,10 +142,22 @@ export default {
       this.$refs.table.initPage();
 
       // keyword search
-      if(param.search) query.search = param.search;
+      // if(param.search) query.search = param.search;
 
       if(inputList){
         if(inputList[0]) query.search = inputList[0]; 
+      }
+
+      if(statusList){
+        if(statusList.hasOwnProperty('0') && statusList[0] !== -1) query.goodsclass_id = statusList[0] || 0;
+        if(statusList.hasOwnProperty('1') && statusList[1] !== -1) query.store_state = statusList[1] || 0;
+      }
+
+      if(dateList){
+        if(dateList[0]){
+          query.starttime = dateList[0][0];
+          query.endtime = dateList[0][1];
+        }
       }
 
       // console.error(query);
@@ -147,6 +199,17 @@ export default {
 
       this.getList();
     },
+
+    formatImg(v){ return v ? typeof v == 'string' ? [ { url: v } ] : v.map(v => ({ url: v })) : []; },
+    formatTime(v){
+      let t = new Date(v); 
+
+      return `${t.getFullYear()}/${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)} \
+              /${(t.getDate() < 10 ? '0' : '') + t.getDate()}\
+               ${(t.getHours() < 10 ? '0' : '') + t.getHours()} \
+              :${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()} \
+              :${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`;
+    }
 
   },
 
