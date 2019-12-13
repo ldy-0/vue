@@ -177,6 +177,7 @@ export default {
       twoQuery: {
         page: 1,
         limit: 10,
+        // store_id: 1,
       },
       twoIsLoading: true,
       stateArr: ['下架', '上架'],

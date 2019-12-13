@@ -363,6 +363,7 @@ export default {
       sendData.goods_state = 1;
       sendData.is_vip=0;
       sendData.is_pintuan = 0;
+      sendData.store_id = 1;
       getGoodsList_api(sendData)
         .then(response => {
           // 这里由于结构做了调整，导致编辑页面需要的数据无法从列表获取，这里只需要给tableData额外传一个id

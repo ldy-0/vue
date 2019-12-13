@@ -74,6 +74,19 @@ async function changeCheck(id, data){
   return res;
 }
 
+// 分类
+async function getStoreClassList(data){
+  let opt = {
+    url: "/api/v2/common/storeclass",
+    method: "GET",
+    params: data
+  };
+
+  let res = await request(opt);
+
+  return res;
+}
+
 export default {
   getAllList,
   getAllExport,
@@ -84,4 +97,6 @@ export default {
 
   getCheckList,
   changeCheck,
+
+  getStoreClassList,
 }

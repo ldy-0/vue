@@ -33,7 +33,7 @@ export default {
         loading: false,
         showOperate: true,
         classList: [
-          { key: '排序序号', value: 'store_id', },
+          { key: '排序序号', value: 'store_sort', },
           { key: 'Logo图', value: 'store_avatar', isImg: true, },
           { key: '店铺名', value: 'store_name', },
           { key: '主营', value: 'store_class', },
@@ -41,17 +41,18 @@ export default {
           { key: '联系人', value: 'contacts_name', },
           { key: '联系方式', value: 'contacts_phone', },
           { key: '证件', value: 'identity', },
-          { key: '身份证号', value: 'store_id_card', },
-          { key: '银行卡号', value: 'bank_account_number', },
+          { key: '上架商品', value: 'online', },
+          { key: '销量', value: 'store_sales', },
           { key: '状态', value: 'stateStr', },
         ],
         btnList: [
-          { key: 'store_id', value: '编辑' },
+          { key: 'isAuthed', value: '编辑' },
           { key: 'isDown', value: '上架' },
-          { key: 'store_state', value: '下架' },
-          { key: 'store_id', value: '备注', },
+          { key: 'isUp', value: '下架' },
+          { key: 'isAuthed', value: '备注', },
         ],
       },
+      imgHeadCofnig: { token: null, config: null, },
       store: {
         name:            { title: '姓名',     value: '', from: 'contacts_name', alert: null, type: 'text', },
         id:              { title: '身份证号', value: '', from: 'store_id_card', alert: null, },
@@ -61,9 +62,11 @@ export default {
         mobile:          { title: '联系方式', value: '', from: 'contacts_phone', alert: null, },
         storeName:       { title: '店铺名',   value: '', from: 'store_name', alert: null, type: 'text', },
         storeClass:      { title: '店铺主营', value: '', from: 'storeclass_id', alert: null, list: [], },
-        storeLicenseImg: { title: '营业照',   value: [], from: 'storeLicenseImg', alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
+        storeLicenseImg: { title: '营业照',   value: [], from: 'storeLicenseImg', alert: null, limit: 1, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
         logoImg:         { title: '店铺logo图', value: [], from: 'logoImg', alert: null, limit: 1, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
         goodsLicenseImg: { title: '其他证件', value: [], from: 'goodsLicenseImg', alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
+        account:         { title: '商家账号', value: '', from: 'seller_name', alert: null, },
+        pwd:             { title: '商家密码', value: '', from: 'seller_password', alert: null, },
       },
 
       down: {
@@ -136,11 +139,16 @@ export default {
       if(index == 2) this.openDownDialog();
 
       // remark 
-      if(index == 3) this.openRemarkDialog();
+      if(index == 3) this.openRemarkDialog(item);
     },
 
     openDownDialog(){ this.dialogConfig.status = 5; },
-    openRemarkDialog(){ this.dialogConfig.status = 6; },
+    openRemarkDialog(item){ 
+      this.dialogConfig.status = 6; 
+
+      this.remark.remark.value = item.remark || '';
+      this.remark.remark.alert = null;
+    },
 
     initAllDialog(item){
       let arr = this.editArr,
@@ -185,8 +193,8 @@ export default {
         contacts_phone: store.mobile.value,
         store_name: store.storeName.value,
         storeclass_id: store.storeClass.value,
-        business_licence: imgList[1],
-        store_avatar: imgList[2],
+        business_licence: imgList[1][0],
+        store_avatar: imgList[2][0],
         identity_images: imgList[3],
         bank_account_name: this.detail.bank_account_name,
         identity: this.detail.identity,
@@ -274,6 +282,7 @@ export default {
     async getAllList() {
       this.tableConfig.loading = true;
 
+      if(!this.query.hasOwnProperty('store_state')) this.query.store_state = '0,1';
       let res = await api.getAllList(this.query);
 
       if(typeof res == 'string' || !res || res.error) return this.handleAllError(res ? res.error || res : '获取活动列表失败');
@@ -303,17 +312,19 @@ export default {
 
       v.stateStr = this.stateMap[v.store_state];
       v.isDown = v.store_state == 0;
+      v.isUp = v.store_state == 1;
+      v.isAuthed = v.store_state != 2;
     },
 
-    async getUploadToken(){
+    async getAllUploadToken(){
       let store = this.store,
           res = await commonReq.getUploadToken();
 
       if(typeof res === 'string' || !res || res.error) return this.handleAllError(res ? res.error || res : '获取上传图片token失败');
 
-      store.idImg.body.token = store.storeLicenseImg.body.token = store.logoImg.body.token = store.goodsLicenseImg.body.token = res.data;
-      store.idImg.body.config = store.storeLicenseImg.body.config = store.logoImg.body.config = store.goodsLicenseImg.body.config = "{ useCdnDomain: true }";
-
+      this.imgHeadCofnig.token = res.data;
+      this.imgHeadCofnig.config = "{ useCdnDomain: true }";
+      store.idImg.body = store.storeLicenseImg.body = store.logoImg.body = store.goodsLicenseImg.body = this.imgHeadCofnig;
     },
 
     // immutable
@@ -349,8 +360,9 @@ export default {
   },
 
   created(){
-    this.allHeadConfig.selectList[0].list = [{ title: '全部', value: -1 }].concat(this.store.storeClass.list = this.CLASSLIST);
-    this.allHeadConfig.selectList[1].list = this.STATELIST;
+    this.allHeadConfig.selectList[1].list = this.STATELIST.slice(0, 3);
+    
+    this.getStoreClassList('all');
   }
 
 }

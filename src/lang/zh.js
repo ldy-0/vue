@@ -64,6 +64,12 @@ export default {
     storeList: '商家列表',
     storeCheck: '入驻审核',
     storeRecommend: '商家推荐',
+    goodsAuth: '上架审核',
+
+    withdraw: '提现列表',
+    balanceWithdraw: '余额提现',
+    dscoreWithdraw: '德分提现',
+    sellerWithdraw: '商家提现',
 
     //平台
     home: '首页',

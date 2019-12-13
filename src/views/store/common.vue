@@ -48,6 +48,7 @@ import editor from '@/components/Tinymce'
 import check from './check';
 import all from './all';
 import recommend from './recommend';
+import storeClass from './class';
 import store from '@/components/form/store'
 import remark from '@/components/form/remark'
 import refuse from '@/components/form/refuse'
@@ -68,7 +69,7 @@ export default {
     sort,
   },
 
-  mixins: [check, all, recommend],
+  mixins: [check, all, recommend, storeClass],
 
   computed: {
     showDialog(){ return Boolean(this.dialogConfig.status); },
@@ -77,16 +78,16 @@ export default {
   data() {
     return {
       CLASSLIST: [
-        { title: '美妆饰品', value: 1, },
-        { title: '百货食品', value: 2, }, 
-        { title: '家用电器', value: 3, },
-        { title: '服饰鞋包', value: 4, },
-        { title: '母婴玩具', value: 5, },
-        { title: '蔬果生鲜', value: 6, },
-        { title: '手机数码', value: 7, },
-        { title: '家居生活', value: 8, },
-        { title: '运动户外', value: 9, },
-        { title: '其他/other', value: 10, },
+        // { title: '美妆饰品', value: 1, },
+        // { title: '百货食品', value: 2, }, 
+        // { title: '家用电器', value: 3, },
+        // { title: '服饰鞋包', value: 4, },
+        // { title: '母婴玩具', value: 5, },
+        // { title: '蔬果生鲜', value: 6, },
+        // { title: '手机数码', value: 7, },
+        // { title: '家居生活', value: 8, },
+        // { title: '运动户外', value: 9, },
+        // { title: '其他/other', value: 10, },
       ],
 
       STATELIST: [
@@ -127,6 +128,7 @@ export default {
     format(v){},
     handleTableEmit(item, index){},
 
+    getUploadToken(){},
     initDialog(item){},
     submit(){},
     
@@ -141,22 +143,19 @@ export default {
       query.limit = this.query.limit;
       this.$refs.table.initPage();
 
-      // keyword search
-      // if(param.search) query.search = param.search;
-
       if(inputList){
         if(inputList[0]) query.search = inputList[0]; 
       }
 
       if(statusList){
-        if(statusList.hasOwnProperty('0') && statusList[0] !== -1) query.goodsclass_id = statusList[0] || 0;
+        if(statusList.hasOwnProperty('0') && statusList[0] !== -1) query.storeclass_id = statusList[0] || 0;
         if(statusList.hasOwnProperty('1') && statusList[1] !== -1) query.store_state = statusList[1] || 0;
       }
 
       if(dateList){
         if(dateList[0]){
-          query.starttime = dateList[0][0];
-          query.endtime = dateList[0][1];
+          query.starttime = this.formatTime(dateList[0][0]);
+          query.endtime = this.formatTime(dateList[0][1]);
         }
       }
 
@@ -180,6 +179,7 @@ export default {
       this.format = this[`format${methodsName}`] || this.format;
       this.handleTableEmit = this[`handle${methodsName}TableEmit`];
 
+      this.getUploadToken = this[`get${methodsName}UploadToken`];
       this.initDialog = this[`init${methodsName}Dialog`];
       this.submit = this[`submit${methodsName}`];
     },
@@ -204,12 +204,12 @@ export default {
     formatTime(v){
       let t = new Date(v); 
 
-      return `${t.getFullYear()}/${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)} \
-              /${(t.getDate() < 10 ? '0' : '') + t.getDate()}\
-               ${(t.getHours() < 10 ? '0' : '') + t.getHours()} \
-              :${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()} \
-              :${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`;
-    }
+      return `${t.getFullYear()}-${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)}
+              -${(t.getDate() < 10 ? '0' : '') + t.getDate()}
+              T${(t.getHours() < 10 ? '0' : '') + t.getHours()}
+              :${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()}
+              :${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`.replace(/\s/g, '');
+    },
 
   },
 

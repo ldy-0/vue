@@ -39,7 +39,6 @@
           <custom-input :obj='recommendPrice' v-if='isStoreGoods'></custom-input>
           <number :obj='marketprice'></number>
           <number :obj='price'></number>
-
           <custom-input :obj='amount'></custom-input>
           <!-- <number :obj='profit'></number> -->
           <div v-if='[0, 2].indexOf(category.value) !== -1'>
@@ -53,7 +52,7 @@
         <!-- 多规格 -->
         <div v-if="spec.value == 2">
           <el-form-item>
-            <multi-sku :obj='multiSkuConfig' :type='category.value' :classList='skuClassList' :skuList='skuList' :limit='5' @update='updateMultiSku'></multi-sku>
+            <multi-sku :obj='multiSkuConfig' :classList='skuClassList' :skuList='skuList' :limit='5' @update='updateMultiSku'></multi-sku>
           </el-form-item>
         </div>
 
@@ -89,7 +88,7 @@
         </el-form-item>
       </el-form>
 
-      <down :obj='down' v-if='dialogConfig.status == 3'></down>
+      <refuse :obj='refuse' v-if='dialogConfig.status == 3'></refuse>
 
       <span slot="footer" class="dialog-footer">
         <el-button @click="closeDialog">取消</el-button>
@@ -114,7 +113,7 @@ import dateTimeRange from "@/components/dateTimeRange";
 import customImg from "@/components/customImg";
 import editor from "@/components/Tinymce";
 import multiSku from "@/components/multiSku";
-import down from '@/components/form/down'
+import refuse from '@/components/form/refuseGoods';
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
@@ -140,37 +139,39 @@ export default {
     customImg,
     editor,
     multiSku,
-    down,
+    refuse,
   },
 
   computed: {
     showDialog() { return Boolean(this.dialogConfig.status); },
-    showGoods(){ return [1, 2].indexOf(this.dialogConfig.status) != -1; },
+    showGoods(){ return [1, 2].indexOf(this.dialogConfig.status) !== -1 },
     isStoreGoods(){ return this.category.value == 2; },
   },
 
   data() {
     return {
       categoryList: [
-        { value: 0, title: "常规商品" }, 
-        { value: 1, title: "VIP商品" },
-        { value: 2, title: "入驻商家" },
+        { id: 0, title: "常规商品" }, 
+        { id: 1, title: "VIP商品" },
+        { id: 2, title: "入驻商家" },
       ],
       dialogConfig: {
         title: "",
-        status: 0 // 1:添加分类，2：编辑分类， 3：下架原因
+        status: 0 // 1:添加分类，2：编辑分类， 3：拒绝原因
       },
       img: { title: "商品图片", value: [], limit: 1, alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
       detailImg: { title: "详情图片", value: [], limit: 10, alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
       name: { type: 'text', title: "商品名称", value: "", alert: null },
-      category: { title: "类别", list: [], value: "", alert: null },
+      category: { title: "类别", list: [], value: 2, alert: null, disabled: true, },
       classify: { title: "分类", source: [], value: [], alert: null },
       spec: { title: "规格", categories: [{ id: 1, title: "单规格" }, { id: 2, title: "多规格" }], value: 1, alert: null, disabled: false, },
       sku: { type: 'text', title: "商品编号", value: "", alert: null },
-      marketprice: { title: "原价", value: "", alert: null },
-      price: { title: "售价", value: "", alert: null },
+
+      marketprice: { title: "原价(元)", value: "", alert: null },
+      price: { title: "售价(元)", value: "", alert: null },
       basePrice: { title: "供货价", value: "", alert: null },
       recommendPrice: { title: "建议零售价", value: "", alert: null },
+
       amount: { type: 'integer', title: "库存", value: "", alert: null },
 
       goods_sort: { title: "排序权重", value: "", alert: null },
@@ -193,49 +194,48 @@ export default {
       stopSubmit: false,
 
       headConfig: {
-        title: "添加商品",
+        // title: "添加商品",
         placeHolder: "请输入商品名称",
-        selectLabelList: ["类别", "状态"],
         multiSelect: { title: "分类", source: [], value: [], alert: null, search: true },
-        selectList: [
-          [
-            { id: null, name: "全部" },
-            { id: 0, name: "自营商品" },
-            { id: 1, name: "VIP商品" },
-            { id: 2, name: "入驻商品" },
-          ],
-          [
-            { id: null, name: "全部" },
-            { id: 1, name: "上架" },
-            { id: 0, name: "下架" }
-          ]
-        ]
+        // selectLabelList: ["类别", "状态"],
+        // selectList: [
+        //   [
+        //     { id: null, name: "全部" },
+        //     { id: 0, name: "常规商品" },
+        //     { id: 1, name: "VIP商品" }
+        //   ],
+        //   [
+        //     { id: null, name: "全部" },
+        //     { id: 1, name: "上架" },
+        //     { id: 0, name: "下架" }
+        //   ]
+        // ]
       },
 
       tableConfig: {
         loading: false,
         showOperate: true,
         updateTitle: "编辑",
-        showDelete: true,
+        // showDelete: true,
         btnList: [
-          { key: 'isDown', value: '上架' },
-          { key: 'goods_state', value: '下架' },
-          { key: 'isWxShow', value: '隐藏' },
-          { key: 'isWxHidden', value: '显示' },
+          { key: 'isEdited', value: '上架' },
+          { key: 'isAuthing', value: '拒绝', type: 'danger' },
+          // { key: 'isWxShow', value: '隐藏' },
+          // { key: 'isWxHidden', value: '显示' },
         ],
         classList: [
           { key: "排序序号", value: "goods_sort" },
           { key: "图片", value: "goods_image", isImg: true },
           { key: "商品名称", value: "goods_name" },
           { key: "店铺名称", value: "store_name" },
-          { key: "一级分类", value: "gc_name_1" },
-          { key: "二级分类", value: "gc_name_2" },
-          { key: "三级分类", value: "gc_name_3" },
+          { key: "分类", value: "classStr" },
+          // { key: "二级分类", value: "gc_name_2" },
+          // { key: "三级分类", value: "gc_name_3" },
           { key: "库存", value: "goods_storage" },
-          { key: "原价", value: "goods_marketprice" },
-          { key: "售价", value: "goods_price" },
-          { key: "类别", value: "is_vipStr" },
-          { key: "状态", value: "goods_stateStr" }
+          { key: "建议零售价(元)", value: "goods_marketprice" },
+          { key: "商品售价(元)", value: "goods_price" },
+          { key: "类别", value: "categoryStr" },
+          { key: "状态", value: "stateStr" }
         ]
       },
       list: [],
@@ -243,14 +243,19 @@ export default {
       query: {
         page: 1,
         limit: 10,
-        // goods_verify: 1,
+        goods_verify: 10,
       },
 
       allClass: [],
+      stateObj: {
+        1: '上架',
+        2: '已拒绝',
+        10: '待审核',
+      },
 
-      down: {
-        title: '确认下架商家？',
-        down:  { title: '下架原因', value: '', type: 'text', alert: null, },
+      refuse: {
+        title: '确认拒绝此店家商品上架申请？',
+        refuse: { title: '拒绝原因', value: '', type: 'text', alert: null, },
       },
 
     };
@@ -260,20 +265,9 @@ export default {
       this.query.page = 1;
       this.$refs.mainTable.initPage();
 
-      let statusList = param.statusList;
-
       this.query.search = param.search;
-
-      delete this.query.is_vip;
-      delete this.query.store_id;
-      delete this.query.store_goods;
-      if(statusList[0] == 2) this.query.store_goods = true;
-      if([0, 1].indexOf(statusList[0]) !== -1){
-        this.query.store_id = 1;
-        this.query.is_vip = statusList[0];
-      }
-
-      this.query.goods_state = statusList[1];
+      this.query.is_vip = param.statusList[0];
+      this.query.goods_state = param.statusList[1];
 
       this.getList();
     },
@@ -287,22 +281,21 @@ export default {
       // up
       if(index == 0) return this.changeGoods(item, 'online');
       // down
-      if(index == 1) return this.changeGoods(item, 'offline');
-      // if(index == 1) return item.store_id != 1 ? this.openDownDialog(item) : this.changeGoods(item, 'offline');
+      if(index == 1) return this.openRefuseDialog(item);
       // wx show
       if(index == 2) return this.changeGoods(item, 'only_app');
       // wx hidden
       if(index == 3) return this.changeGoods(item, 'all_end');
     },
 
-    openDownDialog(item){
-      let down = this.down.down;  
+    openRefuseDialog(item){ 
+      let refuse = this.refuse.refuse;
 
-      this.dialogConfig.status = 3;
-      this.detail = item;
-      
-      down.value = '';
-      down.alert = null;
+      this.dialogConfig.status = 3; 
+      this.detail = item; 
+
+      refuse.value = '';
+      refuse.alert = null;
     },
 
     async updateForm(status) {
@@ -337,12 +330,9 @@ export default {
         : [];
       this.name.value = goods ? goods.goods_name : "";
 
-      this.category.list = goods && goods.store_id !== 1 ? this.categoryList : this.categoryList.slice(0, 2);
       this.category.value = goods ? goods.is_vip : "";
-      this.category.disabled = false;
       // 入驻商家
-      if(goods && goods.store_id !== 1){
-        this.category.disabled = true;
+      if(goods && goods.store_id != 1){
         this.category.value = 2;
       }
 
@@ -372,15 +362,13 @@ export default {
     },
 
     formatSingleSku(goods){
-      this.skuClassList = this.skuList = [];
-
       let sku = goods ? goods.SKUList[0] : {};
       this.sku.value = goods ? sku.goods_serial : "";
 
       this.marketprice.value = goods ? goods.goods_marketprice : "";
       this.price.value = goods ? goods.goods_price : "";
-      this.basePrice.value = goods ? sku.supply_price : '';
-      this.recommendPrice.value = goods ? sku.recommended_price : '';
+      this.basePrice.value = goods ? sku.supply_price : '',
+      this.recommendPrice.value = goods ? sku.recommended_price : '',
 
       this.amount.value = goods ? sku.goods_storage : "";
       this.profit.value = 0;
@@ -406,7 +394,7 @@ export default {
         multiSkuConfig.addable = multiSkuConfig.deletable = false;
         multiSkuConfig.attributeList = this.storeGoodsAttributeList;
       }
-      
+
       this.skuClassList = goods.spec_name.map((v, i) => {
         return {
           name: v,
@@ -425,7 +413,7 @@ export default {
     },
 
     change(param) {
-      // console.log("param :", param);
+      console.log("param :", param);
       this.query.limit = param.limit;
       this.query.page = param.page;
       this.getList();
@@ -446,7 +434,7 @@ export default {
       let paramArr = [ "sku", "marketprice", "price", "amount", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission" ];
 
       // Vip Good
-      if(this.category.value === 1){
+      if(this.category.value == 1){
         paramArr = paramArr.slice(0, 4);
         this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 0;
       }
@@ -471,8 +459,7 @@ export default {
           { key: "商品编号", value: "sku", custom: /^\w+$/ },
         ];
 
-        // Vip Good
-        if(this.category.value === 1){
+        if(this.category.value == 1){
           arr = arr.slice(4);
           item.vip0_commission = item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
         }
@@ -532,8 +519,8 @@ export default {
         firstSpec = this.specList[0],
         param;
 
-      // down
-      if(this.dialogConfig.status == 3) return this.changeGoods(this.detail, 'offline');
+      // refuse 
+      if(this.dialogConfig.status == 3) return this.changeGoods(this.detail, 'refuse');
 
       if (!imgList.length) return (this.img.alert = "请选择图片作为主图");
 
@@ -632,18 +619,11 @@ export default {
     async format(item) {
       let matcher,
         arr = ["is_vip", "goods_state"],
-        selectList = this.headConfig.selectList,
+        // selectList = this.headConfig.selectList,
         classify;
 
       item.img = [{ url: item.goods_image }];
       item.detailImg = item.detailImg ? item.detailImg.map(v => { return { url: v }; }) : [];
-
-      // get match
-      matcher = this.exchange(selectList, arr.map(v => item[v]), "id", "name");
-      arr.forEach((v, i) => (item[`${v}Str`] = matcher[i]));
-
-      // store category
-      if(item.store_id != 1) item.is_vipStr = this.categoryList[2].title;
 
       // 分类名
       this.allClass.filter(v => {
@@ -651,9 +631,16 @@ export default {
         if (v.storegc_id == item.gc_id_2) item.gc_name_2 = v.storegc_name;
         if (v.storegc_id == item.gc_id_3) item.gc_name_3 = v.storegc_name;
       });
+      item.classStr = `${item.gc_name_1}/${item.gc_name_2}/${item.gc_name_3}`;
 
       // 
-      item.isDown = item.goods_state == 0 && item.store_id == 1;
+      item.isAuthing = item.goods_verify == 10;
+      item.isEdited = item.isAuthing && item.goods_price;
+
+      item.stateStr = this.stateObj[item.goods_verify];
+
+      item.categoryStr = '入驻商家';
+
       item.only_app == 0 ? item.isWxShow = true : item.isWxHidden = true;
     },
     exchange(sourceList, valueList, filterProperty, destProperty) {
@@ -722,7 +709,7 @@ export default {
     async getList() {
       //获取列表
       this.tableConfig.loading = true;
-      this.query.type = 'sort';
+      this.query.type = 'sort'
       let res = await api.getGoodsList(this.query, this);
 
       if (res.error) return this.$message.error(res.error);
@@ -746,19 +733,17 @@ export default {
     },
 
     async changeGoods(item, type){
-      let down = this.down.down;
+      let refuse = this.refuse.refuse;
 
       let send = {
         goods_commonid: ['online', 'offline'].indexOf(type) !== -1 ? [item.goods_commonid] : item.goods_commonid,
         type,
       };
 
-      // down
-      if(this.dialogConfig.status == 3){
-        if(!down.value) return down.alert = `${down.title}不能为空!`;
-        send = down.value;
+      if(type == 'refuse'){
+        if(!refuse.value) return refuse.alert = `${refuse.title}不能为空!`;
+        send.goods_verifyremark = refuse.value;
       }
-      // return console.error(send);
 
       let loading = this.$loading({ text: '正在更新状态...', });
 
@@ -767,8 +752,11 @@ export default {
       if(typeof res === 'string' || !res || res.error) return this.handleError(res ? res.error || res : '修改失败', loading);
 
       this.$message.success("操作成功");
-      loading.close();
+
+      this.dialogConfig.status = 0;
       this.getList();
+
+      loading.close();
     },
 
     async getUploadToken() {
@@ -832,7 +820,7 @@ export default {
     });
     this.headConfig.multiSelect.source = classRes.data;
 
-    // this.category.list = this.categoryList;
+    this.category.list = this.categoryList;
   }
 };
 </script>

@@ -59,7 +59,7 @@ export default {
 
       if(!o.value) return o.alert = `请输入${o.title}`;
 
-      console.error(reg.pattern.test(o.value), reg.pattern, o.value, o.value.length);
+      // console.error(reg.pattern.test(o.value), reg.pattern, o.value, o.value.length);
       if(!reg.pattern.test(o.value)) return o.alert = `${o.title}${reg.alert}`;
 
       // if(isNaN(Number(o.value))) return o.alert = `${o.title}必须为数字`;

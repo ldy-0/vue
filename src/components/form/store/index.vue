@@ -18,6 +18,9 @@
       <c-img   :obj='obj.logoImg'></c-img>
       <c-img   :obj='obj.goodsLicenseImg'></c-img>
 
+      <el-form-item :label='obj.account.title' :label-width='obj.account.width || (obj.account.title ? "100px" : "0px")' v-if='obj.account.value'>{{obj.account.value}}</el-form-item>
+      <el-form-item :label='obj.pwd.title' :label-width='obj.pwd.width || (obj.pwd.title ? "100px" : "0px")' v-if='obj.pwd.value'>{{obj.pwd.value}}</el-form-item>
+
     </el-form>
 
   </div>

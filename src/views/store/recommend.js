@@ -32,7 +32,7 @@ export default {
         loading: false,
         showOperate: true,
         classList: [
-          { key: '排序序号', value: 'store_id', },
+          { key: '排序序号', value: 'store_sort', },
           { key: 'Logo图', value: 'store_avatar', isImg: true, },
           { key: '店铺名', value: 'store_name', },
           { key: '主营', value: 'store_class', },
@@ -40,29 +40,18 @@ export default {
           { key: '联系人', value: 'contacts_name', },
           { key: '联系方式', value: 'contacts_phone', },
           { key: '证件', value: 'identity', },
-          { key: '身份证号', value: 'store_id_card', },
-          { key: '银行卡号', value: 'bank_account_number', },
+          { key: '上架商品', value: 'online', },
+          { key: '销量', value: 'store_sales', },
+          // { key: '身份证号', value: 'store_id_card', },
+          // { key: '银行卡号', value: 'bank_account_number', },
           // { key: '状态', value: 'stateStr', },
         ],
         btnList: [
           { key: 'store_id', value: '详情' },
           { key: 'isPublic', value: '推荐' },
           { key: 'store_recommend', value: '撤销', type: 'danger' },
-          { key: 'store_id', value: '指定' },
+          { key: 'isAuthed', value: '指定' },
         ],
-      },
-      store: {
-        name:            { title: '姓名',     value: '', from: 'contacts_name', alert: null, type: 'text', },
-        id:              { title: '身份证号', value: '', from: 'store_id_card', alert: null, },
-        idImg:           { title: '证件照',   value: [], from: 'idImg', alert: null, },
-        bank:            { title: '开户银行', value: '', from: 'bank_name', alert: null, type: 'text', },
-        bankId:          { title: '银行卡号', value: '', from: 'bank_account_number', alert: null,  },
-        mobile:          { title: '联系方式', value: '', from: 'contacts_phone', alert: null, },
-        storeName:       { title: '店铺名',   value: '', from: 'store_name', alert: null, type: 'text', },
-        storeClass:      { title: '店铺主营', value: '', from: 'storeclass_id', alert: null, type: 'text', },
-        storeLicenseImg: { title: '营业照',   value: [], from: 'storeLicenseImg', alert: null, },
-        logoImg:         { title: '店铺logo图', value: [], from: 'logoImg', alert: null, limit: 1, },
-        goodsLicenseImg: { title: '其他证件', value: [], from: 'goodsLicenseImg', alert: null, },
       },
 
       sort: {
@@ -130,8 +119,16 @@ export default {
       if(index == 3) this.openSortDialog();
     },
 
-    openDetailDialog(){ this.dialogConfig.status = 3; this.initRecommendDialog(this.detail); },
-    openSortDialog(){ this.dialogConfig.status = 7; },
+    openDetailDialog(){ 
+      this.dialogConfig.status = 3; 
+      this.initRecommendDialog(this.detail); 
+    },
+    openSortDialog(){ 
+      this.sort.sort.value = this.detail.store_sort;
+      this.sort.sort.alert = null;
+
+      this.dialogConfig.status = 7; 
+    },
 
     initRecommendDialog(item){
       let arr = this.editArr,
@@ -242,9 +239,10 @@ export default {
     async getRecommendList() {
       this.tableConfig.loading = true;
 
+      if(!this.query.hasOwnProperty('store_state')) this.query.store_state = '0,1';
       let res = await api.getAllList(this.query);
 
-      if(typeof res == 'string' || !res || res.error) return this.handleRecommendError(res ? res.error || res : '获取活动列表失败');
+      if(typeof res == 'string' || !res || res.error) return this.handleRecommendError(res ? res.error || res : '获取推荐列表失败');
 
       if(res && res.data){
         res.data.forEach(this.format);
@@ -271,11 +269,12 @@ export default {
 
       v.stateStr = this.stateMap[v.store_state];
       v.isAuthing = v.store_state == 2;
+      v.isAuthed = v.store_state != 2;
 
-      v.isPublic = v.store_recommend == 0;
+      v.isPublic = v.store_recommend == 0 && v.store_state !== 2;
     },
 
-    async getUploadToken(){
+    async getRecommendUploadToken(){
       let res = await commonReq.getUploadToken();
 
       if(typeof res === 'string' || !res || res.error) return this.handleRecommendError(res ? res.error || res : '获取上传图片token失败');
@@ -327,7 +326,7 @@ export default {
   },
 
   created(){
-    this.recommendHeadConfig.selectList[0].list = [{ title: '全部', value: -1 }].concat(this.CLASSLIST);
+    this.getStoreClassList('recommend');
   },
 
 }

@@ -1,18 +1,18 @@
 <template>
   <div class="">
-    <el-button class='' type='primary' v-text='multiSkuConfig.classText' @click='addSkuClass'></el-button>
+    <el-button class='' type='primary' v-text='multiSkuConfig.classText' @click='addSkuClass' v-if="obj.addable"></el-button>
 
     <div class='class_item' v-for='(class_item, class_index) in skuClassList' :key='class_index'>
 
       <input class='class_input' v-model="class_item.name" />
-      <el-button class='' v-text='multiSkuConfig.skuText' @click='addSku(class_index)'></el-button>
-      <i class='el-icon-close class_close' @click='deleteSkuClass(class_index)'></i>
+      <el-button class='' v-text='multiSkuConfig.skuText' @click='addSku(class_index)' v-if="obj.addable"></el-button>
+      <i class='el-icon-close class_close' @click='deleteSkuClass(class_index)' v-if="obj.deletable"></i>
 
       <!-- skus -->
       <div>
         <div class='sku_item' v-for='(sku, sku_index) in class_item.skus' :key='sku_index'>
           <input class='sku_input' v-model='sku.name' />
-          <i class='el-icon-close' @click='deleteSku(class_index, sku_index)'></i>
+          <i class='el-icon-close' @click='deleteSku(class_index, sku_index)' v-if="obj.deletable"></i>
         </div>
       </div>
 
@@ -28,7 +28,7 @@
 
         <div v-for='(sku, sku_index) in skuArr' :key='sku_index' :model='sku'>
           <div class='column' v-for='(item, index) in skusTitle' :key='index'>
-            <input class='field_input' v-model='sku[item.value]' @input='change' v-if='isNaN(Number(item.value))' />
+            <input class='field_input' :class='{ "z-disable": item.disabled }' :disabled='item.disabled' v-model='sku[item.value]' @input='change' v-if='isNaN(Number(item.value))' />
             <div v-text='sku[item.value]' v-else></div>
           </div>
         </div>
@@ -46,10 +46,17 @@ export default {
   },
 
   props: {
-    options: {
+    obj: {
       type: Object,
       default() {
-        return {}
+        return {
+          attributeList: [
+            { key: '商品编号', value: 'sku' },
+            { key: '价格(元)', value: 'price' },
+            { key: '标价(元)', value: 'marketprice' },
+            { key: '库存', value: 'count' },
+          ],
+        }
       }
     },
     classList: {
@@ -69,48 +76,21 @@ export default {
 
   data(){
     return {
+      reservedList: ['goods_id', 'profit', 'supply_price', 'recommended_price'],
       multiSkuConfig: {
         classText: '添加规格类别',
         skuText: '添加规格',
       },
       skuClassList: [],
       skus: [],
-      attributeList: [
-        { key: '商品编号', value: 'sku' },
-        { key: '价格(元)', value: 'price' },
-        { key: '标价(元)', value: 'marketprice' },
-        { key: '库存', value: 'count' },
-        // { key: '平台利润', value: 'profit' },
-        { key: '体验代理佣金', value: 'vip0_commission' },
-        { key: 'VIP1佣金', value: 'vip1_commission' },
-        { key: 'VIP2佣金', value: 'vip2_commission' },
-        { key: 'VIP3佣金', value: 'vip3_commission' },
-        { key: 'VIP4佣金', value: 'vip4_commission' },
-      ],
-      rulesChild2: {
-        name: [
-          { required: true, message: "请输入名称", trigger: "blur", min: 1, type: "string" }
-        ],
-        price: [
-          { required: true, message: "请输入商品价格,不少于0", trigger: "blur", min: 0, type: "number" }
-        ],
-        // marketprice: [
-        //   { required: true, message: "请输入参考价格,不少于0", trigger: "blur", min: 0, type: "number" }
-        // ],
-      }
+      attributeList: [],
     };
   },
-
-  // watch: {
-  //   skuList(v1, v2){
-  //     console.error('watch: ', v1, v2);
-  //   }
-  // },
 
   computed: {
     skusTitle(){
       if(this.skuClassList && this.skuClassList.length){
-        return this.skuClassList.map((v, i) => { return { key: v.name, value: i } }).concat(this.type === 1 ? this.attributeList.slice(0, 4) : this.attributeList);
+        return this.skuClassList.map((v, i) => { return { key: v.name, value: i } }).concat(this.attributeList);
       }
     },
     skuArr(){
@@ -129,11 +109,14 @@ export default {
   methods: {
     addSkuClass(){
       let list = this.skuClassList,
+          obj = this.obj,
           o = {
             // name: `新建规格分类${list.length + 1}`,
             name: ``,
             skus: [],
           };
+
+      // if(obj.) return 
 
       if(list.length >= this.limit) return this.$message.error(`规格类别最多为${this.limit}种`);
 
@@ -200,35 +183,13 @@ export default {
 
         let match = skus.filter(v => v.name === sku.name)[0];
         if(match){
-          sku.goods_id = match.goods_id;
-          sku.sku = match.sku;
-          sku.price = match.price;
-          sku.marketprice = match.marketprice;
-          sku.count = match.count;
-          // sku.profit = match.profit;
-          sku.profit = 0;
-          sku.vip0_commission = match.vip0_commission;
-          sku.vip1_commission = match.vip1_commission;
-          sku.vip2_commission = match.vip2_commission;
-          sku.vip3_commission = match.vip3_commission;
-          sku.vip4_commission = match.vip4_commission;
+          this.copy(sku, match);
           // this.classList[i].items[skuIndex].isNull = matchArr.every(goodsIndex => this.skus[goodsIndex].count <= this.skus[goodsIndex].secureAmount);
         }
 
         // handle modify sku name
         if(skus.length === length){
-          sku.goods_id = skus[i].goods_id;
-          sku.sku = skus[i].sku;
-          sku.price = skus[i].price;
-          sku.marketprice = skus[i].marketprice;
-          sku.count = skus[i].count;
-          // sku.profit = skus[i].profit;
-          sku.profit =0;
-          sku.vip0_commission = skus[i].vip0_commission;
-          sku.vip1_commission = skus[i].vip1_commission;
-          sku.vip2_commission = skus[i].vip2_commission;
-          sku.vip3_commission = skus[i].vip3_commission;
-          sku.vip4_commission = skus[i].vip4_commission;
+          this.copy(sku, skus[i]);
         }
 
         skuList[i] = sku;
@@ -263,13 +224,22 @@ export default {
       return new_arr;
     },
 
+    copy(to, from){
+      let arr = this.reservedList.concat(this.attributeList.map(v => v.value));
+
+      arr.forEach(v => to[v] = from[v]);
+    },
+
   },
 
   mounted(){
+    let o = this.obj;
+
     this.skuClassList = JSON.parse(JSON.stringify(this.classList));
     this.skus = JSON.parse(JSON.stringify(this.skuList));
 
-    // console.error('mounted', this.classList, this.skuClassList);
+    if(o.attributeList) this.attributeList = this.obj.attributeList;
+    // console.error('mounted', this.skuClassList, this.skus);
   }
 }
 </script>
@@ -317,6 +287,9 @@ input{
   width: 80%;
   padding: 2px 4px;
   border: 1px solid #ccc;
+}
+.z-disable{
+  background: #ccc;
 }
 
 .s_bg_1{ background: #fff; }

@@ -55,9 +55,7 @@ export default {
       return  this.obj.value.length>=Number(this.obj.limit);
     }
   },
-  watch: {
-    // obj(v1, v2){ console.error('watch'); },
-  },
+  watch: {},
 
   data() {
     return {

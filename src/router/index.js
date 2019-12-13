@@ -62,14 +62,20 @@ export let asyncRouterMapSeller = [
     path: "/goods", // 商品管理
     component: Layout,
     redirect: "/goods/index",
-    meta: { roles: "goods" },
+    meta: { title: 'goods', icon: "goods", roles: "goods" },
     children: [
       {
         path: "index",
         component: () => import("@/views/goods/index"),
         name: "goods",
-        meta: { title: "goods", icon: "goods", noCache: true }
-      }
+        meta: { title: "goods", noCache: true }
+      },
+      {
+        path: "auth",
+        component: () => import("@/views/goods/auth"),
+        name: "sellGoodsAuth",
+        meta: { title: "goodsAuth", noCache: true }
+      },
     ]
   },
   {
@@ -149,14 +155,28 @@ export let asyncRouterMapSeller = [
   {
     path: '/withDraw', // 提现 
     component: Layout,
-    meta: { roles: 'withDraw' },
+    meta: { title: 'withdraw', roles: 'withDraw', icon: 'withdraw', },
     redirect: '/withDraw/index',
-    children: [{
-      path: 'index',
-      component: () => import('@/views/withDraw/index'),
-      name: 'withDraw',
-      meta: { title: '提现列表', icon: 'withdraw', noCache: true }
-    }]
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/withDraw/index'),
+        name: 'withDraw',
+        meta: { title: 'balanceWithdraw',  noCache: true }
+      },
+      {
+        path: 'd_score',
+        component: () => import('@/views/withDraw/common'),
+        name: 'dscore',
+        meta: { title: 'dscoreWithdraw',  noCache: true }
+      },
+      {
+        path: 'seller',
+        name: 'seller',
+        component: () => import('@/views/withDraw/common'),
+        meta: { title: 'sellerWithdraw', noCache: true,  },
+      },
+    ],
   },
   {
     path: '/news', // 资讯 
@@ -400,13 +420,14 @@ export let asyncRouterMapSeller = [
         component: () => import('@/views/finance'),
         meta: { title: 'reward', noCache: true,  },
       },
+      
     ]
   },
 
   {
     path: '/store',
     component: Layout,
-    meta: { title: 'sellerStore', roles: 'store', icon: 'money',  },
+    meta: { title: 'sellerStore', roles: 'sellerStore', icon: 'money',  },
     children: [
       {
         path: 'list',

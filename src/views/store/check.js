@@ -32,7 +32,7 @@ export default {
         loading: false,
         showOperate: true,
         classList: [
-          { key: '排序序号', value: 'store_id', },
+          { key: '排序序号', value: 'store_sort', },
           { key: 'Logo图', value: 'store_avatar', isImg: true, },
           { key: '店铺名', value: 'store_name', },
           { key: '主营', value: 'store_class', },
@@ -40,8 +40,10 @@ export default {
           { key: '联系人', value: 'contacts_name', },
           { key: '联系方式', value: 'contacts_phone', },
           { key: '证件', value: 'identity', },
-          { key: '身份证号', value: 'store_id_card', },
-          { key: '银行卡号', value: 'bank_account_number', },
+          { key: '上架商品', value: 'online', },
+          { key: '销量', value: 'store_sales', },
+          // { key: '身份证号', value: 'store_id_card', },
+          // { key: '银行卡号', value: 'bank_account_number', },
           // { key: '状态', value: 'stateStr', },
         ],
         btnList: [
@@ -49,19 +51,6 @@ export default {
           { key: 'isAuthing', value: '同意' },
           { key: 'isAuthing', value: '拒绝', type: 'danger' },
         ],
-      },
-      store: {
-        name:            { title: '姓名',     value: '', from: 'contacts_name', alert: null, type: 'text', },
-        id:              { title: '身份证号', value: '', from: 'store_id_card', alert: null, },
-        idImg:           { title: '证件照',   value: [], from: 'idImg', alert: null, },
-        bank:            { title: '开户银行', value: '', from: 'bank_name', alert: null, type: 'text', },
-        bankId:          { title: '银行卡号', value: '', from: 'bank_account_number', alert: null,  },
-        mobile:          { title: '联系方式', value: '', from: 'contacts_phone', alert: null, },
-        storeName:       { title: '店铺名',   value: '', from: 'store_name', alert: null, type: 'text', },
-        storeClass:      { title: '店铺主营', value: '', from: 'storeclass_id', alert: null, type: 'text', },
-        storeLicenseImg: { title: '营业照',   value: [], from: 'storeLicenseImg', alert: null, },
-        logoImg:         { title: '店铺logo图', value: [], from: 'logoImg', alert: null, limit: 1, },
-        goodsLicenseImg: { title: '其他证件', value: [], from: 'goodsLicenseImg', alert: null, },
       },
 
       refuse: {
@@ -237,7 +226,7 @@ export default {
     async getCheckList() {
       this.tableConfig.loading = true;
 
-      this.query.store_state = 2;
+      if(!this.query.hasOwnProperty('store_state')) this.query.store_state = '2,3';
       let res = await api.getAllList(this.query);
 
       if(typeof res == 'string' || !res || res.error) return this.handleCheckError(res ? res.error || res : '获取活动列表失败');
@@ -269,7 +258,7 @@ export default {
       v.isAuthing = v.store_state == 2;
     },
 
-    async getUploadToken(){
+    async getCheckUploadToken(){
       let res = await commonReq.getUploadToken();
 
       if(typeof res === 'string' || !res || res.error) return this.handleCheckError(res ? res.error || res : '获取上传图片token失败');
@@ -312,7 +301,7 @@ export default {
   },
 
   created(){
-    this.checkHeadConfig.selectList[0].list = [{ title: '全部', value: -1 }].concat(this.CLASSLIST);
+    this.getStoreClassList('check');
   },
 
 }
