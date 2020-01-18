@@ -6,11 +6,11 @@
 <template>
   <el-form-item :label="obj.title || obj.name || obj.label" :label-width="obj.width || obj.labelWidth">
 
-      <el-select :placeholder="obj.placeholder || PLACEHOLDER" :multiple="obj.type == MULTI" :disabled="obj.disabled" v-model='obj.value' @change='search' @visible-change="show">
+      <el-select :placeholder="obj.placeholder || PLACEHOLDER" :filterable='obj.search' :multiple="obj.type == MULTI" :disabled="obj.disabled" v-model='obj.value' @change='search' @visible-change="show">
 
         <el-option v-for="item in obj.list" 
                    :label="key ? item[key] : item.title || item.name || item.label" 
-                   :key="value ? item[value] : item.id" :value="value ? item[value] : item.id || item.value"></el-option>
+                   :key="value ? item[value] : item.id" :value="value ? item[value] : ('id' in item ? item.id : item.value)"></el-option>
 
       </el-select>
 
@@ -45,7 +45,7 @@ export default {
 
     search(v){
       let obj = this.obj;
-      // console.error('search: ', v); 
+      // console.error('search: ', v, obj.value); 
 
       obj.alert = typeof obj.value === 'number' || obj.value ? null : `请选择${obj.title}`;
 
@@ -60,5 +60,3 @@ export default {
 
 }
 </script>
-
-

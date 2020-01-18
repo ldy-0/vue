@@ -98,25 +98,51 @@ async function changeShare(id, data){
 	})
 }
 
-// async function editClassList(data) {
-// 	let res = await request({
-// 				url: '/api/v2/seller/storegc/'+data.storegc_id,
-// 				method: 'put',
-// 				data
-// 			});
+// 首页设置
+async function setHome(data){
+	return request({
+		url: '/api/v2/seller/indexconfig',
+		method: 'post',
+		data
+	})
+}
 
-// 	return res;
-// }
+async function getHome(data) {
+	let res = await request({
+				url: '/api/v2/common/indexconfig',
+				method: 'get',
+				params: data
+			});
 
-// async function deleteClassList(data) {
-// 	let res = await request({
-// 				url: '/api/v2/seller/storegc/'+data,
-// 				method: 'delete',
-// 			});
+	return res;
+}
 
-// 	return res;
-// }
+// dscore activity
+async function getDScoreList(data) {
+	let res = await request({
+				url: '/api/v2/seller/applyactivity',
+				method: 'get',
+				params: data
+			});
 
+	return res;
+}
+
+async function addDScore(data){
+	return request({
+		url: '/api/v2/seller/applyactivity',
+		method: 'post',
+		data
+	})
+}
+
+async function deleteDScore(id, data){
+	return request({
+		url: `/api/v2/seller/applyactivity/${id}`,
+		method: 'delete',
+		data
+	})
+}
 
 export default {
 	addVisitor,
@@ -131,4 +157,11 @@ export default {
   setShare,
   deleteShare,
   changeShare,
+
+  setHome,
+  getHome,
+
+  getDScoreList,
+  addDScore,
+  deleteDScore,
 }

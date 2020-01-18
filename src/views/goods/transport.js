@@ -29,7 +29,7 @@ export default {
       this.freightTemp.list = this.transportList;
 
       // 入驻商品
-      if(goods && goods.store_id != 1){
+      if(goods && (goods.store_id != 1 || goods.is_vip)){
         let transportList = goods.transport_list;
         this.freightType.disabled = this.freightTemp.disabled = true;
         this.freightTemp.list = [{ id: goods.transport_id, title: transportList ? transportList.transport_title : '', }];

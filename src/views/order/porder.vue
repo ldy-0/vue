@@ -1,6 +1,6 @@
 <style lang="css">
 .header {
-  margin: 20px 0;
+  margin: 40px 0;
 }
 
 .form_title,
@@ -12,7 +12,6 @@
 .form_title {
   box-sizing: border-box;
   display: inline-block;
-  width: 100px;
   padding: 0 12px 0 0;
   font-weight: bold;
   text-align: right;
@@ -40,9 +39,6 @@
 }
 .form > div:last-of-type {
   width: 100%;
-}
-.form > div:last-of-type .form_title {
-  width: 100px;
 }
 .form > div:last-of-type .form_ctn {
   width: 100%;
@@ -197,7 +193,7 @@ export default {
       formData: {
         order_sn: { title: "订单编号:", value: "", alert: null },
         goods_count: { title: "购买数量:", value: "", alert: null },
-        order_amount: { title: "订单总价:", value: "", alert: null },
+        supply_price: { title: "供货价+运费", value: "", alert: null },
         shipping_fee: { title: "运费:", value: "", alert: null },
         order_amount: { title: "支付金额:", value: "", alert: null },
         add_time: { title: "下单时间:", value: "", alert: null },
@@ -226,7 +222,7 @@ export default {
         placeHolder: "请输入关键字(订单号、买家姓名、联系方式)",
         dateWidth: 100,
         showExport: true,
-        selectLabelList: ["订单状态"],
+        selectLabelList: ["订单状态", '分类'],
         selectList: [
           [
             { id: null, title: "全部" },
@@ -237,7 +233,12 @@ export default {
             { id: 40, title: "已收货" },
             { id: 80, title: "已完成" },
             { id: 100, title: "已关闭" }
-          ]
+          ],
+          [
+            { id: null, title: "全部" },
+            { id: 0, title: '自营VIP商品', },
+            { id: 1, title: '商家VIP商品', },
+          ],
         ]
       },
 
@@ -258,6 +259,7 @@ export default {
           { key: "数量", value: "goods_count" },
           { key: "买家", value: "buyer_name" },
           { key: "联系方式", value: "buyer_telephone" },
+          { key: "分类", value: "classStr" },
           { key: "订单状态", value: "order_state" },
           { key: "下单时间", value: "add_time" }
         ]
@@ -268,9 +270,9 @@ export default {
           { key: "商品图片", value: "goods_image", isImg: true },
           { key: "商品名称", value: "goods_name" },
           { key: "规格", value: "spec" },
-          { key: "金额(￥)", value: "goods_price" },
+          { key: "供货价(￥)", value: "supply_price" },
           { key: "数量", value: "goods_num" },
-          { key: "支付金额(￥)", value: "goods_pay_price" }
+          // { key: "供货价+运费(￥)", value: "goods_pay_price" }
         ]
       },
       list: [],
@@ -281,7 +283,7 @@ export default {
         limit: 10
       },
       isLoading: true,
-      utf16: ""
+      utf16: "",
     };
   },
   methods: {
@@ -323,12 +325,17 @@ export default {
       );
       arr.forEach((v, i) => (item[`${v}Str`] = strList[i]));
 
-      // 标记发货按钮是否显示
-      item.showSend = item.order_state_id == 20;
-      // 标记查看评论按钮是否显示
-      item.showLookComment = item.evaluation_state == 1;
+      if(item.store_id == 1){
+        // 标记发货按钮是否显示
+        item.showSend = item.order_state_id == 20;
+        // 标记查看评论按钮是否显示
+        item.showLookComment = item.evaluation_state == 1;
 
-      item.showFinish = item.order_state_id >= 20 && item.order_state_id <= 40;
+        item.showFinish = item.order_state_id >= 20 && item.order_state_id <= 40;
+      }
+
+      let classList = selectList[1];
+      item.classStr = item.store_id == 1 ? classList[1].title : classList[2].title;
     },
 
     updateForm(status) {
@@ -487,6 +494,7 @@ export default {
 
       this.listQuery.search = param.search;
       this.listQuery.order_state = param.statusList[0];
+      this.listQuery.store_order = param.statusList[1];
       if (param.date) {
         this.listQuery.starttime = param.date.startDate;
         this.listQuery.endtime = param.date.endDate;
@@ -494,6 +502,7 @@ export default {
         delete this.listQuery.starttime;
         delete this.listQuery.endtime;
       }
+
       this.getList();
     },
     change(param) {
@@ -531,6 +540,7 @@ export default {
       let tempData = [];
       allOrder.forEach(item => {
         let goods = item.order_goods[0];
+        item.logistic = item.shipping_code;
         item.goods_name = goods.goods_name;
         item.goods_num = goods.goods_num;
         item.goods_pay_price = goods.goods_pay_price;
@@ -622,7 +632,7 @@ export default {
             return parseTime(v[j]);
           } else {
             return j === "logistic"
-              ? typeof v[j] === "object" ? v[j].join(", ") : v[j]
+              ? v[j] && typeof v[j] === "object" ? v[j].join(", ") : v[j]
               : v[j];
           }
         })

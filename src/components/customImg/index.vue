@@ -1,5 +1,24 @@
 <template>
   <el-form-item :label="obj.title" :label-width="obj.width || '100px'">
+    <div v-if="obj.type == 'multi'">
+      
+      <div class='inline' :key='imgIndex' v-for='(imgItem, imgIndex) in obj.value'>
+        <el-upload list-type="picture-card" :class="{disabled: imgItem.value.length}" :action='obj.url' :data='obj.body' :limit='obj.limit'
+                :file-list='imgItem.value' 
+                :on-remove='(e, list) => changeMultiImgs(e, list, imgItem, imgIndex)'
+                :on-change="(e, list) => changeMultiImgs(e, list, imgItem, imgIndex)" 
+                :on-preview='preview'
+                :on-success='success'
+                :disabled="obj.disabled"
+                multiple
+                v-if='obj.url'>
+                <i class="el-icon-plus"></i>
+        </el-upload>
+        <div>{{imgItem.title}}</div>
+      </div>
+
+    </div>
+    <div v-else>
         <el-upload list-type="picture-card"
               :class="{disabled:showCard}"
               :action='obj.url' 
@@ -31,6 +50,7 @@
 
         <!-- tip -->
         <div class='tip' v-if='obj.tip'>{{obj.tip}}</div>
+    </div>
 
         <el-alert :title='obj.alert' :closable='false' type='error' show-icon v-if='obj.alert'></el-alert>
 
@@ -78,6 +98,18 @@ export default {
       this.obj.alert = this.obj.value.length ? null : '请选择图片';
     },
 
+    changeMultiImgs(e, list, item){
+      let obj = this.obj,
+          arr = obj.value;
+
+      item.value = list;
+
+      if(obj.preventValidate) return ;
+
+      let res = arr.filter(v => !v.value.length)[0];
+      this.obj.alert = res ? `${res.title || obj.title}不能为空` : null;
+    },
+
     success(res){
       let url = `${this.obj.cdnUrl}/${res.key}`;
       // this.obj.value.push(url);
@@ -110,5 +142,16 @@ export default {
 
 .tip{
   color: #f00; 
+}
+
+.inline{
+  display: inline-block;
+  margin: 0 10px 0 0;
+  text-align: center;
+  color: #666;
+}
+
+.el-upload--picture-card{
+  margin: 0 0 21px 0;
 }
 </style>

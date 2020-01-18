@@ -524,6 +524,7 @@ export default {
       let tempData = [];
       allOrder.forEach(item => {
         let goods = item.order_goods[0];
+        item.logistic = item.shipping_code;
         item.goods_name = goods.goods_name;
         item.goods_num = goods.goods_num;
         item.goods_pay_price = goods.goods_pay_price;
@@ -621,7 +622,7 @@ export default {
             return parseTime(v[j]);
           } else {
             return j === "logistic"
-              ? typeof v[j] === "object" ? v[j].join(", ") : v[j]
+              ? v[j] && typeof v[j] === "object" ? v[j].join(", ") : v[j]
               : v[j];
           }
         })

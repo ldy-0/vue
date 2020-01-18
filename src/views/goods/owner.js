@@ -30,7 +30,7 @@ export default {
       });
     },
 
-    changeCategory(categoryIndex){
+    updateOwner(categoryIndex){
       let aStr = ['元', '互转德分'],
           objNames = ['ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award'];
       
@@ -55,6 +55,4 @@ export default {
 
   },
 
-  created(){
-  }
 }

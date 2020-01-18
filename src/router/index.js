@@ -374,10 +374,22 @@ export let asyncRouterMapSeller = [
       	meta: { title: 'setting', noCache: true }
       },
       {
+      	path: 'home', // 首页设置
+      	component: () => import('@/views/operate/home/index'),
+      	name: 'hoem',
+      	meta: { title: 'home', noCache: true }
+      },
+      {
       	path: 'share', //  app分享活动
       	component: () => import('@/views/operate/setting/common'),
       	name: 'share',
       	meta: { title: 'share', noCache: true }
+      },
+      {
+      	path: 'dScore', // 德分活动 
+      	component: () => import('@/views/operate/setting/common'),
+      	name: 'dScore',
+      	meta: { title: 'dScore', noCache: true }
       },
     ]
   },

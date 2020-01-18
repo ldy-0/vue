@@ -83,11 +83,11 @@ export default {
       },
       skuClassList: [],
       skus: [],
-      attributeList: [],
     };
   },
 
   computed: {
+    attributeList(){ return this.obj ? this.obj.attributeList || [] : []; },
     skusTitle(){
       if(this.skuClassList && this.skuClassList.length){
         return this.skuClassList.map((v, i) => { return { key: v.name, value: i } }).concat(this.attributeList);
@@ -111,19 +111,15 @@ export default {
       let list = this.skuClassList,
           obj = this.obj,
           o = {
-            // name: `新建规格分类${list.length + 1}`,
-            name: ``,
+            name: ``, // `新建规格分类${list.length + 1}`,
             skus: [],
           };
-
-      // if(obj.) return 
 
       if(list.length >= this.limit) return this.$message.error(`规格类别最多为${this.limit}种`);
 
       list.push(o);
 
       this.addSku(list.length - 1);
-      // console.error(this.skuClassList);
     },
     deleteSkuClass(index){
       this.skuClassList.splice(index, 1);
@@ -182,15 +178,10 @@ export default {
         });
 
         let match = skus.filter(v => v.name === sku.name)[0];
-        if(match){
-          this.copy(sku, match);
-          // this.classList[i].items[skuIndex].isNull = matchArr.every(goodsIndex => this.skus[goodsIndex].count <= this.skus[goodsIndex].secureAmount);
-        }
+        if(match) this.copy(sku, match);
 
         // handle modify sku name
-        if(skus.length === length){
-          this.copy(sku, skus[i]);
-        }
+        if(skus.length === length) this.copy(sku, skus[i]);
 
         skuList[i] = sku;
       }
@@ -238,7 +229,6 @@ export default {
     this.skuClassList = JSON.parse(JSON.stringify(this.classList));
     this.skus = JSON.parse(JSON.stringify(this.skuList));
 
-    if(o.attributeList) this.attributeList = this.obj.attributeList;
     // console.error('mounted', this.skuClassList, this.skus);
   }
 }

@@ -60,10 +60,11 @@ export default {
   methods: {
     getInput(v){
       let o = this.obj;
+      // console.error(o);
 
       if(o.preventValidate) return ;
 
-      o.alert = (/range/.test(o.type) ? o.value.length : o.value) ? null : `请输入${o.title}`;
+      o.alert = (/range/.test(o.type) ? o.value && o.value.length : o.value) ? null : `请输入${o.title}`;
 
     },
   }

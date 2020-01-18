@@ -271,7 +271,7 @@ export default {
           { key: '当前余额', value: 'available_predeposit' },
           { key: '邀请码', value: 'member_mobile' },
           { key: '上级', value: 'inviter_nick' },
-          { key: '注册时间', value: 'time' },
+          { key: '注册时间', value: 'member_addtime' },
         ],
       },
       list: [],
@@ -308,7 +308,7 @@ export default {
           { key: '消费德分', value: 'available_rc_balance' },
           { key: '总余额', value: 'total_predeposit' },
           { key: '当前余额', value: 'available_predeposit' },
-          { key: '注册时间', value: 'time' },
+          { key: '注册时间', value: 'member_addtime' },
         ],
       },
       twoList: [],
@@ -367,7 +367,6 @@ export default {
 
       let res = await api.getMember_api(send, this);
       res.data.forEach(this.format);
-      console.error(res.data);
 
       this.twoList = res.data;
       this.twoTotal = res.pagination.total;
@@ -388,9 +387,10 @@ export default {
         item.lock_state = false;
       }
 
-      let t = new Date(item.member_addtime * 1000);
-      item.time = `${t.getFullYear()}-${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)}-${(t.getDate() < 10 ? '0' : '') + t.getDate()} 
-                    ${(t.getHours() < 10 ? '0' : '') + t.getHours()}:${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()}:${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`;
+      item.time = item.member_addtime;
+      // let t = new Date(item.member_addtime * 1000);
+      // item.time = `${t.getFullYear()}-${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)}-${(t.getDate() < 10 ? '0' : '') + t.getDate()} 
+      //               ${(t.getHours() < 10 ? '0' : '') + t.getHours()}:${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()}:${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`;
     },
     // member table 操作
     emitHandle(index){

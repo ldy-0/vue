@@ -53,3 +53,6 @@
 ## 发布项目&更新线上代码
  * 执行`npm run build:prod` 命令后在项目目录中会生成一个dist文件，该dist文件中的内容即是我们发布线上的代码包
  * 通过ftp方式上传代码包到服务器上[教程文档](https://docs.qq.com/doc/Dc3RMUEZjY2xrQXNv)
+
+平台账号：P00008
+平台密码：123456789

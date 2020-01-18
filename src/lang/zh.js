@@ -59,6 +59,7 @@ export default {
     reward: '奖励明细',
 
     share: 'app分享活动',
+    dScore: '德分活动',
 
     sellerStore: '商家入驻',
     storeList: '商家列表',

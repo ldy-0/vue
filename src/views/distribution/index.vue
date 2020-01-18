@@ -96,7 +96,7 @@ export default {
           { key: "头像", value: "member_avatar", isAvatar: true },
           { key: "昵称", value: "member_truename" },
           { key: "联系方式", value: "member_mobile" },
-          { key: '注册时间', value: 'time' },
+          { key: '注册时间', value: 'member_addtime' },
           // { key: "累计佣金", value: "total_rc_balance" },
           // { key: "佣金", value: "available_rc_balance" },
           // { key: "上级", value: "inviter_nick" }
@@ -182,9 +182,10 @@ export default {
         item.lock_state = false;
       }
 
-      let t = new Date(item.member_addtime * 1000);
-      item.time = `${t.getFullYear()}-${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)}-${(t.getDate() < 10 ? '0' : '') + t.getDate()} 
-                    ${(t.getHours() < 10 ? '0' : '') + t.getHours()}:${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()}:${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`;
+      item.time = item.member_addtime;
+      // let t = new Date(item.member_addtime * 1000);
+      // item.time = `${t.getFullYear()}-${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)}-${(t.getDate() < 10 ? '0' : '') + t.getDate()} 
+      //               ${(t.getHours() < 10 ? '0' : '') + t.getHours()}:${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()}:${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`;
     },
 //操作============================================
     showDetail(item) {
