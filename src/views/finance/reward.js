@@ -13,6 +13,7 @@ const TYPE = '奖励类型',
           { title: '全部', value: 'all', },
           { title: '销售奖', value: 'order_inviter', },
           { title: '对接奖', value: 'agent_commission', },
+          { title: '红包雨奖', value: 'luckymoney', },
         ],
         pdlog: [
           { title: '全部', value: 'all', },

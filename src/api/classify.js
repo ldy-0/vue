@@ -144,6 +144,47 @@ async function deleteNewsClass(id, data){
 	return res;
 }
 
+// share class
+function getShareClassList(data) {
+	let opt = {
+				url: '/api/v2/seller/posterclass',
+				method: 'GET',
+				params: data
+      }; 
+      
+	return request(opt);
+}
+
+function addShareClass(data) {
+	let opt = {
+				url: '/api/v2/seller/posterclass',
+				method: 'POST',
+				data,
+      }; 
+      
+	return request(opt);
+}
+
+function setShareClass(id, data) {
+	let opt = {
+				url: `/api/v2/seller/posterclass/${id}`,
+				method: 'PUT',
+				data,
+      }; 
+      
+	return request(opt);
+}
+
+function deleteShareClass(id, data) {
+	let opt = {
+				url: `/api/v2/seller/posterclass/${id}`,
+				method: 'DELETE',
+				data,
+      }; 
+      
+	return request(opt);
+}
+
 export default {
 	addClass,
 	getClassList,
@@ -160,4 +201,9 @@ export default {
   addNewsClass,
   editNewsClass,
   deleteNewsClass,
+
+  getShareClassList,
+  addShareClass,
+  setShareClass,
+  deleteShareClass,
 }

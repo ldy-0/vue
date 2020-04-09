@@ -79,6 +79,128 @@ async function deleteRain(id, data) {
 	return res;
 }
 
+// sign
+function getSignSwitch(params) {
+  let opt = {
+				url: `/api/v2/seller/signin/create`,
+				method: 'GET',
+			  params,	
+      };
+
+	return request(opt);
+}
+
+function setSignSwitch(data) {
+  let opt = {
+				url: `/api/v2/seller/signin/setting`,
+				method: 'PUT',
+			  data,	
+      };
+
+	return request(opt);
+}
+
+function getSignList(params) {
+  let opt = {
+				url: `/api/v2/seller/signin`,
+				method: 'GET',
+			  params,	
+      };
+
+	return request(opt);
+}
+
+function getSign(id, params) {
+  let opt = {
+				url: `/api/v2/seller/signin/${id}`,
+				method: 'GET',
+			  params,	
+      };
+
+	return request(opt);
+}
+
+function addSign(data) {
+  let opt = {
+				url: `/api/v2/seller/signin`,
+				method: 'POST',
+			  data,	
+      };
+
+	return request(opt);
+}
+
+function setSign(id, data) {
+  let opt = {
+				url: `/api/v2/seller/signin/${id}`,
+				method: 'PUT',
+			  data,	
+      };
+
+	return request(opt);
+}
+
+async function changeSign(id, data) {
+	let res = await request({
+				url: `/api/v2/seller/signin/${id}/edit`,
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
+function deleteSign(id, params) {
+  let opt = {
+				url: `/api/v2/seller/signin/${id}`,
+				method: 'DELETE',
+			  params,	
+      };
+
+	return request(opt);
+}
+
+// share poster
+function getPosterList(params) {
+  let opt = {
+				url: `/api/v2/seller/poster`,
+				method: 'GET',
+			  params,	
+      };
+
+	return request(opt);
+}
+
+function addPoster(data) {
+  let opt = {
+				url: `/api/v2/seller/poster`,
+				method: 'POST',
+			  data,	
+      };
+
+	return request(opt);
+}
+
+function setPoster(id, data) {
+  let opt = {
+				url: `/api/v2/seller/poster/${id}`,
+				method: 'PUT',
+			  data,	
+      };
+
+	return request(opt);
+}
+
+function deletePoster(id, params) {
+  let opt = {
+				url: `/api/v2/seller/poster/${id}`,
+				method: 'DELETE',
+			  params,	
+      };
+
+	return request(opt);
+}
+
 export default {
   getRainList,
   addRain,
@@ -88,4 +210,18 @@ export default {
   deleteRain,
   getRainSwitch,
   setRainSwitch,
+
+  getSign,
+  getSignList,
+  getSignSwitch,
+  setSignSwitch,
+  addSign,
+  setSign,
+  changeSign,
+  deleteSign,
+
+  getPosterList,
+  addPoster,
+  setPoster,
+  deletePoster,
 }

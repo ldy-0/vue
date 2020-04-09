@@ -10,7 +10,7 @@
 
 <template>
 <div>
-  <div class='form_wrap'>
+  <div class='form_wrap' v-if="isSetting">
     <!-- android -->
     <div class='form_wrap'>
       <el-form label-width='100px' style="width:50%">
@@ -50,6 +50,8 @@
     </div>
 
   </div>
+
+  <asset v-if="isAsset"></asset>
 </div>
 </template>
 <script>
@@ -61,6 +63,7 @@ import customSelect from '@/components/select'
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import commonReq from '@/api/common' 
+import asset from '@/components/form/asset'
 
 export default {
   mixins: [],
@@ -69,7 +72,13 @@ export default {
     customFile,
     customInput,
     customSelect,
-    // editor,
+    asset,
+  },
+
+  computed: {
+    pageName(){ return this.$route.name; },
+    isSetting(){ return this.pageName === 'setting'; },
+    isAsset(){ return this.pageName === 'asset'; },
   },
 
   data() {
@@ -253,16 +262,25 @@ export default {
       this.androidApk.body.config = "{ useCdnDomain: true }";
     },
 
+    init(){
+      let route = this.$route,
+          name = route.name;
+
+      if(name === 'setting'){
+        this.getAppInfo();
+
+        this.getGif();
+
+        this.getApk();
+
+        this.getUploadToken();
+      }
+    },
+
   },
 
   created(){
-    this.getAppInfo();
-
-    this.getGif();
-
-    this.getApk();
-
-    this.getUploadToken();
+    this.init();
   }
 
 }

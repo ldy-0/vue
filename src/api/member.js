@@ -85,16 +85,29 @@ function deleteMember(id, data){
   });
 }
 
-  export default {
-    getMember_api,
-    changeMember_api,
-    UpDownMember_api,
-    getMemberApply_api,
-    auditMemberApply_api,
-    getIncomeList,
-    getTip,
-    saveTip,
-    changeStatus,
-    changeMallStatus,
-    deleteMember,
-  }
+function exportMember(data) {
+  let res = request({
+    url: "/api/v2/seller/member/create",
+    method: "get",
+    params: data,
+    responseType: 'blob',
+  });
+
+  return res;
+}
+
+export default {
+  getMember_api,
+  changeMember_api,
+  UpDownMember_api,
+  getMemberApply_api,
+  auditMemberApply_api,
+  getIncomeList,
+  getTip,
+  saveTip,
+  changeStatus,
+  changeMallStatus,
+  deleteMember,
+
+  exportMember,
+}

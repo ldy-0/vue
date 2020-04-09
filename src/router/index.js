@@ -268,6 +268,13 @@ export let asyncRouterMapSeller = [
         meta: { title: "新闻分类", noCache: true }
       },
       {
+        path: "freight", // 运费 
+        component: () => import("@/views/operate/freight/index"),
+        name: "freight",
+        meta: { title: 'freight', noCache: true }
+      },
+
+      {
         path: "special", // VIP特惠
         component: () => import("@/views/operate/special/index"),
         name: "special",
@@ -286,37 +293,28 @@ export let asyncRouterMapSeller = [
         meta: { title: "rainPackage", noCache: true }
       },
       {
-        path: "freight", // 运费 
-        component: () => import("@/views/operate/freight/index"),
-        name: "freight",
-        meta: { title: 'freight', noCache: true }
+        path: "sign", // 签到 
+        component: () => import("@/views/operate/sign/index"),
+        name: "sign",
+        meta: { title: "sign", noCache: true }
       },
       {
         path: "groupBuying",
         component: () => import("@/views/groupBuying/groupBuying"),
         name: "groupBuying",
-        meta: {
-          title: "groupBuying",
-          noCache: true
-        }
+        meta: { title: "groupBuying", noCache: true }
       },
       {
         path: "killPrice",
         component: () => import("@/views/killPrice/index"),
         name: "killPrice",
-        meta: {
-          title: "killPrice",
-          noCache: true
-        }
+        meta: { title: "killPrice", noCache: true }
       },
       {
         path: "bargain",
         component: () => import("@/views/bargain/index"),
         name: "bargain",
-        meta: {
-          title: "bargain",
-          noCache: true
-        }
+        meta: { title: "bargain", noCache: true }
       },
       
       {
@@ -390,6 +388,18 @@ export let asyncRouterMapSeller = [
       	component: () => import('@/views/operate/setting/common'),
       	name: 'dScore',
       	meta: { title: 'dScore', noCache: true }
+      },
+      {
+      	path: 'asset', // 资产配置
+      	component: () => import('@/views/operate/setting/index'),
+      	name: 'asset',
+      	meta: { title: 'asset', noCache: true }
+      },
+      {
+        path: "poster", // 海报
+        component: () => import("@/views/operate/poster/index"),
+        name: "poster",
+        meta: { title: "poster", noCache: true }
       },
     ]
   },

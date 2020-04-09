@@ -23,14 +23,15 @@ export default {
   methods: {
 
     openLevelDialog(item){
+      let aValidate = ['level'],
+          tableConfig = this.tableConfig;
 
-      let aValidate = ['level'];
       aValidate.forEach(v => {
         this[v].value = '';
         this[v].alert = null;
       });
 
-      this.dialogConfig.status = 7;
+      this.dialogConfig.status = tableConfig.LEVEL;
 
       this.level.value = Number(item.vip_level);
 

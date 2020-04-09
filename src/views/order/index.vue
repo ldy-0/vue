@@ -631,8 +631,6 @@ export default {
   },
 
   created() {
-    let str = "abca";
-    // split initial value undefined, search, match, replace initial value ''
 
     this.getList();
   }

@@ -1,4 +1,15 @@
 <style lang="css">
+.xs_input{
+  width: 100px;
+  margin: 0 10px 0 0;
+}
+
+.xs_input_disabled{
+  background-color: #f5f7fa;
+  border-color: #e4e7ed;
+  color: #c0c4cc;
+  cursor: not-allowed;
+}
 </style>
 
 <template>
@@ -8,13 +19,7 @@
   <custom-head :config='headConfig' @add='openDialog(1)' @search='search' @change='headChange'></custom-head> 
 </el-header>
 
-<custom-table ref='table' :config='tableConfig' 
-                :data='list' 
-                :total='total' 
-                @update='openDialog'
-                @modify='dispatch'
-                @change='change'></custom-table>
-
+<custom-table ref='table' :config='tableConfig' :data='tableConfig.list' :total='tableConfig.total' @update='openDialog' @modify='dispatch' @change='change'></custom-table>
 
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
   <div v-if="[1, 2].indexOf(dialogConfig.status) !== -1">
@@ -22,9 +27,21 @@
 
       <custom-date :obj='date'></custom-date>
       <custom-time :obj='time'></custom-time>
+      
+      <!-- 活动次数 -->
+      <!-- <custom-input :obj='number'></custom-input> -->
+      
+      <custom-input :obj='total'></custom-input>
 
-      <custom-input :obj='number'></custom-input>
-      <custom-input :obj='limit'></custom-input>
+      <!-- 红包金额 -->
+      <el-form-item :label="amount.title" label-width="180px">
+        <input class="el-input__inner xs_input" :class="{xs_input_disabled: amount.disabled}" v-model="amountItem.value" :disabled="amount.disabled" v-for="(amountItem, amountIndex) in amount.value" :key="amountIndex" />
+      </el-form-item>
+      
+      <!-- 红包概率 -->
+      <el-form-item :label="percent.title" label-width="180px">
+        <input class="el-input__inner xs_input"  :class="{xs_input_disabled: amount.disabled}" v-model="percentItem.value" :disabled="percent.disabled" v-for="(percentItem, percentIndex) in percent.value" :key="percentIndex" />
+      </el-form-item>
 
       <custom-img :obj='img'></custom-img>
 
@@ -90,8 +107,8 @@ export default {
 
       date: { type: 'date', title: '活动日期', value: '', alert: null, width: '180px', },
       time: { type: 'timerange', title: '活动时间', value: '', alert: null, width: '180px', },
-      number: { type: 'positive', title: '单次活动游戏次数', value: '', alert: null, width: '180px', disabled: false, },
-      limit: { type: 'positive', title: '单次活动奖励积分上限', value: '', alert: null, width: '180px', disabled: false, },
+      number: { type: 'positive', title: '单次活动游戏次数', value: 1, alert: null, width: '180px', disabled: false, },
+      total: { type: 'positive', title: '发放红包总数额', value: '', alert: null, width: '180px', disabled: false, },
       content: { title: '活动规则', value: '', alert: null, disabled: false, },
       status: { title: '状态', value: '', alert: null, },
       people: { title: '参与人数', value: '', alert: null, },
@@ -99,6 +116,29 @@ export default {
       // goods: { title: '关联商品', categories: [], value: '', alert: null, },
       img: { title: '活动图片', value: [], limit: 1, alert: null, width: '180px', disabled: false, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       stopSubmit: false,
+
+      amount: { 
+        title: '单个红包数值',
+        disabled: false,
+        value: [
+          { value: '', valid: /^[1-9]\d*(\.\d{1,2})?$/, },
+          { value: '', valid: /^[1-9]\d*(\.\d{1,2})?$/, },
+          { value: '', valid: /^[1-9]\d*(\.\d{1,2})?$/, },
+          { value: '', valid: /^[1-9]\d*(\.\d{1,2})?$/, },
+          { value: '', valid: /^[1-9]\d*(\.\d{1,2})?$/, },
+        ],
+      },
+      percent: { 
+        title: '红包数值概率',
+        disabled: false,
+        value: [
+          { value: '' },
+          { value: '' },
+          { value: '' },
+          { value: '' },
+          { value: '' },
+        ],
+      },
 
       headConfig: {
         title: '添加活动',
@@ -118,15 +158,15 @@ export default {
         classList: [
           { key: '活动日期', value: 'dateStr' },
           { key: '活动时间', value: 'timeStr' },
-          { key: '单次活动奖励积分上限', value: 'max_amount' },
+          { key: '实际领取红包总数额', value: 'max_amount' },
           { key: '已参与人数', value: 'member_count' },
-          { key: '发放积分总量', value: 'issue' },
+          { key: '发放红包总数额', value: 'issue' },
           { key: '状态', value: 'statusStr' },
           // { key: '图片', value: 'image', isImg:true },
         ],
+        list: [],
+        total: 0,
       },
-      list: [],
-      total: 0,
       query: { page: 1, limit: 10, },
       detail: '',
 
@@ -186,14 +226,9 @@ export default {
       if(index == 2) this.deleteItem(item);
     },
 
-    async initActivityForm(item){
+    initActivityForm(item){
       let isEdit = this.dialogConfig.status == 2,
-          inputArr = [ ['date', 'date'], ['time', 'time'], ['number', 'max_time'], ['limit', 'max_amount'], ['content', 'explain'] ];
-
-      if(isEdit){
-        // let res = await api.getRain(item.luckymoney_id);
-        // console.error('----', res);
-      }
+          inputArr = [ ['date', 'date'], ['time', 'time'], ['total', 'max_amount'], ['content', 'explain'] ];
 
       this.detail = typeof item == 'object' ? item : '';
 
@@ -207,6 +242,8 @@ export default {
       this.img.alert = null;
       this.img.disabled = isEdit;
 
+      this.setRule(item, isEdit);
+
       // 未开始状态
       if(isEdit && item.status == 0){
         this.img.disabled = this.content.disabled = false; 
@@ -216,9 +253,23 @@ export default {
       this.people.value = item.member_count || '';
       this.score.value = item.issue || '';
     },
+
+    setRule(item, isEdit) {
+      let rule = item.rule || [],
+          amount = this.amount,
+          percent = this.percent;
+      
+      amount.value.forEach((v, i) => percent.value[i].value = v.value = '');
+      amount.disabled = percent.disabled = isEdit;
+
+      rule.forEach((v, i) => {
+        amount.value[i].value = v.amount || '';
+        percent.value[i].value = v.percent || '';
+      });
+    },
     
-    validate(){
-      let validArr = ['date', 'time', 'number', 'limit', 'content'];
+    validateFail(){
+      let validArr = ['date', 'time', 'total', 'content'];
       
       for(let i = 0, len = validArr.length; i < len; i++){
         let key = validArr[i];
@@ -230,6 +281,18 @@ export default {
         }
       }
 
+      let amount = this.amount.value,
+          percent = this.percent.value,
+          sum;
+
+      sum = percent.reduce((p, v, i) => p + Number(v.value), 0);
+      if(Math.abs(sum - 1) > Number.EPSILON) return this.$message.error(`红包概率之和必须为1`);
+
+      for(let i = 0, len = percent.length; i < len; i++){
+        let item = amount[i];
+        if(percent[i].value && !item.valid.test(item.value)) return this.$message.error(`第${i + 1}个红包数值必须大于零,小数点后最多为两位!`);
+      }
+
       if(!this.img.value.length) return this.img.alert = '请选择图片';
     },
 
@@ -238,9 +301,11 @@ export default {
 
       let status = this.dialogConfig.status,
           imgList = this.img.value,
-          param, timeArr;
+          amountList =this.amount.value,
+          percentList = this.percent.value,
+          param, timeArr, rule;
 
-      if(this.validate()) return ;
+      if(this.validateFail()) return ;
       
       this.stopSubmit = true;
 
@@ -249,13 +314,16 @@ export default {
 
       timeArr = this.getActivityTime();
 
+      rule = percentList.map((v, i) => ({ amount: amountList[i].value, percent: v.value, }));
+
       param = {
         start_time: timeArr[0],
         end_time: timeArr[1],
         max_time: this.number.value,
-        max_amount: this.limit.value,
+        max_amount: this.total.value,
         explain: this.content.value,
         banner: img[0],
+        rule,
       };
 
       this.save(param);
@@ -282,7 +350,9 @@ export default {
     },
 
     async getList() { 
-      this.tableConfig.loading = true
+      let tableConfig = this.tableConfig;
+
+      tableConfig.loading = true;
 
       let res = await api.getRainList(this.query, this);
 
@@ -291,8 +361,8 @@ export default {
       if(res && res.data){
         res.data.forEach(this.format);
 
-        this.list = res.data || [];
-        this.total = res.pagination ? res.pagination.total : this.list.length;
+        tableConfig.list = res.data || [];
+        tableConfig.total = res.pagination ? res.pagination.total : tableConfig.list.length;
       }
       
       this.tableConfig.loading = false
@@ -377,21 +447,6 @@ export default {
       return [start, end];
     },
 
-    // 
-    // async getGoodsList() {
-    //   let res = await api.getGoodsList({ is_vip: 1, }, this);
-
-    //   if(typeof res == 'string' || !res || res.error) return this.$message.error(res ? res.error || res : '获取VIP商品列表失败');
-
-    //   if(res && res.data){
-    //     res.data.forEach(this.goodsFormat);
-
-    //     // this.goods.categories = res.data || [];
-    //   }
-    // },
-
-    // goodsFormat(v){ },
-
     async getUploadToken(){
       let res = await commonReq.getUploadToken();
 
@@ -402,10 +457,21 @@ export default {
     },
 
     mock(){
+      let t = new Date();
+      this.date.value = t;
+      this.time.value = [t, new Date(t.getTime() + 2 * 60 * 1000)];
       this.img.value = [{ url: 'https://cdn.health.healthplatform.xyz/Fj8MCYMw8rWnjcX04s3ZFO49LfSn' }];
-      this.number.value = 2;
-      this.limit.value = 100;
+      this.number.value = 1;
+      this.total.value = 50;
       this.content.value = '<p>this is rules</p>';
+
+      let amount = this.amount.value;
+      amount[0].value = 1;
+      amount[2].value = 10;
+
+      let percent = this.percent.value;
+      percent[0].value = 0.1;
+      percent[2].value = 0.9;
     }
   },
 

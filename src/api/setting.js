@@ -144,6 +144,27 @@ async function deleteDScore(id, data){
 	})
 }
 
+// asset setting
+export async function getAssetSetting(data) {
+	let res = await request({
+				url: '/api/v2/seller/assetssetting',
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
+export async function setAssetSetting(data) {
+	let res = await request({
+				url: '/api/v2/seller/assetssetting',
+				method: 'POST',
+				data,
+			});
+
+	return res;
+}
+
 export default {
 	addVisitor,
   getVisitor,

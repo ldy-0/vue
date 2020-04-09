@@ -36,6 +36,8 @@ export default {
 
     server:'运营',
     serverBanner:'首页轮播图',
+    asset: '资产设置',
+    poster: '个人分享设置',
     serverEnrty:'商品分类',
     recommended:'精品推荐',
     serverAct:'动态',
@@ -50,16 +52,16 @@ export default {
     special: 'VIP特惠',
     read: 'VIP解读',
 
-    rainPackage: '红包雨活动',
-
     freight: '运费模板',
 
     finance: '财务管理',
     deal: '交易明细',
     reward: '奖励明细',
 
+    rainPackage: '红包雨活动',
     share: 'app分享活动',
     dScore: '德分活动',
+    sign: '签到活动',
 
     sellerStore: '商家入驻',
     storeList: '商家列表',

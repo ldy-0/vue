@@ -41,8 +41,7 @@
         </el-form-item>
 
         <el-form-item label="" v-if='config.showExport'>
-          <el-button  type="primary" icon="document" @click="exportFile">导出Excel</el-button>
-          <!-- <span class="hbs-inline-tips">导出所有数据，这个过程可能会需要花费  <span class="hbs-hot">几分钟</span> 的时间，请耐心等待</span> -->
+          <el-button  type="primary" icon="document" @click="exportFile">导出</el-button>
         </el-form-item>
 
         <!-- switch -->

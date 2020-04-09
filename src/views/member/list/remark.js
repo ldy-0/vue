@@ -12,15 +12,16 @@ export default {
   methods: {
 
     openRemarkDialog(item){
+      let aValidate = ['remark'],
+          tableConfig = this.tableConfig;
 
-      let aValidate = ['remark'];
       aValidate.forEach(v => {
         this[v].value = '';
         this[v].alert = null;
       });
 
       // this.showDialog = true;
-      this.dialogConfig.status = 6;
+      this.dialogConfig.status = tableConfig.REMARK;
 
       this.remark.value = item.member_remark;
 
