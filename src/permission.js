@@ -3,7 +3,7 @@ import store from './store'
 import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css'// progress bar style
-import { getToken,getRoles, getState,setState} from '@/utils/auth' // getToken from cookie
+import { getToken, removeToken, getRoles, getState,setState} from '@/utils/auth' // getToken from cookie
 import { get } from 'http';
 
 NProgress.configure({ showSpinner: false })// NProgress Configuration
@@ -19,6 +19,14 @@ const whiteList = ['/login', '/authredirect']// no redirect whitelist
 // const hasGetRoleList = ['admin','seller']
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
+
+  let pattern = /^\/seller\//,
+      referrer = localStorage.getItem('healthReferrer');
+  
+  if(pattern.test(location.pathname) !== pattern.test(referrer)){
+    localStorage.setItem('healthReferrer', location.pathname);
+    removeToken();
+  }
   //当前身份验证是通过 临时变量存储 
   //如果需要做持久化缓存 可以只通过cookie判断，
   // 但是，登出只能在全局拦截器进行，这需要后端的参数配合

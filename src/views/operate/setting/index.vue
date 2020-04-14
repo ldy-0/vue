@@ -51,6 +51,7 @@
 
   </div>
 
+  <!-- asset -->
   <asset v-if="isAsset"></asset>
 </div>
 </template>

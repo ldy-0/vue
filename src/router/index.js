@@ -366,12 +366,6 @@ export let asyncRouterMapSeller = [
       	meta: { title: 'business', noCache: true }
       },
       {
-      	path: 'setting', // 设置
-      	component: () => import('@/views/operate/setting/index'),
-      	name: 'setting',
-      	meta: { title: 'setting', noCache: true }
-      },
-      {
       	path: 'home', // 首页设置
       	component: () => import('@/views/operate/home/index'),
       	name: 'hoem',
@@ -379,15 +373,21 @@ export let asyncRouterMapSeller = [
       },
       {
       	path: 'share', //  app分享活动
-      	component: () => import('@/views/operate/setting/common'),
+      	component: () => import('@/views/operate/activity/common'),
       	name: 'share',
       	meta: { title: 'share', noCache: true }
       },
       {
       	path: 'dScore', // 德分活动 
-      	component: () => import('@/views/operate/setting/common'),
+      	component: () => import('@/views/operate/activity/common'),
       	name: 'dScore',
       	meta: { title: 'dScore', noCache: true }
+      },
+      {
+      	path: 'setting', // 设置
+      	component: () => import('@/views/operate/setting/index'),
+      	name: 'setting',
+      	meta: { title: 'setting', noCache: true }
       },
       {
       	path: 'asset', // 资产配置

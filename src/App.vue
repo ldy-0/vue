@@ -6,6 +6,12 @@
 
 <script>
   export default{
-    name: 'App'
+    name: 'App',
+
+    created(){
+      window.unload = function(){
+        localStorage.setItem('healthReferrer', location.pathname);
+      }
+    }
   }
 </script>
