@@ -76,7 +76,7 @@ export default {
     return {
       distribution: { id: 1, title: '分销上下级赠送数量', placeholder: '赠送数量填写', value: '', from: 'assets_setting_1', custom: { pattern: /^\d+(\.\d{1,2})?$/, alert: '值必须为正数!' }, alert: null, },
       active: { id: 2, title: '德分激活赠送比例', placeholder: '赠送比例填写', value: '', from: 'assets_setting_2', custom: { pattern: /^(0(\.\d{1,2})?|1(\.0+)?)$/, alert: '值必须在0-1之间!' }, alert: null, },
-      refill: { id: 3, title: '德分充值按钮赠送比例', placeholder: '赠送比例填写', value: '', from: 'assets_setting_3', custom: { pattern: /^(0(\.\d{1,2})?|1(\.0+)?)$/, alert: '值必须在0-1之间!' }, alert: null, },
+      refill: { id: 3, title: 'VIP产品现金赠送比例', placeholder: '赠送比例填写', value: '', from: 'assets_setting_3', custom: { pattern: /^(0(\.\d{1,2})?|1(\.0+)?)$/, alert: '值必须在0-1之间!' }, alert: null, },
       balance: { id: 4, title: '电商产品余额赠送比例', placeholder: '赠送比例填写', value: '', from: 'assets_setting_4', custom: { pattern: /^(0(\.\d{1,2})?|1(\.0+)?)$/, alert: '值必须在0-1之间!' }, alert: null, },
       cash: { id: 5, title: '电商产品现金赠送比例', placeholder: '赠送比例填写', value: '', from: 'assets_setting_5', custom: { pattern: /^(0(\.\d{1,2})?|1(\.0+)?)$/, alert: '值必须在0-1之间!' }, alert: null, },
       sign: { id: 6, title: '红包雨/签到赠送比例', placeholder: '赠送比例填写', value: '', from: 'assets_setting_6', custom: { pattern: /^(0(\.\d{1,2})?|1(\.0+)?)$/, alert: '值必须在0-1之间!' }, alert: null, },

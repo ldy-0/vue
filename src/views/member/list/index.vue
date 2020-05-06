@@ -601,7 +601,7 @@ export default {
       this.query.search = param.search || null;
       this.query.vip_level = statusList[0] || null;
 
-      this.query.vip_sort = arr[statusList[1]];
+      this.query.vip_sort = arr[statusList[1] || 0];
 
       this.query.page = 1;
       this.$refs.mainTable.initPage();

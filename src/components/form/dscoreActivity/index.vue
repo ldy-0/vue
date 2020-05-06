@@ -6,7 +6,10 @@
     <el-form label-width='100px'>
 
       <c-date :obj='obj.date'></c-date>
+
       <c-input :obj='obj.score'></c-input>
+      <c-input :obj='obj.asset'></c-input>
+
       <c-select :obj='obj.level'></c-select>
 
       <c-img   :obj='obj.img'></c-img>

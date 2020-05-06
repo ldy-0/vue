@@ -17,6 +17,7 @@ export default {
 
       dScoreActivity: {
         score:  { type: 'positive', title: '消费德分', value: '', placeholder: '填写德分', alert: null, },
+        asset:  { type: 'positive', title: '赠送资产', value: '', placeholder: '填写资产', alert: null, },
         date:  { type: 'daterange', title: '活动日期', value: [], alert: null, },
         level: { title: 'VIP等级', value: '', list: [], alert: null, },
         img:   { type: 'array', title: '活动图片', value: [], alert: null, url: '', cdnUrl: '', body: {}, limit: 1, tip: '' },
@@ -28,6 +29,7 @@ export default {
         classList: [
           { key: '活动时间', value: 'time', },
           { key: '消费德分', value: 'gift', },
+          { key: '资产数', value: 'assets', },
           { key: 'VIP等级', value: 'levelStr', },
           { key: '注册数量', value: 'apply_num', },
           { key: '图片', value: 'image', isImg: true, },
@@ -93,6 +95,7 @@ export default {
 
       param = {
         gift: obj.score.value,
+        assets: obj.asset.value,
         image: imgList[0],
         start_time: obj.date.value[0].toISOString(),
         end_time: obj.date.value[1].toISOString(),
@@ -119,7 +122,7 @@ export default {
     },
 
     validDScoreError(obj){
-      let arr = ['img', 'level', 'score', 'date'];
+      let arr = ['img', 'level', 'asset', 'score', 'date'];
 
       for(let i = arr.length - 1; i >= 0; i--){
         let item = obj[arr[i]];

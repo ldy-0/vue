@@ -50,3 +50,9 @@
 
 [2020.3.24需求设计稿](https://lanhuapp.com/web/#/item/project/board?pid=5c03add8-e067-4c43-8e59-d9e6a53788af)  
 [2020.3.24需求文档](https://docs.qq.com/sheet/DSnFEQ1JvcGxZZ2Rp?tab=BB08J2&c=G11A0J0)
+
+### v1.10.0
+  1. modify asset setting.
+  2. dScore activity add asset.
+
+[2020.3.24需求文档](https://docs.qq.com/sheet/DSlZWS0d0S2pTVWZp?tab=BB08J2&c=C3A0A0)
