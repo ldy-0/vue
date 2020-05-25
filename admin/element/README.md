@@ -2,6 +2,30 @@
 vue + element
 
 ### components
+- form/form
+  
+  + property
+
+    | props | type | desc |
+    |-------|------|------|
+    | obj   |Object| 配置对象 |
+
+    - obj  
+      show: 控制组件显示状态  
+      title: form标题  
+      width: 标签宽度(default: 100px)  
+      submit: 是否显示确定按钮(default: false)  
+      value: 内容来源(组件会根据此值自动显示)  
+      list: 显示内容配置列表
+      > 列表项: { title: '标题', width: '标题宽度', style: '', value: '值', type: input|img|video,  }  
+      > type: img, value: 'one.jpg'|['first.jpg'] 
+    
+    - event  
+      submit   
+      close
+
+***
+
 - customInput
 
   + property
@@ -60,7 +84,8 @@ vue + element
       body: `请求体内容`  
       title: `标题`  
       width: `标题宽度`  
-      disabled: `是否禁止输入`
+      disabled: `是否禁止输入`  
+      tip: `提示信息`
 
 ***
 
