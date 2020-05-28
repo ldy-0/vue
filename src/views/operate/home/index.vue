@@ -10,18 +10,22 @@
 .input_group_wrap{
   margin: 20px 0;
 }
-.input_group{
-  width: 120px;
+.input_group_title, .input_group{
   display: inline-block;
-  font-size: 14px;
-  color: #666;
-  text-align: center;
+  width: 100px;
 }
 .input_group_title{
-  width: 100px;
+  padding: 0 12px 0 0;
   font-size: 14px;
   font-weight: 700;
   color: #606266;
+  text-align: right;
+}
+.input_group{
+  margin: 0 20px 0 0;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
 }
 .input_group_item{
   width: 100px;
@@ -32,14 +36,6 @@
 <template>
 <div>
   <div class='form_wrap'>
-    <!-- android -->
-    <!-- <div class='form_wrap'>
-      <el-form label-width='100px' style="width:50%">
-        <custom-select :obj='androidVisitor'></custom-select>
-      </el-form>
-
-      <el-button type='primary' class='submit_btn' @click="submitAppInfo('ANDROID')">确定</el-button>
-    </div> -->
 
     <div class='form_wrap'>
       <el-form label-width='100px' style="width:90%">
@@ -60,7 +56,7 @@
 
         <!-- iconName -->
         <div class='input_group_wrap'>
-          <div class='input_group input_group_title'>{{appIconName.title}}</div>
+          <div class='input_group_title'>{{appIconName.title}}</div>
 
           <div class='input_group' v-for='(nameItem, nameIndex) in appIconName.value' :key='nameIndex'>
             <input class='input_group_item' v-model="nameItem.value" @input='changeInput(nameItem, appIconName)' />
@@ -71,7 +67,7 @@
         </div>
 
         <div class='input_group_wrap'>
-          <div class='input_group input_group_title'>{{wxIconName.title}}</div>
+          <div class='input_group_title'>{{wxIconName.title}}</div>
 
           <div class='input_group' v-for='(nameItem, nameIndex) in wxIconName.value' :key='nameIndex'>
             <input class='input_group_item' v-model="nameItem.value" @input='changeInput(nameItem, wxIconName)' />
@@ -81,22 +77,17 @@
           <el-alert :title='wxIconName.alert' :closable='false' type='error' show-icon v-if='wxIconName.alert'></el-alert>
         </div>
 
+        <!-- bg color -->
         <custom-input :obj='bgColor'></custom-input>
+
+        <!-- new People -->
+        <custom-img :obj="newPeopleBg"></custom-img>
+        <custom-img :obj="newPeopleBanner"></custom-img>
       </el-form>
 
       <el-button type='primary' class='submit_btn' @click='submit'>确定</el-button>
     </div>
 
-    <!-- android package -->
-    <!-- <div class='form_wrap'>
-      <el-form label-width='100px' style="width:50%">
-        <custom-file :obj='androidApk'></custom-file>
-
-        <custom-input :obj='androidVersion'></custom-input>
-      </el-form>
-
-      <el-button type='primary' class='submit_btn' @click='submitApk'>确定</el-button>
-    </div> -->
 
   </div>
 </div>
@@ -111,9 +102,10 @@ import customSelect from '@/components/select'
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import commonReq from '@/api/common' 
+import newPeople from './newPeople.js'
 
 export default {
-  mixins: [],
+  mixins: [newPeople],
 
   components: {
     customImg,
@@ -138,22 +130,20 @@ export default {
           { key: '其他信息', value: 'detail', isRichEditor: true },
         ],
       },
-      // androidVisitor: { 
-      //   title: 'Android', 
-      //   categories: [
-      //     { id: 0, title: '非游客模式' },
-      //     { id: 1, title: '游客模式' },
-      //   ], 
-      //   value: '', 
-      //   alert: null, 
-      // },
       isAdd: true,
 
       bgImg: { title: '背景', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
-      activityImg: { title: '活动菜单', type: 'multi', value: [{ title: '极限秒杀', value: [], }, { title: '火爆拼团', value: [], }, { title: '热门砍价', value: [] }], limit: 1, alert: null, url: '', cdnUrl: '', body: {} },
       registerImg: { title: '会员注册', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       storeImg: { title: '商家入驻', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
-      iconImg: { 
+      activityImg: { 
+        title: '活动菜单', type: 'multi', limit: 1, alert: null, url: '', cdnUrl: '', body: {},
+        value: [
+          { title: '极限秒杀', value: [], }, 
+          { title: '火爆拼团', value: [], }, 
+          { title: '热门砍价', value: [] },
+        ],
+      },
+      iconImg: {
         title: '主菜单', type: 'multi', limit: 1, url: '', cdnUrl: '', body: {}, alert: null,
         value: [
           { title: '图标1', value: [], }, 
@@ -213,38 +203,6 @@ export default {
       name.alert = item.value ? null : `${item.title}不能为空`;
     },
 
-    async submitApk(source){
-      let param,
-          version = this.androidVersion;
-
-      if(!version.value) version.alert = `${version.title}不能为空!`;
-      if(version.alert) return ; 
-
-      // let url = this.androidApk.value.map(v => { return v.raw ? `${this.androidApk.cdnUrl}/${v.response.key}` : v.url });
-      let url = this.androidApk.value.map(v => { 
-        return v.raw ? { url: `${this.androidApk.cdnUrl}/${v.response.key}`, name: v.name, version: version.value, } : { url: v.url, name: v.name, version: version.value };
-      });
-
-      param = {
-        value: JSON.stringify(url[0]),
-      };
-
-      this.saveApk(param);
-    },
-
-    async submitAppInfo(source){
-      let param;
-
-      this.canSubmit = false;
-
-      param = {
-        value: source == 'IOS' ? this.iosVisitor.value : this.androidVisitor.value,
-        source,
-      };
-
-      this.saveAppInfo(param);
-    },
-
     async submit(){
       let paramArr = [],
           param;
@@ -277,6 +235,8 @@ export default {
       };
       o.menus = imgList.slice(6, 16).map((v, i) => { v.appName = appNameList[i].value; v.wxName = wxNameList[i].value; return v; });
       // this.fromImg().concat(this.appIconName.value.map(v => v.value), this.wxIconName.value.map(v => v.value), this.bgColor.value);
+
+      this.setNewPeople(o);
 
       return JSON.stringify(o);
     },
@@ -327,59 +287,10 @@ export default {
     },
 
     // request
-    // async getApk(){
-    //   let res = await api.getApk();
-
-    //   if(res && res.status == 0){
-    //     // let list = res.data ? res.data.map(v => JSON.parse(v)) : [];
-    //     let data = res.data ? res.data : {};
-    //     this.androidApk.value = [ data ];
-    //     this.androidVersion.value = data.version;
-    //   }
-
-    //   if(typeof res == 'string' || !res || res.error) this.$message.error(res ? res.error || res : `获取Apk信息失败!`);
-    // },
-
-    async saveApk(param){
-      let res = await api.addApk(param);
-
-      this.isShowForm = false;
-      this.canSubmit = true;
-
-      typeof res == 'string' || res.error ? this.$message.error(res.error || res) : this.$message.success(`修改成功`);
-
-      this.getApk();
-    },
-
-    async getAppInfo(){
-      let androidRes = await api.getVisitor({ source: 'ANDROID' }),
-          iosRes = await api.getVisitor({ source: 'IOS' });
-
-      if(androidRes && androidRes.status == 0){
-        this.androidVisitor.value = Number(androidRes.data);
-      }
-
-      if(iosRes && iosRes.status == 0){
-        this.iosVisitor.value = Number(iosRes.data);
-      }
-
-      if(typeof androidRes == 'string' || !androidRes || androidRes.error) this.$message.error(androidRes ? androidRes.error || androidRes : '获取android信息失败');
-      if(typeof iosRes == 'string' || !iosRes || iosRes.error) this.$message.error(iosRes ? iosRes.error || iosRes : '获取ios信息失败');
-    },
-
-    async saveAppInfo(param){
-      let res = await api.addVisitor(param);
-
-      this.isShowForm = false;
-      this.canSubmit = true;
-
-      typeof res == 'string' || res.error ? this.$message.error(res.error || res) : this.$message.success(`修改成功`);
-
-      this.getAppInfo();
-    },
-
     async getHome(){
       let res = await api.getHome();
+
+      if(!res || typeof res === 'string' || res.error) return this.$message.error(res ? res.error || res : '获取信息失败!');
 
       if(res && res.data){
         let o = res.data,
@@ -404,20 +315,8 @@ export default {
           appIconNameList[i].value = v.appName;
           wxIconNameList[i].value = v.wxName;
         });
-        // let imgArr = res.data.slice(0, 16).map(v => JSON.parse(v)),
-        //     activityImgArr = imgArr.slice(1, 4),
-        //     iconImgArr = imgArr.slice(6),
-        //     appNameArr = res.data.slice(16, 26),
-        //     wxNameArr = res.data.slice(26);
 
-        // this.bgImg.value = [imgArr[0]];
-        // this.registerImg.value = [imgArr[4]];
-        // this.storeImg.value = [imgArr[5]];
-        // this.activityImg.value.forEach((v, i) => v.value = [activityImgArr[i]]);
-        // this.iconImg.value.forEach((v, i) => v.value = [iconImgArr[i]]);
-
-        // this.appIconName.value.forEach((v, i) => v.value = appNameArr[i]);
-        // this.wxIconName.value.forEach((v, i) => v.value = wxNameArr[i]);
+        this.initNewPeople(img.newPeople);
       }
     },
 
@@ -426,20 +325,26 @@ export default {
 
       this.isShowForm = false;
 
-      typeof res == 'string' || res.error ? this.$message.error(res.error || res) : this.$message.success(`修改成功`);
+      !res || typeof res == 'string' || res.error ? this.$message.error(res.error || res) : this.$message.success(`修改成功`);
       loading.close();
 
       this.getHome();
     },
 
     async getUploadToken(){
-      let res = await commonReq.getUploadToken();
+      let url = 'https://up-z2.qiniup.com',
+          cdnUrl = 'https://cdn.health.healthplatform.xyz',
+          res = await commonReq.getUploadToken();
 
-      if(res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+      if(!res || res.error || typeof res === 'string') return this.$message.error(`${res ? res.error || res : 'getUploadToken接口报错!'}`);
 
-     this.activityImg.url = this.iconImg.url = 'https://up-z2.qiniup.com';
-     this.activityImg.cdnUrl = this.iconImg.cdnUrl = 'https://cdn.health.healthplatform.xyz';
-     this.bgImg.body = this.activityImg.body = this.registerImg.body = this.storeImg.body = this.iconImg.body = { token: res.data, config: "{ useCdnDomain: true }", };
+     let body = { token: res.data, config: "{ useCdnDomain: true }", };
+
+     this.activityImg.url = this.iconImg.url = url;
+     this.activityImg.cdnUrl = this.iconImg.cdnUrl = cdnUrl;
+     this.bgImg.body = this.activityImg.body = this.registerImg.body = this.storeImg.body = this.iconImg.body = body;
+
+     this.initNewPeopleImg(url, cdnUrl, body);
     },
 
     mock(){

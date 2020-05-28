@@ -61,3 +61,11 @@ export function resetPassword(data) {
     data
   })
 }
+
+// 获取店铺信息
+export function getStore() {
+  return request({
+    url: '/api/v2/seller/storeinfo',
+    method: 'get',
+  })
+}

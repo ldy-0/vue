@@ -6,7 +6,7 @@ import {
   getSellerAuth,
   getAdminAuth
 } from "@/api/login";
-import { getToken, setToken, removeToken, setRoles } from "@/utils/auth";
+import { getToken, setToken, removeToken, setRoles, setUser } from "@/utils/auth";
 import store from "@/store";
 import Vue from "vue";
 const user = {
@@ -125,6 +125,7 @@ const user = {
               const sessionID = data.data["token"];
               commit("SET_TOKEN", sessionID);
               setToken(sessionID);
+              setUser(data.data);
               let roles = [];
               if (data.data.is_admin == "1") {
                 getSellerAuth().then(res => {

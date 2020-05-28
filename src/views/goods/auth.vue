@@ -150,6 +150,9 @@ export default {
 
   data() {
     return {
+      AUTHING: 10,
+      PRE_AUTH: 11,
+
       categoryList: [
         { id: 0, title: "常规商品" }, 
         { id: 1, title: "VIP商品" },
@@ -197,19 +200,6 @@ export default {
         // title: "添加商品",
         placeHolder: "请输入商品名称",
         multiSelect: { title: "分类", source: [], value: [], alert: null, search: true },
-        // selectLabelList: ["类别", "状态"],
-        // selectList: [
-        //   [
-        //     { id: null, name: "全部" },
-        //     { id: 0, name: "常规商品" },
-        //     { id: 1, name: "VIP商品" }
-        //   ],
-        //   [
-        //     { id: null, name: "全部" },
-        //     { id: 1, name: "上架" },
-        //     { id: 0, name: "下架" }
-        //   ]
-        // ]
       },
 
       tableConfig: {
@@ -243,7 +233,7 @@ export default {
       query: {
         page: 1,
         limit: 10,
-        goods_verify: 10,
+        goods_verify: '10,11',
       },
 
       allClass: [],
@@ -251,6 +241,7 @@ export default {
         1: '上架',
         2: '已拒绝',
         10: '待审核',
+        11: '预审核通过',
       },
 
       refuse: {
@@ -275,6 +266,10 @@ export default {
       this.query.page = 1;
       this.query.gc_id = param[2];
       this.getList();
+    },
+
+    changeCategory() {
+
     },
 
     handleTableEvent(item, index){
@@ -325,9 +320,7 @@ export default {
       }
 
       this.img.value = goods ? [{ url: goods.goods_image }] : [];
-      this.detailImg.value = goods
-        ? goods.goodsimagesList.map(v => ({ url: v.goodsimage_url })).slice(1)
-        : [];
+      this.detailImg.value = goods ? goods.goodsimagesList.map(v => ({ url: v.goodsimage_url })).slice(1) : [];
       this.name.value = goods ? goods.goods_name : "";
 
       this.category.value = goods ? goods.is_vip : "";
@@ -454,7 +447,7 @@ export default {
           { key: "VIP1佣金", value: "vip1_commission" },
           { key: "体验代理佣金", value: "vip0_commission" },
           { key: "库存数量", value: "count" },
-          { key: "价格", value: "price" },
+          { key: "价格", value: "price", custom: /(^[1-9]\d*(\.\d{1,2})?$)|(^0\.\d{1,2}$)/ },
           { key: "商品标价", value: "marketprice" },
           { key: "商品编号", value: "sku", custom: /^\w+$/ },
         ];
@@ -466,12 +459,14 @@ export default {
 
         arr.forEach((v, i) => {
           if(v.custom){
-            if(!v.custom.test(item[v.value])) err = `${v.key}必须为字母或数字`;
+            if(!v.custom.test(item[v.value])) err = `${v.key}未填写或填写不正确!`;
           }else{
             if(!(item[v.value] >= 0)) err = `${v.key}必须为大于零的数字`;
           }
 
         });
+
+        if(item.price <= 0) err = '价格未填写或填写不正确!';
 
         return err;
       });
@@ -634,7 +629,7 @@ export default {
       item.classStr = `${item.gc_name_1}/${item.gc_name_2}/${item.gc_name_3}`;
 
       // 
-      item.isAuthing = item.goods_verify == 10;
+      item.isAuthing =  [this.AUTHING, this.PRE_AUTH].indexOf(Number(item.goods_verify)) !== -1;
       item.isEdited = item.isAuthing && item.goods_price;
 
       item.stateStr = this.stateObj[item.goods_verify];
@@ -663,6 +658,7 @@ export default {
       if(!selClass) return ;
 
       if (val[1]) selClass = selClass.children.find(v => v.value == val[1]);
+      if(!selClass) return ;
 
       let res = await classAPI.getClassList({ parent_id: val[1] || val[0] });
 
@@ -777,10 +773,7 @@ export default {
     formatName(name) {
       let o = {};
 
-      name
-        .replace(/;$/, "")
-        .split(";")
-        .forEach((v, i) => (o[this.classList[i].name] = v));
+      name.replace(/;$/, "").split(";").forEach((v, i) => (o[this.classList[i].name] = v));
 
       return o;
     },

@@ -7,7 +7,7 @@
 <el-dialog
   :title="isAddItem?'新增管理员':'编辑管理员'"
   :visible.sync="addNewShow"
-  width="30%"
+  width="80%"
   >
   <el-form :model="formForNotive"  ref="ruleForm" :rules="rules" >
     <el-form-item label="姓名" :label-width="formLabelWidth"  prop="username">
@@ -21,11 +21,17 @@
       <el-input v-model="formForNotive.password" auto-complete="off" 
       :placeholder="(!isAddItem)&&'此处可修改密码'"></el-input>
     </el-form-item>
-    <el-form-item label="授予权限" v-if="!isAddItem" :label-width="formLabelWidth" >
-      <el-checkbox-group v-model="formForNotive.checkboxGroup1">
-        <el-checkbox-button v-for="(item,index) of rolesList" :label="item.label" :key="index">{{item.text}}</el-checkbox-button>
-      </el-checkbox-group>
+
+    <el-form-item label="权限" v-if="!isAddItem" :label-width="formLabelWidth" >
+      <div v-for="(firstItem, firstIndex) of routeList" :key="firstIndex">
+        <div>{{firstItem.meta.desc}}</div>
+
+        <el-checkbox-group v-model="formForNotive.checkboxGroup1" :disabled="Boolean(formForNotive.super)">
+          <el-checkbox v-for="(secondItem, secondIndex) of firstItem.children" :label="secondItem.meta.roles" :key="secondIndex">{{secondItem.meta.desc}}</el-checkbox>
+        </el-checkbox-group>
+      </div>
     </el-form-item>
+
   </el-form>
   <span slot="footer" class="dialog-footer">
     <el-button @click="addNewShow=false" >取消</el-button>
@@ -97,13 +103,10 @@
 // getList 接口 获取
 // addNotice 接口 添加
 
-import {
-  getAuthList_api,
-  deleteAuth_api,
-  addAuth_api,
-  editAuth_api
-} from "@/api/seller";
+import { getAuthList_api, deleteAuth_api, addAuth_api, editAuth_api } from "@/api/seller";
 import { getSellerAuth } from "@/api/login";
+import { routeList  } from '@/router';
+
 const formForNotive = {
   //此页面 静态数据
   username: "",
@@ -120,37 +123,20 @@ export default {
       this.rolesList = rolesarry
     });
   },
+
   data() {
     return {
-      //out
       //状态层
       waitAddNotice: false,
       addNewShow: false,
       isAddItem: true,
       //以下来匹配路由权限的，label和路由roles一致，才有权限（seller表示是超级管理员，不用匹配，seller2则不是超级管理员）
       rolesList:[
-      	{
-      		label:'commodityManagement',
-      		text:'商品管理'
-      	},
-      	{
-      		label:'orderManagement',
-      		text:'订单管理'
-      	},
-      	{
-      		label:'memberList',
-      		text:'人员列表'
-      	},
-      	{
-      		label:'authorityManagement',
-      		text:'权限管理'
-      	},
-      	{
-      		label:'infoManagement',
-      		text:'运营'
-      	},
-      
-      
+      	{ label:'commodityManagement', text:'商品管理' },
+      	{ label:'orderManagement', text:'订单管理' },
+      	{ label:'memberList', text:'人员列表' },
+      	{ label:'authorityManagement', text:'权限管理' },
+      	{ label:'infoManagement', text:'运营' },
       ],
       formLabelWidth: "140px", //弹框1 左侧文字默认宽度
       formForNotive: Object.assign({}, formForNotive),
@@ -178,18 +164,6 @@ export default {
       //body
 
       tableData: [{}],
-      // -------------------------
-
-      // ----------------------
-      //out
-      //  waitAddNotice:false,
-      //         formForNotive:{
-      //           name:'',
-      //           account:'',
-      //           password:'',
-      //         },
-      //  addNewShow:false,
-      // formLabelWidth:'80px',
       //header
       industry: "",
       industryList: [
@@ -216,6 +190,27 @@ export default {
       total: 1
     };
   },
+
+  computed: {
+    routeList(){ return routeList; },
+    baseAuth(){ return this.routeList.map(route => route.meta.roles); },
+    allAuth(){ 
+      let arr = [],
+          routeList = this.routeList;
+
+      for(var i = routeList.length - 1; i >= 0; i--){
+        var item = routeList[i];
+
+        if(item.children) item.children.forEach(v => v.meta && v.meta.roles ? arr.push(v.meta.roles) : null);
+        
+        if(item.meta && item.meta.roles) arr.push(item.meta.roles);
+      }
+
+      return arr;
+    },
+  },
+
+
   methods: {
     // out
     async addAuth(formName) {
@@ -275,20 +270,14 @@ export default {
     },
     async editAuth(formName) {
       let res = await new Promise((res, rej) => {
-        this.$refs[formName].validate(valid => {
-          if (valid) {
-            // alert('submit!');
-            res(true);
-          } else {
-            res(false);
-            // console.log('error submit!!');
-            // return false;
-          }
-        });
+        this.$refs[formName].validate(valid => { valid ? res(true) : res(false); });
       });
-      if (!res) {
-        return;
-      }
+
+      if (!res) return;
+
+      let authList = this.formForNotive.checkboxGroup1;
+      this.baseAuth.forEach(v => authList.indexOf(v) === -1 ? authList.push(v) : null);
+
       this.waitAddNotice = true;
       let sendData = {
         // 后端生成
@@ -297,7 +286,7 @@ export default {
         seller_nick: this.formForNotive.username,
         seller_name: this.formForNotive.account,
         seller_password: this.formForNotive.password,
-        seller_limits: this.formForNotive.checkboxGroup1,
+        seller_limits: authList,
         sellergroup_id: 0
       };
       editAuth_api(sendData)
@@ -305,18 +294,10 @@ export default {
           this.waitAddNotice = false;
           this.addNewShow = false;
           if (data.status === 0) {
-            this.$notify({
-              title: "成功",
-              message: "操作成功",
-              type: "success"
-            });
+            this.$notify({ title: "成功", message: "操作成功", type: "success" });
             this.getList();
           } else {
-            this.$notify({
-              title: "失败",
-              message: "操作失败",
-              type: "error"
-            });
+            this.$notify({ title: "失败", message: "操作失败", type: "error" });
           }
         })
         .catch(e => {
@@ -326,7 +307,6 @@ export default {
         });
     },
     editItem(index, rowData) {
-      console.log(rowData);
       this.rules.password[0].required = false
       // this.editLoading = true
       this.formForNotive = Object.assign({}, rowData);
@@ -335,9 +315,12 @@ export default {
     },
     // body
     getList() {
+      let allAuth = this.allAuth;
+
       //获取列表
       this.listLoading = true;
       let sendData = Object.assign({}, this.listQuery);
+
       getAuthList_api(sendData).then(response => {
         if (response && response.status == 0) {
           let result = response.data;
@@ -350,22 +333,14 @@ export default {
               username: aData.seller_nick,
               password: aData.seller_password,
               account: aData.seller_name,
-              //
-              checkboxGroup1: aData.seller_limits,
+              checkboxGroup1: aData.is_admin ? allAuth : aData.seller_limits.filter(v => allAuth.indexOf(v) !== -1),
               //超级管理员标识
               super: aData.is_admin
             });
           });
           this.tableData = tempTableData;
-          console.log("权限");
-          console.log(this.tableData);
-          this.total = response.pagination.total
-            ? response.pagination.total
-            : 1;
-        } else {
-        }
-        console.log("getList", response);
-        // this.list = response
+          this.total = response.pagination.total ? response.pagination.total : 1;
+        } 
         this.listLoading = false;
       });
     },

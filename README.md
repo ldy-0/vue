@@ -41,9 +41,8 @@
 
 ## running 
  - 本地运行: `npm run dev`
- - 构建: `npm run build:prod`
-> 构建包时修改以下文件
-> 1. config/prod.env.js 修改域名
+ - 构建测试包: `npm run build`
+ - 构建正式包: `npm run build:prod`
 
 ## doc
 

@@ -34,37 +34,10 @@
 
 <custom-table ref="mainTable" :config='tableConfig' :data='list' :total='total' @judge='lockItem' @modify='dispatch' @delete='deleteItem' @change='change'></custom-table>
 
+<!-- Detail -->
+<member-detail :obj="memberDetail" @submit="submitMember" @close="memberDetail = null;" v-if="memberDetail"></member-detail>
+
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
-  <!-- detail -->
-  <div v-if='dialogConfig.status === tableConfig.DETAIL' style="display:flex;">
-    <el-form label-width='100px' style="flex:1">
-      <div>
-        <span class='form_title'>{{formData.member_avatar.title}}</span>
-        <img class='form_img' :src='formData.member_avatar.value' />
-      </div>
-      <div v-for='(item, index) in keys' :key='index'>
-        <span class='form_title'>{{formData[item].title}}</span>
-        <span class='form_ctn'>{{formData[item].value}}</span>
-      </div>
-    </el-form>
-    <el-form label-width='100px' style="flex:1;" v-if="formData.card_mall">
-      <div v-for='(item, index) in keys2' :key='index'>
-        <span class='form_title'>{{formData2[item].title}}</span>
-        <span class='form_ctn'>{{formData2[item].value}}</span>
-      </div>
-      <div v-if='formData2.imgs.value'>
-        <span class='form_title'>{{formData2.imgs.title}}</span>
-        <img class='form_img' :src='item' v-for='(item, index) in formData2.imgs.value' :key='index' />
-      </div>
-
-      <div v-if='formData2.video.value'>
-        <span class='form_title'>{{formData2.video.title}}</span>
-        <video :src='formData2.video.value'></video>
-      </div>
-
-    </el-form>
-  </div>
-
   <!-- ModifyLevel -->
   <div v-if="dialogConfig.status === tableConfig.LEVEL">
     <el-form label-width='100px'>
@@ -145,6 +118,7 @@ import number from '@/components/number'
 import mobile from '@/components/mobile'
 import customSelect from '@/components/select'
 import editor from '@/components/Tinymce'
+import memberDetail from '@/components/form/memberDetail'
 import uploadFn from "@/utils/tencent_cos";
 import api from '@/api/member';
 import remark from './remark';
@@ -167,6 +141,7 @@ export default {
     number,
     mobile,
     customSelect,
+    memberDetail,
     editor,
   },
 
@@ -207,30 +182,6 @@ export default {
         ],
       },
 
-      keys: ['member_truename', 'vip_level', 'recharge_rc_balance', 'available_rc_balance','member_mobile','inviter_nick'],
-      formData: {
-        member_avatar: { title: '头像', value: '', alert: null, },
-        member_truename: { title: '昵称', value: '', alert: null, },
-        vip_level: { title: '等级', value: '', alert: null, },
-        recharge_rc_balance: { title: '可用互转德分', value: '', alert: null, },
-        available_rc_balance: { title: '可用消费德分', value: '', alert: null, },
-        member_mobile: { title: '推荐码', value: '', alert: null, },
-        inviter_nick: { title: '上级名称', value: '', alert: null, },
-      },
-      keys2:['member_nick', 'member_mobile', 'member_ww','member_ww','member_qq','company','job','email','address','video','imgs','content'],
-      formData2:{
-        member_nick: { title: '姓名', value: '', alert: null, },
-        member_mobile: { title: '联系方式', value: '', alert: null, },
-        member_ww: { title: '微信号码', value: '', alert: null, },
-        member_qq: { title: 'QQ号码', value: '', alert: null, },
-        company: { title: '公司', value: '', alert: null, },
-        job: { title: '职位', value: '', alert: null, },
-        email: { title: '邮箱', value: '', alert: null, },
-        address: { title: '地址', value: '', alert: null, },
-        video: { title: '视频', value: '', alert: null, },
-        imgs: { title: '图片', value: [], alert: null, },
-        content: { title: '内容', value: '', alert: null, },
-      },
       tableConfig: {
         loading: false,
         showOperate: true,
@@ -275,6 +226,7 @@ export default {
         CLEAR: 8,
         MODIFY: 10,
       },
+
       list: [],
       total: 0,
       query: {
@@ -284,6 +236,7 @@ export default {
         sort: 0,
         vip_sort: 'vip_asc',
       },
+      memberDetail: null,
 
       twoHeadConfig: {
         placeHolder: '请输入手机号',
@@ -389,18 +342,17 @@ export default {
         this.dialogConfig.status = 9;
       }
     },
+
     showDetail(item){
       let dialogConfig = this.dialogConfig,
-          tableConfig = this.tableConfig,
-          formData2 = this.formData2,
-          formData = this.formData;  
+          tableConfig = this.tableConfig;
 
-      dialogConfig.status = tableConfig.DETAIL;
+      this.memberDetail = item;
+    },
 
-      this.keys.forEach(v => formData[v].value = item[v]);  
-      this.keys2.forEach(v => formData2[v].value = item[v]);  
-      this.formData.member_avatar.value = item.member_avatar;
-      this.formData.card_mall = item.card_mall;
+    submitMember(param) {
+      this.memberDetail = null;
+      this.getList();
     },
 
     lookItem(item){

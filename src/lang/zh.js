@@ -44,6 +44,7 @@ export default {
     serverShop:'店铺介绍',
     serverAllbuy:'团购',
     serverKill:'砍价',
+    newPeople: '新人专享',
     serverActivity:'活动',
     distribute:'用户列表',
     evaluation : '评价管理',
@@ -68,6 +69,7 @@ export default {
     storeCheck: '入驻审核',
     storeRecommend: '商家推荐',
     goodsAuth: '上架审核',
+    goodsPreAuth: '预审核',
 
     withdraw: '提现列表',
     balanceWithdraw: '余额提现',

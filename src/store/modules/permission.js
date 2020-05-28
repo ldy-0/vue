@@ -7,7 +7,7 @@ import { asyncRouterMapAdmin,asyncRouterMapSeller, constantRouterMap } from '@/r
  */
 function hasPermission(roles, route) {
   if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.indexOf(role) >= 0)
+    return roles.indexOf(route.meta.roles) !== -1;
   } else {
     return true
   }
@@ -19,27 +19,34 @@ function hasPermission(roles, route) {
  * @param roles
  */
 function filterAsyncRouter(asyncRouterMap, roles) {
-  const accessedRouters = asyncRouterMap.filter(route => {
+  const accessedRouters = asyncRouterMap.filter((route, index) => {
     if (hasPermission(roles, route)) {
       if (route.children && route.children.length) {
         route.children = filterAsyncRouter(route.children, roles)
+	
+        if(!route.children.length) return false;
       }
+
       return true
     }
+
     return false
-  })
-  return accessedRouters
+  });
+
+  return accessedRouters;
 }
 
 const permission = {
   state: {
     routers: constantRouterMap,
-    addRouters: []
+    addRouters: [],
+    routeList: [],
   },
   mutations: {
     SET_ROUTERS: (state, routers) => {
       state.addRouters = routers
       state.routers = constantRouterMap.concat(routers)
+      state.routeList = asyncRouterMapSeller;
     }
   },
   actions: {
@@ -53,39 +60,13 @@ const permission = {
         } 
         else if(roles.indexOf('admin2') >= 0){
           accessedRouters = filterAsyncRouter(asyncRouterMapAdmin,roles)
-          // let authIndex = -1
-          // for(let i=0,len=asyncRouterMapAdmin.length;i<len;i++){
-          //   try{
-          //     if(asyncRouterMapAdmin[i].path=='/auth'){
-          //       authIndex = i
-          //       asyncRouterMapAdmin.splice(authIndex,1)
-          //       accessedRouters = asyncRouterMapAdmin
-          //     }
-          //   }catch(e){
-          //     console.error(i,e,'GenerateRoutes')
-          //   }
-          // }
         }
         //商家
         else if (roles.indexOf('seller') >= 0) {
           accessedRouters = asyncRouterMapSeller
         } 
         else if(roles.indexOf('seller2') >= 0){
-            accessedRouters = filterAsyncRouter(asyncRouterMapSeller,roles)
-            //   let authIndex = -1
-            // for(let i=0,len=asyncRouterMapSeller.length;i<len;i++){
-            // hbs:make some diff
-            // try{
-            //   if(asyncRouterMapAdmin[i].path=='/sellerAuth'){
-            //     authIndex = i
-            //     asyncRouterMapAdmin.splice(authIndex,1)
-            //     accessedRouters = asyncRouterMapAdmin
-            //   }
-            // }catch(e){
-            //   console.error(i,e,'GenerateRoutes')
-            // }
-            
-            // }
+          accessedRouters = filterAsyncRouter(asyncRouterMapSeller,roles)
         }
         // accessedRouters = filterAsyncRouter(asyncRouterMap, roles)
         commit('SET_ROUTERS', accessedRouters)

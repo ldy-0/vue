@@ -7,7 +7,7 @@ export default {
 
       owner: { 
         title: "是否添加对接人", 
-        categories: [
+        list: [
           { id: 1, title: "是" }, 
           { id: 2, title: "否" },
         ], 
@@ -32,7 +32,7 @@ export default {
 
       let sku = goods ? goods.SKUList[0] : {};
       // 普通，vip商品编辑只能编辑对接返还金额, 入驻商品有对接人只能修改金额,没有对接人可添加对接人
-      this.owner.disabled = this.ownerCode.disabled = (this.dialogConfig.status == 2 && (this.category.value != 2 || sku.agent_id)) ? true : false;
+      this.owner.disabled = this.ownerCode.disabled = (this.isEdit && (!this.isStoreGoods || sku.agent_id)) ? true : false;
 
       this.owner.value = sku && sku.agent_id ? 1 : 2;
       this.ownerCode.value = goods ? goods.agent_mobile : '';

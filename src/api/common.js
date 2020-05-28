@@ -1,5 +1,8 @@
 import request from '@/utils/request'
 
+var uploadUrl = 'https://up-z2.qiniup.com';
+var cdnUrl = 'https://cdn.health.healthplatform.xyz';
+
 export function upFileToken_api(data) {
   return request({
     url: '/api/v2/admin/imgkey',
@@ -84,6 +87,8 @@ export default {
   changeSeckillSale,
 
   getUploadToken,
+  uploadUrl,
+  cdnUrl,
 
   getArea,
 }

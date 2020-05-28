@@ -56,3 +56,14 @@
   2. dScore activity add asset.
 
 [2020.3.24需求文档](https://docs.qq.com/sheet/DSlZWS0d0S2pTVWZp?tab=BB08J2&c=C3A0A0)
+
+### v1.11.0
+  1. goods add useCoupon, sales.
+  2. add newPeople goods, order.
+  3. modify auth list.
+  4. asset add rich-text.
+  5. memberList add edit mobile, name, inviter.
+  6. store goods add pre_auth.
+
+[2020.5.13需求设计稿](https://lanhuapp.com/web/#/item/project/board?pid=9c3e63af-e9a0-40c1-baae-2ed3514e7604)  
+[2020.5.13需求文档](https://docs.qq.com/sheet/DSmFhWHpWQVZZSGd0?tab=BB08J2)

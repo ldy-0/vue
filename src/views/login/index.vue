@@ -74,8 +74,9 @@
 
 <script>
 import { isvalidUsername } from "@/utils/validate";
+import { getToken, setToken, removeToken, setUser } from "@/utils/auth";
 import LangSelect from "@/components/LangSelect";
-import { getVerificationCode, resetPassword } from "@/api/login";
+import { getVerificationCode, resetPassword, getStore } from "@/api/login";
 import copyRight from '@/components/copyRight';
 
 export default {
@@ -224,8 +225,18 @@ export default {
 
           loginPromise
             .then((e) => {
-              this.loading = false;
-              this.$router.push({ path: "/" });
+
+              getStore().then(res => {
+                this.loading = false;
+
+                if(res && res.status === 0 && res.data.store_id == 1){
+                  return this.$router.push({ path: "/" });
+                }
+                
+                removeToken();
+                this.$message.error('账户/密码不正确!');
+              })
+              
             })
             .catch(e => {
               console.log("no", e);
