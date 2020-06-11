@@ -29,7 +29,7 @@
       <custom-head :config='headConfig' @search='search'></custom-head>
     </el-header>
 
-    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @change='change'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' :isLoading='isLoading' @show='updateForm' @change='change' @modify="handleTableEvent"></custom-table>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
       <el-header class="header" v-if='showDialog'>
@@ -90,7 +90,7 @@ export default {
       },
 
       tableConfig: {
-        // showOperate: true,
+        showOperate: true,
         // detailTitle: "查看下级",
         classList: [
           { key: "头像", value: "member_avatar", isAvatar: true },
@@ -100,7 +100,10 @@ export default {
           // { key: "累计佣金", value: "total_rc_balance" },
           // { key: "佣金", value: "available_rc_balance" },
           // { key: "上级", value: "inviter_nick" }
-        ]
+        ],
+        btnList: [
+          { key: 'member_id', value: '删除', type: 'danger', },
+        ],
       },
       list: [],
       total: 0,
@@ -142,6 +145,20 @@ export default {
     };
   },
   methods: {
+    handleTableEvent(item, index) {
+      if(index === 0) this.deleteItem(item);
+    },
+
+    async deleteItem(item){
+      let res = await api.deleteMember(item.member_id, null);
+
+      if(res) this.$message({
+        type: res.error ? 'error' : 'success',
+        message: res.error || '删除成功',
+      });
+
+      this.getList();
+    },
 //列表============================================
     async getList() {
       this.isLoading = true;
