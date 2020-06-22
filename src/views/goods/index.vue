@@ -166,7 +166,7 @@ export default {
     showDialog() { return Boolean(this.dialogConfig.status); },
     showGoods(){ return [1, 2].indexOf(this.dialogConfig.status) != -1; },
     isAdd(){ return this.dialogConfig.status === this.ADD; },
-    idEdit(){ return this.dialogConfig.status === this.EDIT; },
+    isEdit(){ return this.dialogConfig.status === this.EDIT; },
 
     isNormalGoods(){ return this.category.value == this.NORMAL_GOOD; },
     isVipGoods(){ return this.category.value == this.VIP_GOOD; }, // 平台和商家所有VIP商品
