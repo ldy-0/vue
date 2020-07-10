@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>微信登陆跳转</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <script>
+    var sQuery = location.href.split('?')[1],
+        aParam = sQuery.split('&').map(v => v.split('=')[1]),
+        url = `${decodeURIComponent(aParam[0])}?code=${aParam[1]}`;
+
+    if(aParam[2]) url += `&state=${aParam[2]}`;
+
+    location.replace(url);
+  </script> 
+</body>
+</html>
