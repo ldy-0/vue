@@ -174,6 +174,7 @@ export default {
             { id: 2, title: 'vip2' },
             { id: 3, title: 'vip3' },
             { id: 4, title: 'vip4' },
+            { id: 5, title: 'vip5' },
           ],
           [
             { id: 0, title: '升序', },

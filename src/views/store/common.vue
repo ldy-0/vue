@@ -90,6 +90,18 @@ export default {
         // { title: '其他/other', value: 10, },
       ],
 
+      companyTypeList: [
+        { title: '-', value: 0, },
+        { title: '个体户', value: 1, },
+        { title: '一般纳税人', value: 2, },
+        { title: '小规模纳税人', value: 3, },
+      ],
+
+      invoiceList: [
+        { title: '是', id: 1, },
+        { title: '否', id: 2, },
+      ],
+
       STATELIST: [
         { title: '全部', value: -1, },
         { title: '下架', value: 0, },

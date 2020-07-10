@@ -15,6 +15,7 @@ export default {
           { id: 2, title: 'VIP2', },
           { id: 3, title: 'VIP3', },
           { id: 4, title: 'VIP4', },
+          { id: 5, title: 'VIP5', },
         ],
       },
     };

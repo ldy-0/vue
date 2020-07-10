@@ -40,6 +40,7 @@ export default {
           { key: '联系人', value: 'contacts_name', },
           { key: '联系方式', value: 'contacts_phone', },
           { key: '证件', value: 'identity', },
+          { key: '单位性质', value: 'companyTypeStr', },
           { key: '上架商品', value: 'online', },
           { key: '销量', value: 'store_sales', },
           // { key: '身份证号', value: 'store_id_card', },
@@ -264,6 +265,12 @@ export default {
 
       let res = this.CLASSLIST.filter(vv => vv.value == v.storeclass_id)[0];
       v.store_class = res ? res.title : '-';
+
+      // 单位性质
+      res = this.companyTypeList.filter(vv => vv.value == v.taxpayer)[0];
+      v.companyTypeStr = res ? res.title : '-';
+      // 发票
+      v.invoice = v.can_invoice == 1 ? 1 : 2;
 
       v.store_time = this.formatTime(v.store_addtime * 1000);
 

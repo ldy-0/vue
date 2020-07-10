@@ -83,6 +83,10 @@
         <!-- new People -->
         <custom-img :obj="newPeopleBg"></custom-img>
         <custom-img :obj="newPeopleBanner"></custom-img>
+
+        <!-- coupon -->
+        <custom-radio :obj='coupon'></custom-radio>
+        <custom-img :obj="couponBg"></custom-img>
       </el-form>
 
       <el-button type='primary' class='submit_btn' @click='submit'>确定</el-button>
@@ -99,6 +103,7 @@ import customImg from '@/components/customImg'
 import customFile from '@/components/customFile'
 import customInput from '@/components/customInput'
 import customSelect from '@/components/select'
+import customRadio from "@/components/customRadio";
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import commonReq from '@/api/common' 
@@ -112,6 +117,7 @@ export default {
     customFile,
     customInput,
     customSelect,
+    customRadio,
     // editor,
   },
 
@@ -192,6 +198,19 @@ export default {
       },
       bgColor: { type: 'string', title: '背景颜色', value: '', alert: null, },
 
+      couponBg: { title: '优惠券背景图', value: [], limit: 1, alert: null, preventValidate: true, url: '', cdnUrl: '', body: {}, width: '150px', },
+      coupon: {
+        title: "开启优惠券", 
+        list: [
+          { id: 1, title: '是' }, 
+          { id: 2, title: "否" }
+        ], 
+        value: 1, 
+        alert: null, 
+        disabled: false,
+        width: '150px',
+      },
+
       androidApk: { title: 'Android APK', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
       androidVersion: { type: 'string', title: '版本号', value: '', alert: null, },
       desc: { title: '内容', value: '' },
@@ -237,6 +256,12 @@ export default {
       // this.fromImg().concat(this.appIconName.value.map(v => v.value), this.wxIconName.value.map(v => v.value), this.bgColor.value);
 
       this.setNewPeople(o);
+
+      let couponBgList = this.couponBg.value.map(img => img.raw ? { url: `${this.couponBg.cdnUrl}/${img.response.key}`, name: img.name } : { url: img.url, name: img.name, });
+      o.img.coupon = {
+        isOpen: this.coupon.value == 1 ? true : false,
+      };
+      if(couponBgList.length) o.img.coupon.bg = couponBgList[0];
 
       return JSON.stringify(o);
     },
@@ -317,6 +342,9 @@ export default {
         });
 
         this.initNewPeople(img.newPeople);
+
+        this.couponBg.value = img.coupon && img.coupon.bg ? [img.coupon.bg] : [];
+        this.coupon.value = img.coupon && img.coupon.isOpen ? 1 : 2;
       }
     },
 
@@ -334,15 +362,16 @@ export default {
     async getUploadToken(){
       let url = 'https://up-z2.qiniup.com',
           cdnUrl = 'https://cdn.health.healthplatform.xyz',
+          couponBg = this.couponBg,
           res = await commonReq.getUploadToken();
 
       if(!res || res.error || typeof res === 'string') return this.$message.error(`${res ? res.error || res : 'getUploadToken接口报错!'}`);
 
      let body = { token: res.data, config: "{ useCdnDomain: true }", };
 
-     this.activityImg.url = this.iconImg.url = url;
-     this.activityImg.cdnUrl = this.iconImg.cdnUrl = cdnUrl;
-     this.bgImg.body = this.activityImg.body = this.registerImg.body = this.storeImg.body = this.iconImg.body = body;
+     this.activityImg.url = this.iconImg.url = couponBg.url = url;
+     this.activityImg.cdnUrl = this.iconImg.cdnUrl = couponBg.cdnUrl = cdnUrl;
+     this.bgImg.body = this.activityImg.body = this.registerImg.body = this.storeImg.body = this.iconImg.body = couponBg.body = body;
 
      this.initNewPeopleImg(url, cdnUrl, body);
     },

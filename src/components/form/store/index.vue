@@ -14,6 +14,8 @@
       <c-input :obj='obj.mobile'></c-input>
       <c-input :obj='obj.storeName'></c-input>
       <c-select :obj='obj.storeClass'></c-select>
+      <c-select :obj='obj.companyClass'></c-select>
+      <c-radio :obj='obj.invoice'></c-radio>
       <c-img   :obj='obj.storeLicenseImg'></c-img>
       <c-img   :obj='obj.logoImg'></c-img>
       <c-img   :obj='obj.goodsLicenseImg'></c-img>
@@ -29,6 +31,7 @@
 import cInput from '@/components/customInput'
 import cImg from '@/components/customImg'
 import cSelect from '@/components/customSelect'
+import cRadio from '@/components/customRadio'
 
 export default {
   name: 'store',
@@ -37,6 +40,7 @@ export default {
     cInput,
     cImg,
     cSelect,
+    cRadio,
   },
 
   props: {

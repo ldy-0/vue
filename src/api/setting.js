@@ -144,7 +144,7 @@ async function deleteDScore(id, data){
 	})
 }
 
-// asset setting
+// 资产设置
 export async function getAssetSetting(data) {
 	let res = await request({
 				url: '/api/v2/seller/assetssetting',
@@ -158,6 +158,27 @@ export async function getAssetSetting(data) {
 export async function setAssetSetting(data) {
 	let res = await request({
 				url: '/api/v2/seller/assetssetting',
+				method: 'POST',
+				data,
+			});
+
+	return res;
+}
+
+// 返利设置
+export async function getRebateSetting(data) {
+	let res = await request({
+				url: '/api/v2/seller/rebatesetting',
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
+export async function setRebateSetting(data) {
+	let res = await request({
+				url: '/api/v2/seller/rebatesetting',
 				method: 'POST',
 				data,
 			});
@@ -185,4 +206,7 @@ export default {
   getDScoreList,
   addDScore,
   deleteDScore,
+
+  getRebateSetting,
+  setRebateSetting,
 }

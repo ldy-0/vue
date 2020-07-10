@@ -419,6 +419,12 @@ export let asyncRouterMapSeller = [
         name: "poster",
         meta: { roles: 'setting_poster', title: "poster", noCache: true, desc: '海报设置', },
       },
+      {
+      	path: 'rebate', // 返利设置
+      	component: () => import('@/views/operate/setting/global'),
+      	name: 'rebate',
+      	meta: { roles: 'setting_rebate', title: 'rebate', noCache: true, desc: '返利设置', },
+      },
     ]
   },
 

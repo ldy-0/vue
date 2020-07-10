@@ -47,7 +47,7 @@
         <div v-if="spec.value == 1">
           <custom-input :obj='sku'></custom-input>
 
-          <custom-input :obj='basePrice' v-if='isStoreGoods || showStore'></custom-input>
+          <custom-input :obj='basePrice'></custom-input>
           <custom-input :obj='recommendPrice' v-if='isStoreGoods || showStore'></custom-input>
           <number :obj='marketprice'></number>
           <number :obj='price'></number>
@@ -56,13 +56,13 @@
           <custom-input :obj='amount'></custom-input>
 
           <!-- <number :obj='profit'></number> -->
-          <div v-if='[0, 2].indexOf(category.value) !== -1 && !isNewPeople'>
+          <!-- <div v-if='[0, 2].indexOf(category.value) !== -1 && !isNewPeople'>
             <number :obj='vip0_commission'></number>
             <number :obj='vip1_commission'></number>
             <number :obj='vip2_commission'></number>
             <number :obj='vip3_commission'></number>
             <number :obj='vip4_commission'></number>
-          </div>
+          </div> -->
         </div>
         <!-- 多规格 -->
         <div v-if="spec.value == 2">
@@ -84,18 +84,18 @@
         <custom-input :obj='activityDesc'></custom-input>
 
         <!-- 返还积分 -->
-        <custom-input :obj='integral' v-if='[0, 2].indexOf(category.value) !== -1'></custom-input>
+        <!-- <custom-input :obj='integral' v-if='[0, 2].indexOf(category.value) !== -1'></custom-input> -->
 
         <!-- 对接人 -->
         <custom-radio :obj='owner' @change='changeOwner'></custom-radio>
         <div v-if="owner.value == 1">
           <custom-input :obj='ownerCode'></custom-input> 
 
-          <custom-input :obj='ownerVip0Award'></custom-input> 
+          <!-- <custom-input :obj='ownerVip0Award'></custom-input> 
           <custom-input :obj='ownerVip1Award'></custom-input> 
           <custom-input :obj='ownerVip2Award'></custom-input> 
           <custom-input :obj='ownerVip3Award'></custom-input> 
-          <custom-input :obj='ownerVip4Award'></custom-input> 
+          <custom-input :obj='ownerVip4Award'></custom-input>  -->
         </div>
 
         <el-form-item :label="content.title" v-if='dialogConfig.status'>
@@ -485,7 +485,8 @@ export default {
     },
 
     validateSigleSku(){
-      let paramArr = [ "sku", "marketprice", "price", "amount", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission" ];
+      // let paramArr = [ "sku", "marketprice", "price", "amount", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission" ];
+      let paramArr = [ 'basePrice', "marketprice", "price", "amount"];
 
       // Vip商品|新人专享商品
       if(this.isVipGoods || this.isNewPeople){
@@ -493,7 +494,8 @@ export default {
         this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 0;
       }
 
-      if ( paramArr.some(v => this[v].value ? false : (this[v].alert = `请输入${this[v].title}`) )) return true;
+      if ( this.sku.value ? false : (this.sku.alert = `${this.sku.title}未填写或填写不正确`) ) return true;
+      if ( paramArr.some(v => Number(this[v].value) > 0 ? false : (this[v].alert = `${this[v].title}未填写或填写不正确`) )) return true;
     },
 
     validateMultiSku(){
@@ -509,12 +511,13 @@ export default {
           { key: "体验代理佣金", value: "vip0_commission" },
           { key: "库存数量", value: "count" },
           { key: "价格", value: "price", custom: /(^[1-9]\d*(\.\d{1,2})?$)|(^0\.\d{1,2}$)/ },
+          { key: "供货价", value: "supply_price", custom: /(^[1-9]\d*(\.\d{1,2})?$)|(^0\.\d{1,2}$)/ },
           { key: "商品标价", value: "marketprice" },
           { key: "商品编号", value: "sku", custom: /^\w+$/ },
         ];
 
-        // Vip商品|新人专享商品
-        if(this.isVipGoods || this.isNewPeople){
+        // Vip商品|新人专享商品 |普通商品|店铺商品
+        if(this.isVipGoods || this.isNewPeople || this.isNormalGoods || this.isStoreGoods){
           arr = arr.slice(4);
           item.vip0_commission = item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
         }
@@ -529,6 +532,7 @@ export default {
         });
 
         if(item.price <= 0) err = '价格未填写或填写不正确!';
+        if(item.supply_price <= 0) err = '供货价未填写或填写不正确!';
 
         return err;
       });

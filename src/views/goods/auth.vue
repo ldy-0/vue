@@ -41,13 +41,13 @@
           <number :obj='price'></number>
           <custom-input :obj='amount'></custom-input>
           <!-- <number :obj='profit'></number> -->
-          <div v-if='[0, 2].indexOf(category.value) !== -1'>
+          <!-- <div v-if='[0, 2].indexOf(category.value) !== -1'>
             <number :obj='vip0_commission'></number>
             <number :obj='vip1_commission'></number>
             <number :obj='vip2_commission'></number>
             <number :obj='vip3_commission'></number>
             <number :obj='vip4_commission'></number>
-          </div>
+          </div> -->
         </div>
         <!-- 多规格 -->
         <div v-if="spec.value == 2">
@@ -69,18 +69,18 @@
         <custom-input :obj='activityDesc'></custom-input>
 
         <!-- 返还积分 -->
-        <custom-input :obj='integral' v-if='[0, 2].indexOf(category.value) !== -1'></custom-input>
+        <!-- <custom-input :obj='integral' v-if='[0, 2].indexOf(category.value) !== -1'></custom-input> -->
 
         <!-- 对接人 -->
         <custom-radio :obj='owner' @change='changeOwner'></custom-radio>
         <div v-if="owner.value == 1">
           <custom-input :obj='ownerCode'></custom-input> 
 
-          <custom-input :obj='ownerVip0Award'></custom-input> 
+          <!-- <custom-input :obj='ownerVip0Award'></custom-input> 
           <custom-input :obj='ownerVip1Award'></custom-input> 
           <custom-input :obj='ownerVip2Award'></custom-input> 
           <custom-input :obj='ownerVip3Award'></custom-input> 
-          <custom-input :obj='ownerVip4Award'></custom-input> 
+          <custom-input :obj='ownerVip4Award'></custom-input>  -->
         </div>
 
         <el-form-item :label="content.title" v-if='dialogConfig.status'>
@@ -424,7 +424,8 @@ export default {
     },
 
     validateSigleSku(){
-      let paramArr = [ "sku", "marketprice", "price", "amount", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission" ];
+      // let paramArr = [ "sku", "marketprice", "price", "amount", "vip0_commission", "vip1_commission", "vip2_commission", "vip3_commission", "vip4_commission" ];
+      let paramArr = [ "sku", "marketprice", "price", "amount"];
 
       // Vip Good
       if(this.category.value == 1){
@@ -452,7 +453,8 @@ export default {
           { key: "商品编号", value: "sku", custom: /^\w+$/ },
         ];
 
-        if(this.category.value == 1){
+        // vip商品 |店铺商品
+        if(this.category.value == 1 || this.isStoreGoods){
           arr = arr.slice(4);
           item.vip0_commission = item.vip1_commission = item.vip2_commission = item.vip3_commission = item.vip4_commission = 0;
         }

@@ -38,6 +38,7 @@ export default {
     serverBanner:'首页轮播图',
     asset: '资产设置',
     poster: '个人分享设置',
+    rebate: '平台设置',
     serverEnrty:'商品分类',
     recommended:'精品推荐',
     serverAct:'动态',

@@ -41,6 +41,7 @@ export default {
           { key: '联系人', value: 'contacts_name', },
           { key: '联系方式', value: 'contacts_phone', },
           { key: '证件', value: 'identity', },
+          { key: '单位性质', value: 'companyTypeStr', },
           { key: '上架商品', value: 'online', },
           { key: '销量', value: 'store_sales', },
           { key: '状态', value: 'stateStr', },
@@ -62,6 +63,8 @@ export default {
         mobile:          { title: '联系方式', value: '', from: 'contacts_phone', alert: null, },
         storeName:       { title: '店铺名',   value: '', from: 'store_name', alert: null, type: 'text', },
         storeClass:      { title: '店铺主营', value: '', from: 'storeclass_id', alert: null, list: [], },
+        companyClass:    { title: '单位性质', value: '', from: 'taxpayer', alert: null, list: [], },
+        invoice:         { title: '是否可开发票', value: '', from: 'invoice', alert: null, list: [], },
         storeLicenseImg: { title: '营业照',   value: [], from: 'storeLicenseImg', alert: null, limit: 1, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
         logoImg:         { title: '店铺logo图', value: [], from: 'logoImg', alert: null, limit: 1, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
         goodsLicenseImg: { title: '其他证件', value: [], from: 'goodsLicenseImg', alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
@@ -85,13 +88,6 @@ export default {
         3: '拒绝',
       },
     };
-  },
-
-  watch: {
-    // allDesc: {
-    //   deep: true,
-    //   handler(v1, v2){ this.allDesc.alert = v1.value ? null : `${this.allDesc.title}不能为空`; },
-    // }
   },
 
   methods: {
@@ -193,6 +189,8 @@ export default {
         contacts_phone: store.mobile.value,
         store_name: store.storeName.value,
         storeclass_id: store.storeClass.value,
+        taxpayer: store.companyClass.value,
+        can_invoice: store.invoice.value == 1 ? 1 : 0,
         business_licence: imgList[1][0],
         store_avatar: imgList[2][0],
         identity_images: imgList[3],
@@ -308,6 +306,12 @@ export default {
       let res = this.CLASSLIST.filter(vv => vv.value == v.storeclass_id)[0];
       v.store_class = res ? res.title : '-';
 
+      // 单位性质
+      res = this.companyTypeList.filter(vv => vv.value == v.taxpayer)[0];
+      v.companyTypeStr = res ? res.title : '-';
+      // 发票
+      v.invoice = v.can_invoice == 1 ? 1 : 2;
+
       v.store_time = this.formatTime(v.store_addtime * 1000);
 
       v.stateStr = this.stateMap[v.store_state];
@@ -363,6 +367,9 @@ export default {
     this.allHeadConfig.selectList[1].list = this.STATELIST.slice(0, 3);
     
     this.getStoreClassList('all');
+
+    this.store.companyClass.list = this.companyTypeList;
+    this.store.invoice.list = this.invoiceList;
   }
 
 }
