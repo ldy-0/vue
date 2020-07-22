@@ -40,7 +40,7 @@
           <img class='form_img' :src='img.value' />
         </div>
 
-        <div v-for='(item, index) in keys' :key='index'>
+        <div v-for='(item, index) in keys' :key='index' v-if="formData[item].value">
           <span class='form_title'>{{formData[item].title}}</span>
           <span class='form_ctn'>{{formData[item].value}}</span>
         </div>
@@ -102,7 +102,9 @@ export default {
         address: { title: "买家地址", value: "", alert: null },
         reason_info: { title: "退款原因", value: "", alert: null },
         refund_amount: { title: "退款金额(￥)", value: "", alert: null },
-        buyer_message: { title: "退款内容", value: "", alert: null }
+        buyer_message: { title: "退款内容", value: "", alert: null },
+        express_name: { title: '物流公司', value: '', alert: null, },
+        invoice_no: { title: '物流单号', value: '', alert: null, },
       },
       detail: {},
       stopSubmit: false,
@@ -187,7 +189,7 @@ export default {
       let formData = this.formData;
 
       this.dialogConfig.status = typeof status === "number" ? status : 2;
-
+      
       this.keys.forEach(v => {
         formData[v].value = status[v];
       });

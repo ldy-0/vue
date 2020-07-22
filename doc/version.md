@@ -67,3 +67,14 @@
 
 [2020.5.13需求设计稿](https://lanhuapp.com/web/#/item/project/board?pid=9c3e63af-e9a0-40c1-baae-2ed3514e7604)  
 [2020.5.13需求文档](https://docs.qq.com/sheet/DSmFhWHpWQVZZSGd0?tab=BB08J2)
+
+### v1.12.0
+  1. modify withdraw.
+  2. goods pre auth add edit.
+  3. aftersale add logistic info.
+  4. order add storeOrder.
+  5. add invoice switch.
+  6. banner add rainPackage, business, vip.  
+
+[2020.6.24需求文档](https://healthsource.feishu.cn/sheets/shtcnwEVpriSi3VYjIulezoBTJf)  
+[2020.6.24需求设计稿](https://lanhuapp.com/web/#/item/project/board/detail?type=share_mark&pid=9690a397-7f36-45ab-a5ca-1359e291f934&imgId=8dad60a5-4a14-4f34-93ee-f103a88431d3&project_id=9690a397-7f36-45ab-a5ca-1359e291f934&image_id=8dad60a5-4a14-4f34-93ee-f103a88431d3&teamId=0cd0138a-96c8-4cb6-ac0c-e783f4cb068e&param=none)  

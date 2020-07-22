@@ -45,13 +45,12 @@ import goods from '@/components/form/goods';
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
-import owner from './owner';
 import multisku from './multiSku';
 import transport from './transport';
 import user from './user';
 
 export default {
-  mixins: [owner, transport, multisku, user],
+  mixins: [transport, multisku, user],
 
   components: {
     customHead,
@@ -85,7 +84,7 @@ export default {
       goodsConfig: {
         show: true,
         detail: null,
-        disabled: true,
+        submit: '确定',
       },
       
       dialogConfig: {
@@ -110,7 +109,7 @@ export default {
         // updateTitle: "详情",
         // showDelete: true,
         btnList: [
-          { key: 'isAuthing', value: '详情' },
+          { key: 'isAuthing', value: '编辑' },
           { key: 'isEdited', value: '同意' },
           { key: 'isAuthing', value: '拒绝', type: 'danger' },
           // { key: 'isWxShow', value: '隐藏' },
@@ -171,12 +170,13 @@ export default {
       this.getList();
     },
 
+    // 列表操作
     handleTableEvent(item, index){
       // 详情
       if(index == 0) return this.updateForm(item);
-      // pre_auth
+      // 预审核通过
       if(index == 1) return this.changeGoods(item, 'pre_apply');
-      // down
+      // 预审核拒绝
       if(index == 2) return this.openRefuseDialog(item);
       // wx show
       // if(index == 2) return this.changeGoods(item, 'only_app');
@@ -198,14 +198,14 @@ export default {
       let goods,
           config = this.goodsConfig;
 
-      // Edit
+      // 编辑
       if (status != 1) {
         let res = await api.getGoods(status.goods_commonid);
         if (res.error) return this.$message.error(res.error);
         goods = res.data;
       }
 
-      // get first class list
+      // 获取一级分类列表
       let classRes = await classAPI.getClassList({ parent_id: 0 });
       if(!classRes || typeof classRes === 'string' || classRes.error) return this.$message.error(classRes ? classRes.error || classRes : '获取分类列表失败!')
       classRes.data.forEach(v => {
@@ -213,7 +213,8 @@ export default {
         v.value = v.storegc_id;
         v.children = [];
       });
-
+      
+      // 编辑时获取二/三级分类列表
       if (goods) {
         await this.loadClass([goods.gc_id_1, 0, 0], classRes.data);
         await this.loadClass([goods.gc_id_1, goods.gc_id_2, 0], classRes.data);
@@ -225,7 +226,6 @@ export default {
       config.detail = this.detail = goods;
 
       this.dialogConfig.status = typeof status === "number" ? this.ADDGOODS : this.EDITGOODS;
-      // console.error('updateform', this.dialogConfig.status, this.name.value, this.img.value);
     },
 
     closeGoodsDialog() {

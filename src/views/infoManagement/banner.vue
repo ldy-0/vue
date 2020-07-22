@@ -231,6 +231,10 @@ export default {
         { id: 1, title: '团购', url: 'group' },
         { id: 2, title: '砍价', url: 'bargain' },
         { id: 3, title: 'VIP特惠', url: 'special' },
+        { id: 4, title: '红包雨', url: 'redPackage' },
+        { id: 5, title: '商圈/社区', url: 'business' },
+        { id: 6, title: '合作共赢', url: 'vip' },
+        { id: 7, title: '直播礼包', url: 'gift' },
       ],
     };
   },

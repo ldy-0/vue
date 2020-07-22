@@ -5,7 +5,7 @@
 <div class="notice">
   
   <el-header class="header">
-    <custom-head :config='headConfig' @search='search' @emit='handleHeadEmit'></custom-head> 
+    <custom-head :config='headConfig' @search='search' @emit='handleHeadEmit' @change="changeSwitch"></custom-head> 
   </el-header>
 
   <custom-table ref='table' :config='tableConfig' :data='list' :total='total' @modify='handleTableEmit' @change='change'></custom-table>
@@ -128,10 +128,16 @@ export default {
 
       if(type == 'dscore' && statusList){
         if(statusList.hasOwnProperty('0') && statusList[0] !== -1) query.status = statusList[0] || 0;
+        if(statusList.hasOwnProperty('1') && statusList[1] !== -1) query.type = statusList[1] || 0;
       }
 
       // console.error(query);
       this.getList(this.query = query);
+    },
+
+    changeSwitch(type, index) {
+      // 控制发票
+      if(this.type == 'seller' && index == 0) this.setSellerInvoice();
     },
 
     initPage(){
@@ -176,6 +182,8 @@ export default {
     this.getList();
 
     this.toExcel = toExcel;
+
+    if(this.type === 'seller') this.getSellerInvoice();
   },
 }
 </script>

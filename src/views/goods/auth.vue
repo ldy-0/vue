@@ -72,7 +72,7 @@
         <!-- <custom-input :obj='integral' v-if='[0, 2].indexOf(category.value) !== -1'></custom-input> -->
 
         <!-- 对接人 -->
-        <custom-radio :obj='owner' @change='changeOwner'></custom-radio>
+        <c-radio :obj='owner' @change='changeOwner'></c-radio>
         <div v-if="owner.value == 1">
           <custom-input :obj='ownerCode'></custom-input> 
 
@@ -117,7 +117,7 @@ import refuse from '@/components/form/refuseGoods';
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
-import owner from './owner';
+import owner from '@/components/form/goods/owner';
 import multisku from './multiSku';
 import transport from './transport';
 
@@ -146,12 +146,15 @@ export default {
     showDialog() { return Boolean(this.dialogConfig.status); },
     showGoods(){ return [1, 2].indexOf(this.dialogConfig.status) !== -1 },
     isStoreGoods(){ return this.category.value == 2; },
+
+    isEdit(){ return this.dialogConfig.status === this.EDIT; },
   },
 
   data() {
     return {
       AUTHING: 10,
       PRE_AUTH: 11,
+      EDIT: 2,
 
       categoryList: [
         { id: 0, title: "常规商品" }, 
@@ -160,7 +163,7 @@ export default {
       ],
       dialogConfig: {
         title: "",
-        status: 0 // 1:添加分类，2：编辑分类， 3：拒绝原因
+        status: 0 // 1:添加，2：编辑， 3：拒绝原因
       },
       img: { title: "商品图片", value: [], limit: 1, alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },
       detailImg: { title: "详情图片", value: [], limit: 10, alert: null, url: "https://up-z2.qiniup.com", cdnUrl: "https://cdn.health.healthplatform.xyz", body: {} },

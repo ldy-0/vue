@@ -57,7 +57,7 @@ export default {
 
       newPeople.value = this.NOT_USE_NEWPEOPLE;
     },
-
+    // 新人专享属性值改变回调
     changeNewPeople(index) {
       let config = this.multiSkuConfig,
           newPeoplePrice = this.newPeoplePrice;
@@ -76,21 +76,22 @@ export default {
 
     validateNewPeople() {
       let newPeoplePrice = this.newPeoplePrice,
-          pattern = /(^[1-9]\d*(\.\d{1,2})?$)|(^0\.\d{1,2}$)/,
+          pattern = /(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)/,
           skuList = this.specList;
 
       if(this.isNewPeople){
         if(this.isSingleSku){
-          if(newPeoplePrice.value <= 0) return newPeoplePrice.alert = `新人价未设置或设置不正确!`, false;
+          if(isNaN(Number(newPeoplePrice.value)) || newPeoplePrice.value < 0) return newPeoplePrice.alert = `新人价未设置或设置不正确!`, false;
         }else{
-          let item = skuList.filter(v => !pattern.test(v.newcomer_price) || v.newcomer_price <= 0)[0];
+          let item = skuList.filter(v => !pattern.test(v.newcomer_price) || v.newcomer_price < 0)[0];
+          console.log(item);
           if(item) return this.$message.error(`新人价未设置或设置值不正确!`), false;
         }
       }
 
       return true;
     },
-
+    // 设置商品新人专享相关属性
     setNewPeople(o) {
       let newPeople = this.newPeople,
           newPeoplePrice = this.newPeoplePrice;

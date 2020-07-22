@@ -126,6 +126,12 @@ export let asyncRouterMapSeller = [
         name: "newOrder",
         meta: { roles: 'order_newPeople', title: "新人订单", noCache: true, desc: "新人订单", },
       },
+      {
+        path: "storeOrder",
+        component: () => import("@/views/order/storeOrder"),
+        name: "storeOrder",
+        meta: { roles: 'order_store', title: "商家订单", noCache: true, desc: "商家普通订单", }
+      },
     ]
   },
   {
@@ -335,7 +341,7 @@ export let asyncRouterMapSeller = [
         meta: { roles: 'bargain', title: "bargain", noCache: true, desc: '砍价', },
       },
       {
-        path: "newPeople",
+        path: "newPeople", // 新人专享
         component: () => import("@/views/operate/activity/newPeople/index"),
         name: "newPeople",
         meta: { roles: 'newPeople', title: "newPeople", noCache: true, desc: '新人专享', },

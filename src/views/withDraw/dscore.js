@@ -19,8 +19,9 @@ export default {
 
         selectList: [
           { title: '状态', list: [] },
+          { title: '账户类别', list: [] },
         ],
-        statusList: [-1],
+        statusList: [-1, -1],
 
       },
 
@@ -42,7 +43,9 @@ export default {
           { key: '日期', value: 'rcbc_addtime', },
           { key: '头像', value: 'avatar', isAvatar: true, },
           { key: '昵称', value: 'nickName', },
-          { key: '姓名', value: 'rcbc_bank_user', },
+          { key: '姓名', value: 'accountName', },
+          { key: '账户', value: 'account', },
+          { key: '账户类型', value: 'typeStr', },
           { key: '联系方式', value: 'mobile', },
           { key: '实际德分', value: 'arrival_amount', },
           { key: '可提现德分', value: 'total_amount', },
@@ -50,7 +53,7 @@ export default {
         ],
         btnList: [
           { key: 'rcbc_id', value: '详情' },
-          { key: 'isAuthing', value: '处理' },
+          { key: 'isAuthing', value: '处理', isConfirm: true, },
           { key: 'isAuthing', value: '拒绝', type: 'danger', },
         ],
       },
@@ -67,12 +70,24 @@ export default {
         2: '已拒绝',
       },
 
+      typeList: [
+        { id: -1, title: '全部' },
+        { id: 1, title: '银行卡' },
+        { id: 2, title: '支付宝' },
+        { id: 3, title: '微信' },
+      ],
+      dscoreTypeMap: {
+        1: '银行卡',
+        2: '支付宝',
+        3: '微信',
+      },
+
       dscoreWithdraw: {
         show: false,
         list: [
           { title: '头像', value: '', key: 'avatar', type: 'img', style: { width: '100px', height: '80px' }, },
           { title: '昵称', value: '', key: 'nickName', },
-          { title: '姓名', value: '', key: 'rcbc_bank_user', },
+          { title: '姓名', value: '', key: 'accountName', },
           { title: '联系方式', value: '', key: 'mobile', },
           { title: '银行卡号', value: '', key: 'rcbc_bank_no', },
           { title: '开户银行', value: '', key: 'rcbc_bank_name', },
@@ -127,7 +142,7 @@ export default {
       if(index == 0) this.openDscoreWithdrawDialog(item);
 
       // state
-      if([1, 2].indexOf(index) !== -1) this.changeDscoreStatus(item, index);
+      if([1, 2].indexOf(index) !== -1) return this.changeDscoreStatus(item, index);
 
     },
 
@@ -291,22 +306,16 @@ export default {
         v.mobile = v.member.member_mobile;
         v.total_amount = v.member.recharge_rc_balance;
       }catch(e){ console.error(e.message); }
+      
+      // 账户类型
+      v.typeStr = this.dscoreTypeMap[v.rcbc_type];
+      v.account = v.rcbc_account || v.rcbc_bank_no;
+      v.accountName = v.rcbc_account_name || v.rcbc_bank_user;
 
+      // 提现状态
       v.stateStr = this.dscoreStateMap[v.rcbc_payment_state];
       v.isAuthing = v.rcbc_payment_state == 0;
     },
-
-    // async getUploadToken(){
-    //   let res = await commonReq.getUploadToken();
-
-    //   if(typeof res === 'string' || !res || res.error) return this.handleDscoreError(res ? res.error || res : '获取上传图片token失败');
-
-    //   this.dscoreImg.body.token = res.data;
-    //   this.dscoreImg.body.config = "{ useCdnDomain: true }";
-
-    // },
-
-    // immutable
 
     // util
     handleDscoreError(err, loading){
@@ -320,6 +329,7 @@ export default {
 
   created(){
     this.dscoreHeadConfig.selectList[0].list = this.dscoreStateList;
+    this.dscoreHeadConfig.selectList[1].list = this.typeList;
   }
 
 }

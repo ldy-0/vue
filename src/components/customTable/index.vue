@@ -128,9 +128,9 @@ export default {
   
   methods: {
     show(i, row, index, item){ 
-      if(['danger', 'warning'].indexOf(item.type) != -1) return this.$confirm('确认继续操作吗?', '', this.confirmOpt).then(() => this.$emit('modify', row, index));
+      if(['danger', 'warning'].indexOf(item.type) != -1 || item.isConfirm) return this.$confirm('确认继续操作吗?', '', this.confirmOpt).then(() => this.$emit('modify', row, index));
 
-      this.$emit('modify', row, index); 
+      this.$emit('modify', row, index);
     },
     showDetail(index, row) { this.$emit('show', row); },
     showUpdate(index, row) { this.$emit('update', row); },

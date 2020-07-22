@@ -87,15 +87,18 @@
         <!-- <custom-input :obj='integral' v-if='[0, 2].indexOf(category.value) !== -1'></custom-input> -->
 
         <!-- 对接人 -->
-        <custom-radio :obj='owner' @change='changeOwner'></custom-radio>
+        <c-radio :obj='owner' @change='changeOwner'></c-radio>
         <div v-if="owner.value == 1">
           <custom-input :obj='ownerCode'></custom-input> 
 
-          <!-- <custom-input :obj='ownerVip0Award'></custom-input> 
-          <custom-input :obj='ownerVip1Award'></custom-input> 
-          <custom-input :obj='ownerVip2Award'></custom-input> 
-          <custom-input :obj='ownerVip3Award'></custom-input> 
-          <custom-input :obj='ownerVip4Award'></custom-input>  -->
+          <div v-if="isVipGoods">
+            <custom-input :obj='ownerVip0Award'></custom-input> 
+            <custom-input :obj='ownerVip1Award'></custom-input> 
+            <custom-input :obj='ownerVip2Award'></custom-input> 
+            <custom-input :obj='ownerVip3Award'></custom-input> 
+            <custom-input :obj='ownerVip4Award'></custom-input> 
+            <custom-input :obj='ownerVip5Award'></custom-input> 
+          </div>
         </div>
 
         <el-form-item :label="content.title" v-if='dialogConfig.status'>
@@ -132,10 +135,10 @@ import down from '@/components/form/down'
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
-import owner from './owner';
 import transport from './transport';
 import activity from './activity';
 import store from './store';
+import owner from '@/components/form/goods/owner';
 import multisku from '@/components/form/goods/multiSku';
 import coupon from '@/components/form/goods/coupon';
 import sales from '@/components/form/goods/sales';
@@ -576,6 +579,12 @@ export default {
 
       // owner
       if(this.owner.value == 1 && !this.ownerCode.value) return this.ownerCode.alert = `请填写${this.ownerCode.title}`;
+      // vip商品对接返利检验
+      if(this.isVipGoods && this.owner.value == 1){
+        let arr = [this.ownerVip0Award, this.ownerVip1Award, this.ownerVip2Award, this.ownerVip3Award, this.ownerVip4Award, this.ownerVip5Award];
+
+        if( arr.some(v => v.value && Number(v.value) >= 0 ? false : (this.$message.error(`${v.title}未填写或填写不正确!`), true) ) ) return ;
+      }
 
       if(!this.validateNewPeople()) return ;
 
@@ -625,8 +634,8 @@ export default {
 
       // owner
       if(this.owner.value == 1){
-        let ownerPropArr = ['ownerCode', 'ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award'],
-            arr = ['agent_mobile', 'agent_commission_0', 'agent_commission_1', 'agent_commission_2', 'agent_commission_3', 'agent_commission_4'];
+        let ownerPropArr = ['ownerCode', 'ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award', 'ownerVip5Award'],
+            arr = ['agent_mobile', 'agent_commission_0', 'agent_commission_1', 'agent_commission_2', 'agent_commission_3', 'agent_commission_4', 'agent_commission_5'];
 
         ownerPropArr.forEach((prop, i) => { param[arr[i]] = this[prop].value; });
 

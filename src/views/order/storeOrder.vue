@@ -165,6 +165,7 @@ export default {
 
   data() {
     return {
+      PUBLIC_ORDER: 1,
       detail: {},
       order_id: null,
       dialogConfig: {
@@ -196,7 +197,10 @@ export default {
         order_points: { title: "积分抵扣:", value: "", alert: null },
         pd_amount: { title: "余额抵扣:", value: "", alert: null },
         logistic: { title: "物流信息:", value: "", alert: null },
-        order_message: { title: "备注:", value: "", alert: null }
+        order_message: { title: "备注:", value: "", alert: null },
+        store_name: { title: "商家名称:", value: "", alert: null },
+        contacts_phone: { title: "商家电话:", value: "", alert: null },
+        orderTypeStr: { title: "分类:", value: "", alert: null },
       },
       formDataTwo: {
         geval_frommembername: { title: "昵称", value: "", alert: null },
@@ -215,17 +219,22 @@ export default {
         placeHolder: "请输入关键字(订单号、买家姓名、联系方式)",
         dateWidth: 100,
         showExport: true,
-        selectLabelList: ["订单状态",],
+        selectLabelList: ["订单状态", "分类"],
         selectList: [
           [
             { id: null, title: "全部" },
-            { id: 0, title: "已取消" },
-            { id: 10, title: "待付款" },
+            // { id: 0, title: "已取消" },
+            // { id: 10, title: "待付款" },
             { id: 20, title: "待发货" },
             { id: 30, title: "待收货" },
             { id: 40, title: "已收货" },
             { id: 80, title: "已完成" },
-            { id: 100, title: "已关闭" }
+            // { id: 100, title: "已关闭" }
+          ],
+          [
+            { id: null, title: "全部" },
+            { id: 1, title: '商家普通订单', },
+            { id: 10, title: '商家VIP订单', },
           ],
         ]
       },
@@ -234,9 +243,9 @@ export default {
         showOperate: true,
         detailTitle: "详情",
         btnList: [
-          { key: "showSend", value: "发货" },
+          // { key: "showSend", value: "发货" },
           { key: "showLookComment", value: "查看评论" },
-          { key: "showFinish", value: "关闭" },
+          // { key: "showFinish", value: "关闭" },
           { key: "order_id", value: "备注" },
         ],
         classList: [
@@ -279,7 +288,7 @@ export default {
       //获取列表
       this.isLoading = true;
       let send = Object.assign({}, this.listQuery);
-      send.order_type = 1;
+      send.store_order = 1;
       let res = await api.getOrderList_api(send, this);
       if (res.data && res.status == 0) {
         res.data.forEach(this.format);
@@ -321,6 +330,9 @@ export default {
       item.showLookComment = item.evaluation_state == 1;
 
       item.showFinish = item.order_state_id >= 20 && item.order_state_id <= 40;
+
+      // 分类
+      item.orderTypeStr = item.order_type == 1 ? '普通商品' : 'VIP商品';
     },
 
     updateForm(status) {
@@ -370,14 +382,14 @@ export default {
     async changeItem(status, index) {
       this.order_id = status.order_id;
       // 发货
-      if (index == 0) {
-        this.post.value = "";
-        this.postName.value = "YTO";
-        this.thirdDialogConfig.status = typeof status === "number" ? status : 8;
-      } 
+      // if (index == 0) {
+      //   this.post.value = "";
+      //   this.postName.value = "YTO";
+      //   this.thirdDialogConfig.status = typeof status === "number" ? status : 8;
+      // } 
 
       // 查看评论
-      if (index == 1) {
+      if (index == 0) {
         let res = await apiOfcomment.getAssessList({ search: status.order_sn });
         if (res.status == 0 && res.data.length != 0) {
           this.twoDialogConfig.status = 3;
@@ -397,31 +409,31 @@ export default {
       } 
 
       // 关闭
-      if(index == 2){
-        let config = {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        };
-        this.$confirm(`确认此操作, 是否继续?`, "提示", config)
-          .then(() => {
-            let param = {
-              order_id: this.order_id,
-              state_type: "order_close"
-            };
-            api.changeOrder_api(param).then(res => {
-              if (res.status == 0) this.$message.success("关闭订单成功");
-              if (res.status != 0) this.$message.error("关闭订单失败");
-              this.getList();
-            });
-          })
-          .catch(e => {
-            this.$notify.info({ message: "已取消操作" });
-          });
-      }
+      // if(index == 2){
+      //   let config = {
+      //     confirmButtonText: "确定",
+      //     cancelButtonText: "取消",
+      //     type: "warning"
+      //   };
+      //   this.$confirm(`确认此操作, 是否继续?`, "提示", config)
+      //     .then(() => {
+      //       let param = {
+      //         order_id: this.order_id,
+      //         state_type: "order_close"
+      //       };
+      //       api.changeOrder_api(param).then(res => {
+      //         if (res.status == 0) this.$message.success("关闭订单成功");
+      //         if (res.status != 0) this.$message.error("关闭订单失败");
+      //         this.getList();
+      //       });
+      //     })
+      //     .catch(e => {
+      //       this.$notify.info({ message: "已取消操作" });
+      //     });
+      // }
 
       // 备注
-      if(index == 3) this.openRemarkDialog(status);
+      if(index == 1) this.openRemarkDialog(status);
 
     },
 
@@ -463,7 +475,7 @@ export default {
       };
       let res = await api.changeOrder_api(param);
       if (res.status == 0) this.$message.success("发货成功");
-      if (res.status != 0) this.$message.error("发货失败");
+      if (!res || res.status != 0 || res.error) this.$message.error("发货失败");
       this.stopSubmit = false;
       this.thirdDialogConfig.status = 0;
       this.getList();
@@ -480,7 +492,7 @@ export default {
 
       this.listQuery.search = param.search;
       this.listQuery.order_state = param.statusList[0];
-      this.listQuery.store_order = param.statusList[1];
+      this.listQuery.order_type = param.statusList[1];
       if (param.date) {
         this.listQuery.starttime = param.date.startDate;
         this.listQuery.endtime = param.date.endDate;
@@ -504,7 +516,8 @@ export default {
       //请求全部订单数据
       let send = {
         limit: 0,
-        order_type: 1
+        order_type: this.listQuery.order_type,
+        store_order: 1,
       };
       if (typeof this.listQuery.order_state === "number") {
         send.order_state = this.listQuery.order_state;
@@ -516,11 +529,7 @@ export default {
         allOrder = res.data;
       }
       if (!allOrder) {
-        return this.$notify({
-          title: "警告",
-          message: "暂无数据",
-          type: "warning"
-        });
+        return this.$notify({ title: "警告", message: "暂无数据", type: "warning" });
       }
       let tempData = [];
       allOrder.forEach(item => {
@@ -530,9 +539,7 @@ export default {
         item.goods_num = goods.goods_num;
         item.goods_pay_price = goods.goods_pay_price;
         item.goods_serial = goods.goods_serial ? goods.goods_serial : "";
-        item.goods_spec = goods.goods_spec
-          ? JSON.stringify(goods.goods_spec)
-          : "";
+        item.goods_spec = goods.goods_spec ? JSON.stringify(goods.goods_spec) : "";
 
         let reciver_info = item.order_reciver_info;
         // item.reciver_name = item.reciver.reciver_name;
@@ -555,65 +562,15 @@ export default {
             });
           }
         }
-        // for(let i =1;i<item.goods.length;i++){
-        //   let arr = Object.assign({},item);
-        //   arr.goods_name=item.goods[i].goods_name,
-        //   arr.goods_num=item.goods[i].goods_num,
-        //   arr.goods_pay_price=item.goods[i].goods_pay_price,
-        //   tempData.push(arr);
-        // }
+        
       });
       import("@/vendor/Export2Excel").then(excel => {
-        const tHeader = [
-          "订单号",
-          "订单状态",
-          "订单总价",
-          "运费",
-          "下单时间",
-          "购买时间",
-          "买家名称",
-          "买家电话",
-          "买家地址",
-          "优惠券",
-          "积分抵扣",
-          "余额抵扣",
-          "物流信息",
-          "备注",
-          "商品名",
-          "购买数量",
-          "支付金额",
-          "商品编号",
-          "规格"
-        ];
-        const filterVal = [
-          "order_sn",
-          "order_state",
-          "order_amount",
-          "shipping_fee",
-          "add_time",
-          "payment_time",
-          "name",
-          "phone",
-          "address",
-          "voucher_price",
-          "order_points",
-          "pd_amount",
-          "logistic",
-          "order_message",
-          "goods_name",
-          "goods_num",
-          "goods_pay_price",
-          "goods_serial",
-          "goods_spec"
-        ];
+        const tHeader = [ "订单号", "订单状态", "订单总价", "运费", "下单时间", "购买时间", "买家名称", "买家电话", "买家地址", "优惠券", "积分抵扣", "余额抵扣", "物流信息", "备注", "商品名", "购买数量", "支付金额", "商品编号", "规格" ];
+        const filterVal = [ "order_sn", "order_state", "order_amount", "shipping_fee", "add_time", "payment_time", "name", "phone", "address", "voucher_price", "order_points", 
+                            "pd_amount", "logistic", "order_message", "goods_name", "goods_num", "goods_pay_price", "goods_serial", "goods_spec" ];
         const list = tempData;
         const data = this.formatJson(filterVal, list);
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: "订单",
-          autoWidth: true
-        });
+        excel.export_json_to_excel({ header: tHeader, data, filename: "商家订单", autoWidth: true });
       });
     },
     formatJson(filterVal, jsonData) {

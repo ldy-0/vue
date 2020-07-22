@@ -16,6 +16,22 @@ async function changeStatus(data) {
   });
 }
 
+async function getRemainSetting(data) {
+  return request({
+    url: "/api/v2/common/memberwithdraw",
+    method: "get",
+    params:data
+  });
+}
+
+async function setRemainSetting(data) {
+  return request({
+    url: "/api/v2/seller/memberwithdraw",
+    method: "POST",
+    data
+  });
+}
+
 // 商家提现 
 async function getSellerWithdrawList(data) {
   return request({
@@ -42,6 +58,22 @@ async function addSellerWithdrawRemark(id, data) {
   };
 
   return request(opt);
+}
+
+// 商家发票
+async function getStoreInvoice(data) {
+  return request({
+    url: "/api/v2/seller/turnover/1/edit",
+    method: "get",
+    params:data
+  });
+}
+async function setStoreInvoice(data) {
+  return request({
+    url: "/api/v2/seller/turnover/setting",
+    method: "PUT",
+    data
+  });
 }
 
 // 德分提现 
@@ -82,6 +114,8 @@ async function setDscoreWithdraw(data) {
 export default {
   getWithdrawList,
   changeStatus,
+  getRemainSetting,
+  setRemainSetting,
 
   getSellerWithdrawList,
   changeSellerWithdrawState,
@@ -91,4 +125,7 @@ export default {
   changeDscoreWithdrawState,
   getDscoreWithdraw,
   setDscoreWithdraw,
+
+  getStoreInvoice,
+  setStoreInvoice,
 }

@@ -82,11 +82,14 @@
         <div v-if="owner.value == 1">
           <custom-input :obj='ownerCode'></custom-input> 
 
-          <!-- <custom-input :obj='ownerVip0Award'></custom-input> 
-          <custom-input :obj='ownerVip1Award'></custom-input> 
-          <custom-input :obj='ownerVip2Award'></custom-input> 
-          <custom-input :obj='ownerVip3Award'></custom-input> 
-          <custom-input :obj='ownerVip4Award'></custom-input>  -->
+          <div v-if="isVipGoods">
+            <custom-input :obj='ownerVip0Award'></custom-input> 
+            <custom-input :obj='ownerVip1Award'></custom-input> 
+            <custom-input :obj='ownerVip2Award'></custom-input> 
+            <custom-input :obj='ownerVip3Award'></custom-input> 
+            <custom-input :obj='ownerVip4Award'></custom-input> 
+            <custom-input :obj='ownerVip5Award'></custom-input> 
+          </div>
         </div>
 
         <el-form-item :label="content.title">
@@ -230,7 +233,7 @@ export default {
       this.goodsImg.value = goods ? [{ url: goods.goods_image }] : [];
       this.detailImg.value = goods ? goods.goodsimagesList.map(v => ({ url: v.goodsimage_url })).slice(1) : [];
       this.name.value = goods ? goods.goods_name : "";
-
+      // 商品类别
       this.category.list = goods && goods.store_id !== 1 ? this.categoryList : this.categoryList.slice(0, 2);
       this.category.value = goods ? goods.is_vip : 0;
       this.category.disabled = false;
@@ -349,8 +352,14 @@ export default {
       // activityDesc
       if(this.isNormalGoods && this.activityDesc.value.length > 4) return this.$message.error(`普通商品促销活动描述不能超过4个字!`);
 
-      // owner
+      // 对接人
       if(this.owner.value == this.HAS_OWNER && !this.ownerCode.value) return this.ownerCode.alert = `请填写${this.ownerCode.title}`;
+      // vip商品对接返利检验
+      if(this.isVipGoods && this.owner.value == 1){
+        let arr = [this.ownerVip0Award, this.ownerVip1Award, this.ownerVip2Award, this.ownerVip3Award, this.ownerVip4Award, this.ownerVip5Award]; 
+
+        if( arr.some(v => v.value && Number(v.value) >= 0 ? false : (this.$message.error(`${v.title}未填写或填写不正确!`), true) ) ) return ;
+      }
 
       if(!this.validateNewPeople()) return true;
     },
@@ -428,7 +437,6 @@ export default {
           classify = this.classify,
           firstSpec = this.specList[0],
           param;
-      // this.mockGoods();
 
       if(this.isIllegalGoods()) return ;
       this.submited = true;
@@ -473,14 +481,14 @@ export default {
       param.recommended_price = firstSku.recommended_price || 0;
       // param.newcomer_price = firstSku.newcomer_price || '';
 
-      // freight
+      // 运费
       param.goods_freight = this.freightType.value == 1 ? this.freight.value : '';
       param.transport_id = this.freightType.value == 2 ? this.freightTemp.value : '';
 
-      // owner
+      // 对接人
       if(this.owner.value == this.HAS_OWNER){
-        let ownerPropArr = ['ownerCode', 'ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award'],
-            arr = ['agent_mobile', 'agent_commission_0', 'agent_commission_1', 'agent_commission_2', 'agent_commission_3', 'agent_commission_4'];
+        let ownerPropArr = ['ownerCode', 'ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award', 'ownerVip5Award'],
+            arr = ['agent_mobile', 'agent_commission_0', 'agent_commission_1', 'agent_commission_2', 'agent_commission_3', 'agent_commission_4', 'agent_commission_5'];
 
         ownerPropArr.forEach((prop, i) => { param[arr[i]] = this[prop].value; });
 
@@ -489,7 +497,7 @@ export default {
 
       this.setSales(param);
       this.setCoupon(param);
-      // newPeople
+      // 新人专享
       if(this.isNewPeople) this.setNewPeople(param);
 
       // return console.error(img, 'about param : ', param);
@@ -568,20 +576,7 @@ export default {
       this.goodsImg.body = this.detailImg.body = this.activityIcon.body = { token: res.data, config: { useCdnDomain: true, }, };
     },
 
-    mockGoods() {
-      if(this.isEdit) return ;
-      this.goodsImg.value = [ { url: 'https://cdn.health.healthplatform.xyz/FlmxdWaBToPeFk6yBTFhYQi8Kbay', } ]; 
-      this.name.value = '年货大礼包(v-m-n)';
-      this.classify.value = [40, 59, 60];
-
-      // this.price.value = 1;
-      // this.marketprice.value = 124;
-      // this.sku.value = 12345;
-      // this.amount.value = 2400,
-      // this.freight.value = 1.2;
-      // this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 1;
-    },
-
+    
     preview(item){  this.img = typeof item == 'object' ? item.value : item; },
     closePreview(){ this.img = null; },
   },

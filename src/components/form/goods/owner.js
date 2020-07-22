@@ -22,13 +22,14 @@ export default {
       ownerVip2Award: { type: 'positive', title: 'VIP2佣金', post: '元', value: '', alert: null, disabled: false, },
       ownerVip3Award: { type: 'positive', title: 'VIP3佣金', post: '元', value: '', alert: null, disabled: false, },
       ownerVip4Award: { type: 'positive', title: 'VIP4佣金', post: '元', value: '', alert: null, disabled: false, },
+      ownerVip5Award: { type: 'positive', title: 'VIP5佣金', post: '元', value: '', alert: null, disabled: false, },
     };
   },
 
   methods: {
     initOwner(goods){
-      let ownerPropArr = ['ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award'],
-          arr = ['agent_commission_0', 'agent_commission_1', 'agent_commission_2', 'agent_commission_3', 'agent_commission_4'];
+      let ownerPropArr = ['ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award', 'ownerVip5Award'],
+          arr = ['agent_commission_0', 'agent_commission_1', 'agent_commission_2', 'agent_commission_3', 'agent_commission_4', 'agent_commission_5'];
 
       let sku = goods ? goods.SKUList[0] : {};
       // 普通，vip商品编辑只能编辑对接返还金额, 入驻商品有对接人只能修改金额,没有对接人可添加对接人
@@ -45,7 +46,7 @@ export default {
 
     updateOwner(categoryIndex){
       let aStr = ['元', '互转德分'],
-          objNames = ['ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award'];
+          objNames = ['ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award', 'ownerVip5Award'];
       
       objNames.forEach(v => { this[v].value = ''; this[v].post = aStr[categoryIndex]; });
       this.ownerCode.value = '';
@@ -53,7 +54,7 @@ export default {
 
     changeOwner(ownerIndex){
       let aStr = ['元', '互转德分'],
-          objNames = ['ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award'],
+          objNames = ['ownerVip0Award', 'ownerVip1Award', 'ownerVip2Award', 'ownerVip3Award', 'ownerVip4Award', 'ownerVip5Award'],
           index = this.category.value;
       
       if(ownerIndex == 1){

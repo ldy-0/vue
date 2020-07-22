@@ -18,7 +18,7 @@ async function changeOrder_api(data) {
       data
     });
 
-    return res.error !== '' ? _this.$message.error({ message: res.error, duration: 1200 }) : res;
+    return res;
   }
   
   export default {

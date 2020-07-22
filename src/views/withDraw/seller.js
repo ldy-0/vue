@@ -20,6 +20,10 @@ export default {
         ],
         statusList: [-1],
 
+        switchList: [
+          { title: '提供发票', value: false, },
+        ],
+
       },
 
       sellerImg: { title: '活动图片', value: [], alert: null, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {}, limit: 1, tip: '*活动图片不超过100Kb' },
@@ -36,13 +40,14 @@ export default {
           { key: '银行账号', value: 'account', },
           { key: '金额', value: 'toc_amount', },
           { key: '申请时间', value: 'toc_addtime', },
+          { key: '单位性质', value: 'companyTypeStr', },
           { key: '状态', value: 'stateStr', },
         ],
         btnList: [
           { key: 'toc_id', value: '详情' },
-          { key: 'isAuthing', value: '同意' },
+          { key: 'isAuthing', value: '同意', isConfirm: true, },
           // { key: 'pdc_id', value: '拒绝' },
-          { key: 'isAuthing', value: '备注' },
+          { key: 'isAuthing', value: '备注', isConfirm: true, },
         ],
       },
 
@@ -58,6 +63,13 @@ export default {
         2: '已拒绝',
       },
 
+      companyTypeList: [
+        { title: '-', value: 0, },
+        { title: '个体户', value: 1, },
+        { title: '一般纳税人', value: 2, },
+        { title: '小规模纳税人', value: 3, },
+      ],
+
       sellerWithdraw: {
         show: false,
         list: [
@@ -70,6 +82,7 @@ export default {
           { title: '申请时间', value: '', key: 'toc_addtime', },
           { title: '金额', value: '1000', key: 'toc_amount', },
           { title: '状态', value: '', key: 'stateStr', },
+          { title: '发票', value: '', key: 'toc_invoice', type: 'img', style: { width: '100px', height: '80px' }, },
         ],
       },
       
@@ -238,6 +251,27 @@ export default {
       this.getSellerList();
     },
 
+    async getSellerInvoice() {
+      let invoice = this.sellerHeadConfig.switchList[0],
+          res = await api.getStoreInvoice();
+      if(typeof res == 'string' || !res || res.error) return this.handleSellerError(res ? res.error || res : '获取发票信息失败');
+
+      if(res && res.data){
+        invoice.value = res.data == 1 ? true : false;
+      }
+    },
+
+    async setSellerInvoice() {
+      let invoice = this.sellerHeadConfig.switchList[0],
+          res = await api.setStoreInvoice({ value: invoice.value ? 1 : 0, });
+      if(typeof res == 'string' || !res || res.error) return this.handleSellerError(res ? res.error || res : '修改发票信息失败');
+
+      if(res && res.data){
+        this.$message.success(`修改成功!`);
+        this.getSellerInvoice();
+      }
+    },
+
     async getSellerList() {
       this.tableConfig.loading = true;
 
@@ -253,7 +287,7 @@ export default {
       }
       
       this.tableConfig.loading = false
-    },    
+    },
 
     formatSeller(v){
       try{
@@ -266,19 +300,14 @@ export default {
       v.account = v.toc_bank_no;
       v.bankName = v.store.bank_name;
 
+      // 单位性质
+      let res = this.companyTypeList.filter(vv => vv.value == v.taxpayer)[0];
+      v.companyTypeStr = res ? res.title : '-';
+
+      // 提现状态
       v.stateStr = this.sellerStateMap[v.toc_payment_state];
       v.isAuthing = v.toc_payment_state == 0;
     },
-
-    // async getUploadToken(){
-    //   let res = await commonReq.getUploadToken();
-
-    //   if(typeof res === 'string' || !res || res.error) return this.handleSellerError(res ? res.error || res : '获取上传图片token失败');
-
-    //   this.sellerImg.body.token = res.data;
-    //   this.sellerImg.body.config = "{ useCdnDomain: true }";
-
-    // },
 
     // immutable
     showSeller(item, index){
@@ -296,19 +325,6 @@ export default {
       
       this.$message.error(err);
     },
-
-    // mockSeller(){
-    //   let img = 'https://cdn.health.healthplatform.xyz/Fj2MUuTZ5UvAG0LqSFBcI__J1U2D';
-
-    //   let list = [
-    //     { id: 1, name: 'vip1', mobile: '12345', area: 'SK地方豆腐干开的饭馆', status: 1, img: img, arr: ['1', '2'], },
-    //     { id: 2, name: 'vip2', mobile: '12345', area: 'SK地方豆腐干开的饭馆', status: 0, img: img, arr: ['1', '2'], },
-    //   ];
-
-    //   list.forEach(this.format);
-    //   this.list = list;
-    //   this.total = list.length;
-    // },
 
   },
 
