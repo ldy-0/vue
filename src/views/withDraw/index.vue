@@ -322,7 +322,6 @@ export default {
     //分页-查询==========================================
     search(param){
       let statusList = param.statusList;
-      console.error('search :', param); 
 
       this.query.page = 1;
       this.$refs.mainTable.initPage();
@@ -344,8 +343,8 @@ export default {
       }
 
       if(param.date){
-        this.query.starttime = new Date(param.date.startDate).getTime()/1000;
-        this.query.endtime = new Date(param.date.endDate).getTime()/1000;
+        this.query.starttime = new Date(param.date.startDate);
+        this.query.endtime = new Date(param.date.endDate);
       }else{
         delete this.query.starttime;
         delete this.query.endtime;

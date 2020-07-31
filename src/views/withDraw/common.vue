@@ -117,8 +117,9 @@ export default {
 
       if(dateList){
         if(dateList[0]){
-          query.starttime = format.formatDate(dateList[0][0]);
-          query.endtime = format.formatDate(dateList[0][1]);
+          // format.formatDate
+          query.starttime = new Date(dateList[0][0]);
+          query.endtime = new Date(dateList[0][1]);
         }
       }
 

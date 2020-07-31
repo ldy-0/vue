@@ -211,7 +211,7 @@ export default {
       ? { startDate: new Date(this.date[0]).toLocaleDateString(), endDate: new Date(this.date[1]+86400000).toLocaleDateString(), }
       : null;
 
-      param.dateList = this.dateList;
+      param.dateList = this.dateList[0] ? this.dateList.map(v => [v[0], v[1] + 86400000]) : this.dateList;
 
       // single status search
       param.status = typeof index === 'number' && typeof selectIndex !== 'number' ? index || 0 : null;
