@@ -4,7 +4,7 @@
 }
 
 .submit_btn{
-  margin-left: 100px;
+  margin-left: 150px;
 }
 </style>
 
@@ -13,7 +13,7 @@
   <div class='form_wrap' v-if="isSetting">
     <!-- android -->
     <div class='form_wrap'>
-      <el-form label-width='100px' style="width:50%">
+      <el-form label-width='150px' style="width:50%">
         <custom-select :obj='androidVisitor'></custom-select>
       </el-form>
 
@@ -22,7 +22,7 @@
 
     <!-- ios -->
     <div class='form_wrap'>
-      <el-form label-width='100px' style="width:50%">
+      <el-form label-width='150px' style="width:50%">
         <custom-select :obj='iosVisitor'></custom-select>
       </el-form>
 
@@ -31,7 +31,7 @@
 
     <!-- gif -->
     <div class='form_wrap'>
-      <el-form label-width='100px' style="width:50%">
+      <el-form label-width='150px' style="width:50%">
         <custom-file :obj='img'></custom-file>
       </el-form>
 
@@ -40,13 +40,22 @@
 
     <!-- android package -->
     <div class='form_wrap'>
-      <el-form label-width='100px' style="width:50%">
+      <el-form label-width='150px' style="width:50%">
         <custom-file :obj='androidApk'></custom-file>
 
         <custom-input :obj='androidVersion'></custom-input>
       </el-form>
 
       <el-button type='primary' class='submit_btn' @click='submitApk'>确定</el-button>
+    </div>
+
+    <!-- 分销封顶 -->
+    <div class='form_wrap'>
+      <el-form label-width='150px' style="width:50%">
+        <custom-radio :obj='distribute'></custom-radio>
+      </el-form>
+
+      <el-button type='primary' class='submit_btn' @click="submitDistribute">确定</el-button>
     </div>
 
   </div>
@@ -61,6 +70,7 @@ import api from '@/api/setting'
 import customFile from '@/components/customFile'
 import customInput from '@/components/customInput'
 import customSelect from '@/components/select'
+import customRadio from '@/components/customRadio'
 import editor from '@/components/Tinymce'
 import uploadFn from "@/utils/tencent_cos";
 import commonReq from '@/api/common' 
@@ -73,6 +83,7 @@ export default {
     customFile,
     customInput,
     customSelect,
+    customRadio,
     asset,
   },
 
@@ -118,10 +129,20 @@ export default {
       },
       isAdd: true,
 
-      img: { title: '开机动画', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
-      androidApk: { title: 'Android APK', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {} },
+      img: { title: '开机动画', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {}, width: '150px', },
+      androidApk: { title: 'Android APK', value: [], limit: 1, alert: null, preventValidate: true, url: 'https://up-z2.qiniup.com', cdnUrl: 'https://cdn.health.healthplatform.xyz', body: {}, width: '150px', },
       androidVersion: { type: 'string', title: '版本号', value: '', alert: null, },
       desc: { title: '内容', value: '' },
+
+      distribute: { 
+        title: '分销是否限制封顶', 
+        list: [
+          { id: 1, title: '是' },
+          { id: 2, title: '否' },
+        ], 
+        value: '', 
+        alert: null, 
+      },
     }
   },
 
@@ -179,6 +200,17 @@ export default {
       this.saveGif(param);
     },
 
+    submitDistribute(source){
+      let param = {},
+          distribute = this.distribute;
+
+      this.canSubmit = false;
+
+      param.value = distribute.value == 1 ? 1 : 0;
+
+      this.saveDistribute(param);
+    },
+
     // request
     async getApk(){
       let res = await api.getApk();
@@ -202,6 +234,25 @@ export default {
       typeof res == 'string' || res.error ? this.$message.error(res.error || res) : this.$message.success(`修改成功`);
 
       this.getApk();
+    },
+
+    async getDistribute(){
+      let res = await api.getDistributeSetting();
+
+      if(res && res.status == 0){
+        this.distribute.value = res.data == 1 ? 1 : 2;
+      }
+    },
+
+    async saveDistribute(param){
+      let res = await api.setDistributeSetting(param);
+
+      this.isShowForm = false;
+      this.canSubmit = true;
+
+      !res || typeof res == 'string' || res.error ? this.$message.error(res.error || res || `修改失败`) : this.$message.success(`修改成功`);
+
+      this.getDistribute();
     },
 
     async getAppInfo(){
@@ -275,6 +326,8 @@ export default {
         this.getApk();
 
         this.getUploadToken();
+
+        this.getDistribute();
       }
     },
 

@@ -35,7 +35,7 @@
 <custom-table ref="mainTable" :config='tableConfig' :data='list' :total='total' @judge='lockItem' @modify='dispatch' @delete='deleteItem' @change='change'></custom-table>
 
 <!-- Detail/会员详情 -->
-<member-detail :obj="memberDetail" @submit="submitMember" @close="memberDetail = null;" v-if="memberDetail"></member-detail>
+<repay-detail :obj="detail" @submit="submitMember" @close="detail = null;" v-if="detail"></repay-detail>
 
 <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
   <!-- ModifyLevel/修改VIP等级 -->
@@ -118,7 +118,7 @@ import number from '@/components/number'
 import mobile from '@/components/mobile'
 import customSelect from '@/components/select'
 import editor from '@/components/Tinymce'
-import memberDetail from '@/components/form/memberDetail'
+import repayDetail from '@/components/form/repay'
 import uploadFn from "@/utils/tencent_cos";
 import api from '@/api/member';
 import remark from './remark';
@@ -141,7 +141,7 @@ export default {
     number,
     mobile,
     customSelect,
-    memberDetail,
+    repayDetail,
     editor,
   },
 
@@ -163,10 +163,11 @@ export default {
 
       headConfig: {
         placeHolder: '请输入手机号或姓名',
-        showExport: true,
+        // showExport: true,
         btnList: [
-          { titleKey: 'name', name: '温馨提示' },
+          // { titleKey: 'name', name: '温馨提示' },
         ],
+        selectLabelList: ['分类', '状态'],
         selectList: [
           [
             { id:'', title: '全部' },
@@ -177,10 +178,17 @@ export default {
             { id: 5, title: 'vip5' },
           ],
           [
-            { id: 0, title: '升序', },
-            { id: 1, title: '降序', },
+            { id:'', title: '全部' },
+            { id: 1, title: '正常' },
+            { id: 2, title: '冻结' },
+            { id: 3, title: '注销' },
           ],
+          // [
+          //   { id: 0, title: '升序', },
+          //   { id: 1, title: '降序', },
+          // ],
         ],
+        dateWidth: '400px',
       },
 
       tableConfig: {
@@ -198,10 +206,12 @@ export default {
            { key: 'member_id', value: '查看下级', },
            { key: 'member_id', value: '修改等级', },
            { key: 'member_id', value: '清除', type: 'danger', },
+           { key: 'is_suspend', status: 0, value: '注销账号', type: 'danger', },
+           { key: 'is_suspend', status: 1, value: '取消注销', type: 'danger', },
         ],
         classList: [
-          { key: '头像', value: 'member_avatar', isAvatar: true, },
-          { key: '昵称', value: 'member_truename' },
+          // { key: '头像', value: 'member_avatar', isAvatar: true, },
+          // { key: '昵称', value: 'member_truename' },
           { key: '姓名', value: 'member_nick' },
           { key: '联系方式', value: 'member_mobile' },
           { key: '等级', value: 'vip_level' },
@@ -213,9 +223,13 @@ export default {
           { key: '当前余额', value: 'available_predeposit' },
           { key: '总资产', value: 'total_assets' },
           { key: '当前资产', value: 'available_assets' },
-          { key: '邀请码', value: 'member_mobile' },
-          { key: '上级', value: 'inviter_nick' },
-          { key: '注册时间', value: 'member_addtime' },
+          // { key: '邀请码', value: 'member_mobile' },
+          // { key: '上级', value: 'inviter_nick' },
+          { key: '注册时间', value: 'time' },
+          { key: '分期总额', value: 'repay_total' },
+          { key: '逾期总额', value: 'repay_amount' },
+          { key: '超时时间', value: 'delay_time' },
+          { key: '账号状态', value: 'statusStr' },
         ],
         DETAIL: 1,
         INCOME: 2,
@@ -233,11 +247,11 @@ export default {
       query: {
         page: 1,
         limit: 10,
-        is_vip: 1,
-        sort: 0,
-        vip_sort: 'vip_asc',
+        // is_vip: 1,
+        // sort: 0,
+        // vip_sort: 'vip_asc',
       },
-      memberDetail: null,
+      detail: null,
 
       twoHeadConfig: {
         placeHolder: '请输入手机号',
@@ -285,7 +299,7 @@ export default {
     // 列表
     async getList() { 
       this.tableConfig.loading = true;
-      let res = await api.getMember_api(this.query);
+      let res = await api.getRepayMemberList(this.query);
 
       if(!res || typeof res === 'string' || res.error){
         this.tableConfig.loading = false;
@@ -310,11 +324,25 @@ export default {
       if(id) this.twoQuery.inviter_id = send.inviter_id = id
 
       let res = await api.getMember_api(send, this);
-      res.data.forEach(this.format);
+      res.data.forEach(this.formatMember);
 
       this.twoList = res.data;
       this.twoTotal = res.pagination.total;
       this.twoTableConfig.loading = false;
+    },
+
+    formatMember(item){
+      item.img = [ {url: item.image }];
+      if(item.card_mall == 1){
+        item.lock_state = true;
+      } else{
+        item.lock_state = false;
+      }
+
+      // 注册时间
+      let t = new Date(item.member_addtime * 1000);
+      item.time = `${t.getFullYear()}-${t.getMonth() < 9 ? '0' : ''}${t.getMonth() + 1}-${t.getDate() < 10 ? '0' : ''}${t.getDate()} 
+                    ${t.getHours() < 10 ? '0' : ''}${t.getHours()}:${t.getMinutes() < 10 ? '0' : ''}${t.getMinutes()}:${t.getSeconds() < 10 ? '0' : ''}${t.getSeconds()}`;
     },
 
     initTwoQuery(){
@@ -324,6 +352,13 @@ export default {
     },
 
     format(item){
+      let memberInfoList = ['member_id', 'member_nick', 'member_mobile', 'vip_level', 'recharge_rc_balance', 'available_rc_balance', 'total_predeposit', 'available_predeposit', 'total_assets', 
+            'available_assets', 'is_freeze', 'is_suspend', 'card_mall', 'member_avatar', 'member_truename', 'member_remark'];
+      
+      // 会员信息
+      memberInfoList.forEach(v => item[v] = item.member[v]);
+      item.statusStr = item.is_freeze == 1 ? '冻结' : item.is_suspend == 1 ? '注销中' : '正常';
+
       item.img = [ {url: item.image }];
       if(item.card_mall == 1){
         item.lock_state = true;
@@ -331,10 +366,10 @@ export default {
         item.lock_state = false;
       }
 
-      item.time = item.member_addtime;
-      // let t = new Date(item.member_addtime * 1000);
-      // item.time = `${t.getFullYear()}-${(t.getMonth() < 9 ? '0' : '') + (t.getMonth() + 1)}-${(t.getDate() < 10 ? '0' : '') + t.getDate()} 
-      //               ${(t.getHours() < 10 ? '0' : '') + t.getHours()}:${(t.getMinutes() < 10 ? '0' : '') + t.getMinutes()}:${(t.getSeconds() < 10 ? '0' : '') + t.getSeconds()}`;
+      // 注册时间
+      let t = new Date(item.member.member_addtime * 1000);
+      item.time = `${t.getFullYear()}-${t.getMonth() < 9 ? '0' : ''}${t.getMonth() + 1}-${t.getDate() < 10 ? '0' : ''}${t.getDate()} 
+                    ${t.getHours() < 10 ? '0' : ''}${t.getHours()}:${t.getMinutes() < 10 ? '0' : ''}${t.getMinutes()}:${t.getSeconds() < 10 ? '0' : ''}${t.getSeconds()}`;
     },
     // member table 操作
     emitHandle(index){
@@ -344,15 +379,22 @@ export default {
       }
     },
 
-    showDetail(item){
+    async showDetail(item){
       let dialogConfig = this.dialogConfig,
           tableConfig = this.tableConfig;
 
-      this.memberDetail = item;
+      this.getRepayMember(item);
+    },
+
+    async getRepayMember(item){
+      let res = await api.getRepayMember(item.member_id);
+      if(!res || typeof res === 'string' || res.error) return this.$message.error(res ? res.error || res : '获取详情信息失败!');
+
+      if(res.data) this.detail = res.data;
     },
 
     submitMember(param) {
-      this.memberDetail = null;
+      this.detail = null;
       this.getList();
     },
 
@@ -459,9 +501,9 @@ export default {
       }
 
       // 冻结
-      if(index === 2) this.changeStatus(item, 1);
+      if(index === 2) this.changeStatus(item, 1, 'freeze');
       // 解冻
-      if(index === 3) this.changeStatus(item, 2);
+      if(index === 3) this.changeStatus(item, 0, 'freeze');
 
       // add/minute
       if(index === 4) return this.showModify(item);
@@ -477,6 +519,10 @@ export default {
 
       // 清除德分记录
       if(index === 8) this.clearDScoreRecord(item);
+
+      // 注销
+      if(index === 9) this.changeStatus(item, 1, 'suspend');
+      if(index === 10) this.changeStatus(item, 0, 'suspend');
     },
 
     async getIncomeList(isReset){
@@ -497,8 +543,9 @@ export default {
 
     },
 
-    async changeStatus(item, status){
-      let param = { type: 'freeze', status };
+    async changeStatus(item, status, type){
+      let param = { status };
+      if(type) param.type = type;
 
       let res = await api.changeStatus(item.member_id, param);
 
@@ -549,12 +596,23 @@ export default {
 
     search(param){
       let statusList = param.statusList,
+          date = param.date,
           arr = ['vip_asc', 'vip_desc'];
 
       this.query.search = param.search || null;
       this.query.vip_level = statusList[0] || null;
 
-      this.query.vip_sort = arr[statusList[1] || 0];
+      // this.query.vip_sort = arr[statusList[1] || 0];
+      // 状态
+      if(statusList[1]){
+        this.query.is_freeze = statusList[1] == 2 ? 1 : statusList[1] == 1 ? 0 : null;
+        this.query.is_suspend = statusList[1] == 3 ? 1 : statusList[1] == 1 ? 0 : null;
+      }else{
+        this.query.is_freeze = this.query.is_suspend = null;
+      }
+
+      this.query.starttime = date ? date.startDate : null;
+      this.query.endtime = date ? date.endDate : null;
 
       this.query.page = 1;
       this.$refs.mainTable.initPage();

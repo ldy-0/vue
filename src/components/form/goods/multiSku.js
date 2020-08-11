@@ -11,6 +11,7 @@ export default {
         VIP: 1,
         STORE: 2,
         NEWPEOPLE: 3,
+        REPAY: 4,
       },
       skuClassList: [],
       skuList: [],
@@ -65,6 +66,23 @@ export default {
         // { key: 'VIP4佣金', value: 'vip4_commission' },
       ],
 
+      rePayGoodsAttributeList: [
+        { key: '商品编号', value: 'sku' },
+        { key: '价格(元)', value: 'price' },
+        { key: '标价(元)', value: 'marketprice' },
+        { key: '供货价(元)', value: 'supply_price', },
+        { key: '建议零售价(元)', value: 'recommended_price', },
+        { key: '库存', value: 'count' },
+        { key: '是否分期', value: 'isRepay', isRepay: true, 
+          list: [
+            { title: '是', value: 1, },
+            { title: '否', value: 2, },
+          ],
+        },
+        { key: '分期价格', value: 'prepay_price' },
+        { key: '分期时间', value: 'repay_day' },
+      ],
+
     }
   },
 
@@ -85,7 +103,11 @@ export default {
       if(index == config.NEWPEOPLE){
         config.attributeList = this.newPeopleGoodsAttributeList;
       }
-      
+
+      // 分期
+      if(index == config.REPAY){
+        config.attributeList = this.rePayGoodsAttributeList;
+      }
     },
 
     changeSku(index) {
@@ -96,6 +118,12 @@ export default {
         newPeoplePrice.value = '';               
       }else{
         this.updateMultiSkuConfig(this.isNewPeople ? config.NEWPEOPLE : this.isNormalGoods ? config.NORMAL : this.isVipGoods ? config.VIP : config.STORE);
+        // 分期
+        if(this.showRepay){
+          this.repay.value = this.NOT_REPAY;
+          this.prePayPrice.value = this.repayTime.value = 0;
+          this.updateMultiSkuConfig(config.REPAY);
+        }
       }
     },
 

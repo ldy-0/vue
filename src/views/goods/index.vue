@@ -17,7 +17,7 @@
 
     <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @update='updateForm' @delete='deleteItem' @change='change' @modify='handleTableEvent'></custom-table>
 
-    <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
+    <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' :close-on-click-modal="false" width="80%">
       <el-form label-width='120px' v-if='showGoods'>
         <custom-img :obj='img'></custom-img>
 
@@ -667,11 +667,11 @@ export default {
       item.img = [{ url: item.goods_image }];
       item.detailImg = item.detailImg ? item.detailImg.map(v => { return { url: v }; }) : [];
 
-      // get match
+      // 类别/状态
       matcher = this.exchange(selectList, arr.map(v => item[v]), "id", "name");
       arr.forEach((v, i) => (item[`${v}Str`] = matcher[i]));
 
-      // store category
+      // 类别为店铺
       if(item.store_id != 1 && !item.is_vip) item.is_vipStr = this.categoryList[2].title;
 
       // 分类名
@@ -681,8 +681,9 @@ export default {
         if (v.storegc_id == item.gc_id_3) item.gc_name_3 = v.storegc_name;
       });
 
-      // 
+      // 是否显示上架按钮
       item.isDown = item.goods_state == 0 && (item.store_id == 1 || item.is_vip);
+      // 控制显示/隐藏按钮
       item.only_app == 0 ? item.isWxShow = true : item.isWxHidden = true;
     },
     exchange(sourceList, valueList, filterProperty, destProperty) {

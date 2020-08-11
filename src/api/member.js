@@ -96,6 +96,44 @@ function exportMember(data) {
   return res;
 }
 
+// 分期
+function getRepayMemberList(data) {
+  let res = request({
+    url: "/api/v2/seller/repay",
+    method: "get",
+    params: data,
+  });
+
+  return res;
+}
+function getRepayMember(id, data) {
+  let res = request({
+    url: `/api/v2/seller/repay/${id}`,
+    method: "get",
+    params: data,
+  });
+
+  return res;
+}
+function changeRepayTime(id, data) {
+  let res = request({
+    url: `/api/v2/seller/repay/${id}`,
+    method: "PUT",
+    data,
+  });
+
+  return res;
+}
+function cancelRepay(id, data) {
+  let res = request({
+    url: `/api/v2/seller/repay/${id}`,
+    method: "DELETE",
+    data,
+  });
+
+  return res;
+}
+
 export default {
   getMember_api,
   changeMember_api,
@@ -110,4 +148,9 @@ export default {
   deleteMember,
 
   exportMember,
+
+  getRepayMemberList,
+  getRepayMember,
+  changeRepayTime,
+  cancelRepay,
 }

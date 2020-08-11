@@ -186,6 +186,27 @@ export async function setRebateSetting(data) {
 	return res;
 }
 
+// 返利封顶
+export async function getDistributeSetting(data) {
+	let res = await request({
+				url: '/api/v2/seller/inviter/create',
+				method: 'get',
+				params: data
+			});
+
+	return res;
+}
+
+export async function setDistributeSetting(data) {
+	let res = await request({
+				url: '/api/v2/seller/inviter/1',
+				method: 'PUT',
+				data,
+			});
+
+	return res;
+}
+
 export default {
 	addVisitor,
   getVisitor,
@@ -207,6 +228,12 @@ export default {
   addDScore,
   deleteDScore,
 
+  getAssetSetting,
+  setAssetSetting,
+
   getRebateSetting,
   setRebateSetting,
+
+  getDistributeSetting,
+  setDistributeSetting,
 }

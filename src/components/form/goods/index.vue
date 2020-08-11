@@ -11,7 +11,7 @@
 
 <template>
   <div>
-    <el-dialog :title="obj.title || ''" :visible="obj.show" width="80%" @close='closeDialog'>
+    <el-dialog :title="obj.title || ''" :visible="obj.show" width="80%" :close-on-click-modal="false" @close='closeDialog'>
 
       <el-form label-width='120px' :disabled="obj.disabled">
         <custom-img :obj='goodsImg'></custom-img>
@@ -42,11 +42,18 @@
         <div v-if="isSingleSku">
           <custom-input :obj='sku'></custom-input>
 
+          <!-- 分期 -->
+          <custom-radio :obj='repay' @change="changeRepay" v-if="showRepay"></custom-radio>
+          <custom-input :obj='prePayPrice' v-if="isRepay"></custom-input>
+          <custom-input :obj='repayTime' v-if="isRepay"></custom-input>
+
           <custom-input :obj='basePrice'></custom-input>
           <custom-input :obj='recommendPrice' v-if='isStoreGoods || showStore'></custom-input>
           <number :obj='marketprice'></number>
+
           <number :obj='price' v-if="!isNewPeople"></number>
           <custom-input :obj='newPeoplePrice' v-if="!isStoreGoods && isNewPeople"></custom-input>
+
           <custom-input :obj='amount'></custom-input>
           <!-- <div v-if='[0, 2].indexOf(category.value) !== -1 && !isNewPeople'>
             <number :obj='vip0_commission'></number>
@@ -128,6 +135,7 @@ import store from './store';
 import coupon from './coupon';
 import newPeople from './newPeople';
 import sales from './sales';
+import repay from './repay';
 import commonReq from "@/api/common";
 import api from "@/api/goods";
 import classAPI from "@/api/classify";
@@ -135,7 +143,7 @@ import classAPI from "@/api/classify";
 export default {
   name: 'form-goods',
 
-  mixins: [owner, multisku, transport, activity, store, coupon, newPeople, sales],
+  mixins: [owner, multisku, transport, activity, store, coupon, newPeople, sales, repay],
 
   props: {
     obj: {
@@ -219,6 +227,8 @@ export default {
 
     isSingleSku(){ return this.spec.value === this.SINGLESKU; },
     isMultiSku(){ return this.spec.value === this.MULTISKU; },
+
+    isRepay(){ return this.repay.value === this.REPAY; }, // 商品是否可分期
   },
 
   methods: {
@@ -247,6 +257,7 @@ export default {
       }
 
       // vip商品
+      this.store.disabled = false;
       this.initStore(goods);
 
       this.classify.source = obj.classList;
@@ -267,7 +278,8 @@ export default {
       this.initFreight(goods);
       this.initOwner(goods);
       this.initCoupon(goods);
-      this.initNewPeople(goods); // 新人专享初始化必须在优惠券，对接人后面
+      this.initNewPeople(goods); // 新人专享初始化必须在优惠券，对接人后面  
+      this.initRepay(goods);
 
       this.detail = goods;
     },
@@ -361,7 +373,10 @@ export default {
         if( arr.some(v => v.value && Number(v.value) >= 0 ? false : (this.$message.error(`${v.title}未填写或填写不正确!`), true) ) ) return ;
       }
 
+      // 新人专享
       if(!this.validateNewPeople()) return true;
+      // 分期
+      if(!this.validateRepay()) return true;
     },
 
     validateSigleSku(){
@@ -431,6 +446,7 @@ export default {
     },
 
     submit() {
+      // this.mockData();
       let spec = this.spec,
           goodsImg = this.goodsImg,
           imgList = this.goodsImg.value,
@@ -499,6 +515,8 @@ export default {
       this.setCoupon(param);
       // 新人专享
       if(this.isNewPeople) this.setNewPeople(param);
+      // 分期
+      if(this.showRepay) this.setRepay(param);
 
       // return console.error(img, 'about param : ', param);
       this.save(param);
@@ -524,7 +542,7 @@ export default {
       return o.limit == 1 ? arr[0] ? arr[0].url : '' : arr.map(v => JSON.stringify(v));
     },
 
-    changeCategory(index) {
+    changeCategory(index, isRepay) {
       this.showStore = index == this.VIPGOODS;
       this.freightType.disabled = [1, 2].indexOf(index) !== -1 ? true : false;
 
@@ -532,8 +550,8 @@ export default {
         if(!this.store.list.length) this.getStoreList();
         this.freightType.value = 1;        
       }
-
-      this.updateOwner(index);
+      // 类别修改更新，分期不更新
+      if(!isRepay) this.updateOwner(index);
       this.updateMultiSkuConfig(index);
       this.updateCoupon(index);
     },
@@ -576,6 +594,19 @@ export default {
       this.goodsImg.body = this.detailImg.body = this.activityIcon.body = { token: res.data, config: { useCdnDomain: true, }, };
     },
 
+    mockData(){
+      if(this.isEdit) return ;
+      this.goodsImg.value = [ { url: 'https://cdn.health.healthplatform.xyz/FlmxdWaBToPeFk6yBTFhYQi8Kbay', } ]; 
+      this.name.value = '年货大礼包(n-s-n)';
+      this.classify.value = [40, 59, 60];
+
+      // this.price.value = 1;
+      // this.marketprice.value = 124;
+      // this.sku.value = 12345;
+      // this.amount.value = 2400,
+      // this.freight.value = 1.2;
+      // this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 1;
+    },
     
     preview(item){  this.img = typeof item == 'object' ? item.value : item; },
     closePreview(){ this.img = null; },

@@ -38,19 +38,15 @@ import customInput from "@/components/customInput";
 import multiSelect from "@/components/multiSelect";
 import dateTimeRange from "@/components/dateTimeRange";
 import customImg from "@/components/customImg";
-import editor from "@/components/Tinymce";
-import multiSku from "@/components/multiSku";
 import refuse from '@/components/form/refuseGoods';
 import goods from '@/components/form/goods';
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
-import multisku from './multiSku';
-import transport from './transport';
 import user from './user';
 
 export default {
-  mixins: [transport, multisku, user],
+  mixins: [user],
 
   components: {
     customHead,
@@ -59,8 +55,6 @@ export default {
     multiSelect,
     dateTimeRange,
     customImg,
-    editor,
-    multiSku,
     refuse,
     goods,
   },
@@ -246,8 +240,6 @@ export default {
     },
 
     async submit() {
-      // this.mockData();
-
       // refuse 
       if(this.dialogConfig.status == this.REFUSE) return this.changeGoods(this.detail, 'refuse');
     },
@@ -424,20 +416,6 @@ export default {
 
       this.$message.error(text);
     },
-
-    mockData(){
-      if(this.dialogConfig.status == 2) return ;
-      this.img.value = [ { url: "https://cdn.health.healthplatform.xyz/FpRp_lTUWcu5fehu5b2dBlSOPvwv" } ]; 
-      this.name.value = 'pub商品(商品对接人)';
-      this.price.value = 1;
-      this.marketprice.value = 124;
-      this.sku.value = 12345;
-      this.amount.value = 2400,
-      this.freight.value = 1.2;
-      this.category.value = 0;
-      this.classify.value = [12, 13, 14];
-      this.vip0_commission.value = this.vip1_commission.value = this.vip2_commission.value = this.vip3_commission.value = this.vip4_commission.value = 1;
-    }
 
   },
 

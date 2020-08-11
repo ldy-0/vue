@@ -1,4 +1,5 @@
 import api from '@/api/store';
+import apiSetting from '@/api/setting';
 import commonReq from '@/api/common' 
 
 export default {
@@ -6,7 +7,7 @@ export default {
     return {
       checkHeadConfig: {
         btnList: [
-          // { title: '上传活动' },
+          { title: '资产设置' },
         ],
 
         inputList: [
@@ -59,6 +60,11 @@ export default {
         refuse:          { title: '拒绝原因', value: '', type: 'text', alert: null, },
       },
 
+      asset: {
+        title: '',
+        asset: { title: '资产设置', value: '', type: 'positive', alert: null, },
+      },
+
       stateMap: {
         0: '下架',
         1: '上架',
@@ -100,8 +106,8 @@ export default {
     },
 
     handleCheckHeadEmit(index){
-      // add
-      if(index == 0) this.openDialog(1);
+      // 
+      if(index == 0) this.openAssetDialog();
     },
 
     handleCheckTableEmit(item, index){
@@ -118,6 +124,10 @@ export default {
 
     openDetailDialog(){ this.dialogConfig.status = 3; this.initRecommendDialog(this.detail); },
     openRefuseDialog(){ this.dialogConfig.status = 4; },
+    openAssetDialog(){ 
+      this.dialogConfig.status = 8;
+      this.getAsset();
+    },
 
     initCheckDialog(item){
       let arr = this.editArr,
@@ -144,6 +154,9 @@ export default {
 
       // refuse 
       if(status == 4) return this.changeCheckStatus(this.detail, 2);
+
+      // 资产设置
+      if(status == 8) return this.changeAsset();
 
       if(this.validCheckError()) return ;
 
@@ -211,6 +224,34 @@ export default {
       this.dialogConfig.status = 0;
       this.getList();
       loading.close();
+    },
+
+    async changeAsset(item, index){
+      let param = { source: 10, },
+          asset = this.asset.asset;
+
+      if(!asset.value) return asset.alert = `${asset.title}不能为空!`;
+
+      param.value = asset.value;
+
+      let loading = this.$loading({ text: '正在设置...' });
+
+      let res = await apiSetting.setAssetSetting(param);
+
+      res.status == 0 ? this.$message.success(this.successTip) : this.handleCheckError(res ? res.error || res : '资产设置失败');
+
+      this.dialogConfig.status = 0;
+      loading.close();
+    },
+
+    async getAsset() {
+      let res = await apiSetting.getAssetSetting();
+      if(typeof res == 'string' || !res || res.error) return this.handleCheckError(res ? res.error || res : '获取资产信息失败');
+
+      if(res.data){
+        this.asset.asset.value = res.data.assets_setting_10;
+      }
+      
     },
 
     async deleteCheck(item){

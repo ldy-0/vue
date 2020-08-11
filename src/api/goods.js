@@ -155,6 +155,23 @@ async function deleteRead(id, data) {
 	return res;
 }
 
+// 分期
+function getRepaySetting(data) {
+	return request({
+    url: '/api/v2/common/repay',
+    method: 'get',
+    params: data
+  });
+}
+
+function setRepaySetting(data) {
+	return request({
+    url: '/api/v2/seller/repay',
+    method: 'POST',
+    data,
+  });
+}
+
 export default {
 	addGoods,
 	setGoods,
@@ -173,4 +190,7 @@ export default {
   addRead,
   setRead,
   deleteRead,
+
+  getRepaySetting,
+  setRepaySetting,
 }

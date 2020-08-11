@@ -40,6 +40,8 @@
 
       </el-form>
 
+      <slot></slot>
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeDialog">取消</el-button>
         <el-button type="primary" @click="submit" v-if="config.submit">{{config.submit}}</el-button>

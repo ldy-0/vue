@@ -9,18 +9,23 @@
   <div>
 
     <el-header class="header">
-      <custom-head style="display:inline-block" :config='headConfig' @add='updateForm(1)' @search='search'></custom-head>
+      <custom-head style="display:inline-block" :config='headConfig' @emit='handleHeadEvent' @search='search'></custom-head>
+
       <el-form :inline="true" style="display:inline-block">
         <multiSelect :obj='headConfig.multiSelect' @load='loadClass' @search="searchByclass"></multiSelect>
       </el-form>
     </el-header>
 
-    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @update='updateForm' @delete='deleteItem' @change='change' @modify='handleTableEvent'></custom-table>
+    <custom-table ref='mainTable' :config='tableConfig' :data='list' :total='total' @delete='deleteItem' @change='change' @modify='handleTableEvent'></custom-table>
 
     <goods :obj="goodsConfig" @submit="submitGoods" @close="closeGoodsDialog" v-if="showGoods"></goods>
 
     <el-dialog :title="dialogConfig.title" :visible.sync="showDialog" :before-close='closeDialog' width="80%">
-      <refuse :obj='refuse' v-if='dialogConfig.status == 3'></refuse>
+      <el-form label-width='120px'>
+        <custom-radio :obj="repayDscore" v-if="dialogConfig.status == REPAY"></custom-radio>
+
+        <custom-input :obj="freezeTime" v-if="dialogConfig.status == FREEZETIME"></custom-input>
+      </el-form>
 
       <span slot="footer" class="dialog-footer">
         <el-button @click="closeDialog">取消</el-button>
@@ -33,32 +38,27 @@
 <script>
 import customTable from "@/components/customTable";
 import customHead from "@/components/customHead";
-import goods from '@/components/form/goods';
 import customInput from "@/components/customInput";
-import customSelect from "@/components/select";
-import cSelect from "@/components/customSelect";
+import customRadio from "@/components/customRadio";
 import multiSelect from "@/components/multiSelect";
-import customRadio from "@/components/radio";
-import cRadio from "@/components/customRadio";
 import dateTimeRange from "@/components/dateTimeRange";
 import customImg from "@/components/customImg";
 import refuse from '@/components/form/refuseGoods';
+import goods from '@/components/form/goods';
 import api from "@/api/goods";
 import commonReq from "@/api/common";
 import classAPI from "@/api/classify";
+import user from './user';
 
 export default {
-  mixins: [],
+  mixins: [user],
 
   components: {
     customHead,
     customTable,
     customInput,
-    customSelect,
-    cSelect,
-    multiSelect,
     customRadio,
-    cRadio,
+    multiSelect,
     dateTimeRange,
     customImg,
     refuse,
@@ -68,9 +68,7 @@ export default {
   computed: {
     showDialog() { return this.dialogConfig.status ? this.dialogConfig.status < 100 : false; },
     showGoods(){ return [this.ADDGOODS, this.EDITGOODS].indexOf(this.dialogConfig.status) !== -1 },
-    isStoreGoods(){ return this.category.value == 2; },
-
-    isEdit(){ return this.dialogConfig.status === this.EDIT; },
+    isAdmin(){ return this.userInfo && this.userInfo.is_admin == 1; },
   },
 
   data() {
@@ -78,45 +76,61 @@ export default {
       CLOSEDIALOG: 0,
       ADDGOODS: 100,
       EDITGOODS: 101,
+      REPAY: 3,
+      FREEZETIME: 4,
 
       AUTHING: 10,
       PRE_AUTH: 11,
-      EDIT: 2,
-
-      categoryList: [
-        { id: 0, title: "常规商品" }, 
-        { id: 1, title: "VIP商品" },
-        { id: 2, title: "入驻商家" },
-      ],
-      dialogConfig: {
-        title: "",
-        status: 0 // 1:添加，2：编辑， 3：拒绝原因
-      },
 
       goodsConfig: {
         show: true,
+        showRepay: true,
         detail: null,
         submit: '确定',
       },
+      
+      dialogConfig: {
+        title: "",
+        status: 0 // 1:添加分类，2：编辑分类， 3：拒绝原因
+      },
 
-      classList: [],
+      skuClassList: [],
+      skuList: [],
       detail: null,
       stopSubmit: false,
 
       headConfig: {
         // title: "添加商品",
+        btnList: [
+          { title: '添加商品', },
+          { title: '分期设置', },
+          { title: '冗余时间设置', },
+        ],
         placeHolder: "请输入商品名称",
         multiSelect: { title: "分类", source: [], value: [], alert: null, search: true },
+        selectLabelList: ['状态'], //'是否分期', 
+        selectList: [
+          // [
+          //   { id: null, name: "全部" },
+          //   { id: 1, name: '是' },
+          //   { id: 0, name: "否" }
+          // ],
+          [
+            { id: null, name: "全部" },
+            { id: 1, name: "上架" },
+            { id: 0, name: "下架" }
+          ],
+        ]
       },
 
       tableConfig: {
         loading: false,
         showOperate: true,
-        updateTitle: "编辑",
-        // showDelete: true,
+        showDelete: true,
         btnList: [
-          { key: 'isEdited', value: '上架' },
-          { key: 'isAuthing', value: '拒绝', type: 'danger' },
+          { key: 'goods_commonid', value: '编辑' },
+          { key: 'isDown', value: '上架' },
+          { key: 'goods_state', value: '下架' },
           // { key: 'isWxShow', value: '隐藏' },
           // { key: 'isWxHidden', value: '显示' },
         ],
@@ -131,6 +145,8 @@ export default {
           { key: "库存", value: "goods_storage" },
           { key: "建议零售价(元)", value: "goods_marketprice" },
           { key: "商品售价(元)", value: "goods_price" },
+          { key: "是否分期", value: "repayStr" },
+          { key: "分期首付", value: "prepay_price" },
           { key: "类别", value: "categoryStr" },
           { key: "状态", value: "stateStr" }
         ]
@@ -140,7 +156,7 @@ export default {
       query: {
         page: 1,
         limit: 10,
-        goods_verify: '10,11',
+        is_repay: 1,
       },
 
       allClass: [],
@@ -151,21 +167,27 @@ export default {
         11: '预审核通过',
       },
 
-      refuse: {
-        title: '确认拒绝此店家商品上架申请？',
-        refuse: { title: '拒绝原因', value: '', type: 'text', alert: null, },
+      repayDscore: { 
+        title: "能否德分支付", value: 1, alert: null, disabled: false,
+        list: [
+          { id: 1, title: "是" }, 
+          { id: 2, title: "否" },
+        ],
       },
+      freezeTime: { type: 'text', title: '冗余时间设置(天)', value: '', alert: null, },
 
     };
   },
   methods: {
     search(param) {
+      let statusList = param.statusList;
+
       this.query.page = 1;
       this.$refs.mainTable.initPage();
 
       this.query.search = param.search;
-      this.query.is_vip = param.statusList[0];
-      this.query.goods_state = param.statusList[1];
+      // this.query.repay = param.statusList[0];
+      this.query.goods_state = statusList[0];
 
       this.getList();
     },
@@ -175,29 +197,47 @@ export default {
       this.getList();
     },
 
-    changeCategory() {
-
+    handleHeadEvent(index) {
+      // 添加商品
+      if(index == 0) return this.updateForm(1);
+      // 分期设置
+      if(index == 1) return this.openDialog(this.REPAY);
+      // 冗余时间设置
+      if(index == 2) return this.openDialog(this.FREEZETIME);
     },
 
+    // 列表操作
     handleTableEvent(item, index){
+      console.log(index);
+      // 详情
+      if(index == 0) return this.updateForm(item);
       // up
-      if(index == 0) return this.changeGoods(item, 'online');
+      if(index == 1) return this.changeGoods(item, 'online');
       // down
-      if(index == 1) return this.openRefuseDialog(item);
+      if(index == 2) return this.changeGoods(item, 'offline');
       // wx show
-      if(index == 2) return this.changeGoods(item, 'only_app');
+      // if(index == 2) return this.changeGoods(item, 'only_app');
       // wx hidden
-      if(index == 3) return this.changeGoods(item, 'all_end');
+      // if(index == 3) return this.changeGoods(item, 'all_end');
+
     },
 
-    openRefuseDialog(item){ 
-      let refuse = this.refuse.refuse;
+    async openDialog(type){ 
+      let repayDscore = this.repayDscore,
+          freezeTime = this.freezeTime;
 
-      this.dialogConfig.status = 3; 
-      this.detail = item; 
+      this.dialogConfig.status = type;
+      repayDscore.value = freezeTime.value = '';
+      repayDscore.alert = freezeTime.alert = null;
 
-      refuse.value = '';
-      refuse.alert = null;
+      
+      let res = await api.getRepaySetting();
+      if(!res || typeof res === 'string' || res.error) return this.$message.error(res ? res.error || res : '获取分期设置信息失败!')
+      
+      if(res.data){
+        repayDscore.value = res.data.repay_rcb == 1 ? 1 : 2;
+        freezeTime.value = res.data.repay_day;
+      }
     },
 
     async updateForm(status) {
@@ -234,60 +274,64 @@ export default {
       this.dialogConfig.status = typeof status === "number" ? this.ADDGOODS : this.EDITGOODS;
     },
 
+    closeGoodsDialog() {
+       this.dialogConfig.status = this.CLOSEDIALOG;
+    },
+
     change(param) {
       console.log("param :", param);
       this.query.limit = param.limit;
       this.query.page = param.page;
       this.getList();
     },
-
+    
     closeDialog() {
       let config = this.dialogConfig;
 
       config.status = 0;
     },
 
-    closeGoodsDialog() {
-      this.dialogConfig.status = this.CLOSEDIALOG;
+    submit() {
+      let freezeTime = this.freezeTime,
+          param = {};
+
+      // 分期德分设置
+      if(this.REPAY == this.dialogConfig.status){
+        param.source = 'rcb';
+        param.value = this.repayDscore.value == 1 ? 1 : 0;
+        
+        let loading = this.$loading();
+        
+        return this.saveRepaySetting(param, loading);
+      }
+
+      // 冗余时间设置
+      if(this.FREEZETIME == this.dialogConfig.status){
+        param.source = 'day';
+        param.value = freezeTime.value;
+
+        if(!/^[1-9]\d*$/.test(freezeTime.value)) return freezeTime.alert = `冗余时间未设置或设置不正确`;
+        
+        let loading = this.$loading();
+        
+        return this.saveRepaySetting(param, loading);
+      }
     },
 
-    async submit() {
-      // refuse 
-      if(this.dialogConfig.status == 3) return this.changeGoods(this.detail, 'refuse');
+    async saveRepaySetting(param, loading) {
+      let res = await api.setRepaySetting(param);
+      if(!res || typeof res === 'string' || res.error) return this.$message.error(res ? res.error || res : '设置失败!'), loading.close();
+
+      this.$message.success('设置成功!');
+      this.closeDialog();
+      loading.close();
     },
 
     submitGoods(param) {
       this.getList();
       this.dialogConfig.status = this.CLOSEDIALOG;
     },
-
-    async format(item) {
-      let matcher,
-        arr = ["is_vip", "goods_state"],
-        // selectList = this.headConfig.selectList,
-        classify;
-
-      item.img = [{ url: item.goods_image }];
-      item.detailImg = item.detailImg ? item.detailImg.map(v => { return { url: v }; }) : [];
-
-      // 分类名
-      this.allClass.filter(v => {
-        if (v.storegc_id == item.gc_id_1) item.gc_name_1 = v.storegc_name;
-        if (v.storegc_id == item.gc_id_2) item.gc_name_2 = v.storegc_name;
-        if (v.storegc_id == item.gc_id_3) item.gc_name_3 = v.storegc_name;
-      });
-      item.classStr = `${item.gc_name_1}/${item.gc_name_2}/${item.gc_name_3}`;
-
-      // 
-      item.isAuthing =  [this.AUTHING, this.PRE_AUTH].indexOf(Number(item.goods_verify)) !== -1;
-      item.isEdited = item.isAuthing && item.goods_price;
-
-      item.stateStr = this.stateObj[item.goods_verify];
-
-      item.categoryStr = '入驻商家';
-
-      item.only_app == 0 ? item.isWxShow = true : item.isWxHidden = true;
-    },
+    
     exchange(sourceList, valueList, filterProperty, destProperty) {
       let res,
         resList = [];
@@ -338,26 +382,12 @@ export default {
       selClass.children = res.data;
     },
 
-    async save(param) {
-      let status = this.dialogConfig.status;
-      console.log("save: ", param, status);
-
-      let res = status == 1 ? await api.addGoods(param) : await api.setGoods(this.detail.goods_commonid, param);
-
-      if(typeof res == 'string' || res.error) this.$message.error(res.error || res);
-
-      this.getList();
-      this.stopSubmit = false;
-      this.dialogConfig.status = 0;
-    },
-
     async getList() {
-      //获取列表
       this.tableConfig.loading = true;
       this.query.type = 'sort'
       let res = await api.getGoodsList(this.query, this);
 
-      if (res.error) return this.$message.error(res.error);
+      if(!res || typeof res === 'string' || res.error) return this.$message.error(res ? res.error || res : '获取列表失败!')
 
       // get all class list
       let allClass = await classAPI.getClassList();
@@ -371,6 +401,36 @@ export default {
       this.tableConfig.loading = false;
     },
 
+    format(item) {
+      let matcher, classify;
+
+      item.img = [{ url: item.goods_image }];
+      item.detailImg = item.detailImg ? item.detailImg.map(v => { return { url: v }; }) : [];
+
+      // 分类名
+      this.allClass.filter(v => {
+        if (v.storegc_id == item.gc_id_1) item.gc_name_1 = v.storegc_name;
+        if (v.storegc_id == item.gc_id_2) item.gc_name_2 = v.storegc_name;
+        if (v.storegc_id == item.gc_id_3) item.gc_name_3 = v.storegc_name;
+      });
+      item.classStr = `${item.gc_name_1}/${item.gc_name_2}/${item.gc_name_3}`;
+
+      // 
+      item.isAuthing = item.goods_verify == this.AUTHING;
+      item.isEdited = item.isAuthing && item.goods_price;
+
+      // 是否分期
+      item.repayStr = item.is_repay == 1 ? '是' : '否';
+
+      item.stateStr =  item.goods_state == 1 ? '上架' : '下架'; //this.stateObj[item.goods_verify];
+
+      item.categoryStr = item.is_vip ? 'VIP商品' : '普通商品';
+      
+      // 是否显示上架按钮
+      item.isDown = item.goods_state == 0 && (item.store_id == 1 || item.is_vip);
+      item.only_app == 0 ? item.isWxShow = true : item.isWxHidden = true;
+    },
+
     async deleteItem(item) {
       let res = await api.deleteGoods(item.goods_commonid);
 
@@ -378,7 +438,7 @@ export default {
     },
 
     async changeGoods(item, type){
-      let refuse = this.refuse.refuse;
+      let refuse;
 
       let send = {
         goods_commonid: ['online', 'offline'].indexOf(type) !== -1 ? [item.goods_commonid] : item.goods_commonid,
@@ -398,20 +458,20 @@ export default {
 
       this.$message.success("操作成功");
 
-      this.dialogConfig.status = 0;
+      this.dialogConfig.status = this.CLOSEDIALOG;
       this.getList();
 
       loading.close();
     },
 
-    async getUploadToken() {
-      let res = await commonReq.getUploadToken();
+    // async getUploadToken() {
+    //   let res = await commonReq.getUploadToken();
 
-      if (res.error) return this.$message.error(`getUploadToken: ${res.error}`);
+    //   if (res.error) return this.$message.error(`getUploadToken: ${res.error}`);
 
-      this.detailImg.body.token = this.img.body.token = res.data;
-      this.detailImg.body.config = this.img.body.config = "{ useCdnDomain: true }";
-    },
+    //   this.detailImg.body.token = this.img.body.token = res.data;
+    //   this.detailImg.body.config = this.img.body.config = "{ useCdnDomain: true }";
+    // },
 
     // utils
     formatClass() {
@@ -432,6 +492,8 @@ export default {
     this.getFirstClassList();
 
     this.getList();
+
+    this.initUser();
   }
 };
 </script>

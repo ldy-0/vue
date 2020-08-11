@@ -27,8 +27,17 @@
       </div>
 
         <div v-for='(sku, sku_index) in skuArr' :key='sku_index' :model='sku'>
-          <div class='column' v-for='(item, index) in skusTitle' :key='index'>
-            <input class='field_input' :class='{ "z-disable": item.disabled }' :disabled='item.disabled' v-model='sku[item.value]' @input='change' v-if='isNaN(Number(item.value))' />
+          <div :class='["column"]' v-for='(item, index) in skusTitle' :key='index'>
+            <!-- 分期 -->
+            <div v-if="item.isRepay">
+              <el-select class="select" v-model="sku.isRepay" placeholder="请选择" @change="changeRepay(sku)">
+                <el-option v-for="(v, i) in item.list" :key="i" :label="v.title" :value="v.value"></el-option>
+              </el-select>
+            </div>
+            <input class='field_input' 
+                   :class='{ "z-disable": item.disabled || sku.isRepay == 2 && repayList.indexOf(item.value) != -1 }' 
+                   :disabled='item.disabled || sku.isRepay == 2 && repayList.indexOf(item.value) != -1'
+                   v-model='sku[item.value]' @input='change' v-else-if='isNaN(Number(item.value))' />
             <div v-text='sku[item.value]' v-else></div>
           </div>
         </div>
@@ -38,11 +47,13 @@
   </div>
 </template>
 <script>
+import customSelect from "@/components/customSelect";
 
 export default {
   name: 'multiSku',
 
   components: {
+    customSelect,
   },
 
   props: {
@@ -83,6 +94,8 @@ export default {
       },
       skuClassList: [],
       skus: [],
+
+      repayList: ['prepay_price', 'repay_day'],
     };
   },
 
@@ -149,6 +162,10 @@ export default {
 
     change(){
       this.$emit('update', this.skuClassList, this.skus);
+    },
+    // 分期状态改变
+    changeRepay(sku) {
+      if(sku.isRepay == 2) sku.prepay_price = sku.repay_day = 0;
     },
 
     // update skus
@@ -273,6 +290,9 @@ input{
   display: inline-block;
   width: 10%;
 }
+.select{
+  width: 80%;
+}
 .field_input{
   width: 80%;
   padding: 2px 4px;
@@ -280,6 +300,10 @@ input{
 }
 .z-disable{
   background: #ccc;
+}
+
+.column_repay{
+  display: inline-block;
 }
 
 .s_bg_1{ background: #fff; }

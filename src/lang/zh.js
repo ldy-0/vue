@@ -13,7 +13,7 @@ export default {
 		company: '公司介绍' ,
     caseShow: '案例列表',
 		news: '新闻资讯',
-    memberList:'人员列表',
+    memberList:'会员列表',
     manage:'提现管理',
     record:'提现记录',
     statistics:'分销统计',
@@ -26,6 +26,7 @@ export default {
     seckillOrder:'秒杀订单',
 
     goods: '商品列表',
+    goodsExpect: '超值期待',
     commodityManagement:'商品管理',
     orderManagement:'订单管理',
     bargain:'砍价管理',

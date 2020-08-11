@@ -82,6 +82,12 @@ export let asyncRouterMapSeller = [
         name: "sellGoodsAuth",
         meta: { roles: 'goods_auth', title: "goodsAuth", noCache: true, desc: '商品审核', },
       },
+      {
+        path: "expect",
+        component: () => import("@/views/goods/expect"),
+        name: "goodsExpect",
+        meta: { roles: 'goods_expect', title: "goodsExpect", noCache: true, desc: '超值期待', },
+      },
     ]
   },
   {
@@ -131,6 +137,12 @@ export let asyncRouterMapSeller = [
         component: () => import("@/views/order/storeOrder"),
         name: "storeOrder",
         meta: { roles: 'order_store', title: "商家订单", noCache: true, desc: "商家普通订单", }
+      },
+      {
+        path: "repayOrder",
+        component: () => import("@/views/order/repayOrder"),
+        name: "repayOrder",
+        meta: { roles: 'order_repay', title: "分期订单", noCache: true, desc: "分期订单", }
       },
     ]
   },
@@ -250,7 +262,13 @@ export let asyncRouterMapSeller = [
         path: "list",
         component: () => import("@/views/member/list/index"),
         name: "memberList",
-        meta: { roles: 'member_list', title: "会员列表", noCache: true, icon: "user", desc: "会员列表", },
+        meta: { roles: 'member_list', title: "会员列表", noCache: true, desc: "会员列表", },
+      },
+      {
+        path: "repay",
+        component: () => import("@/views/member/list/repay"),
+        name: "repayMemberList",
+        meta: { roles: 'member_list_repay', title: "分期会员", noCache: true, desc: "分期会员", },
       }
     ]
   },

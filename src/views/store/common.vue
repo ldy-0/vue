@@ -20,14 +20,21 @@
       </el-form-item>     
     </el-form> -->
     <store :obj='store' v-if='[1, 2, 3].indexOf(dialogConfig.status) !== -1'></store> 
-
+    
+    <!-- 拒绝 -->
     <refuse :obj='refuse' v-if='dialogConfig.status == 4'></refuse>
-
+    
+    <!-- 下架 -->
     <down :obj='down' v-if='dialogConfig.status == 5'></down>
 
+    <!-- 备注 -->
     <remark :obj='remark' v-if='dialogConfig.status == 6'></remark>
 
+    <!-- 排序 -->
     <sort :obj='sort' v-if='dialogConfig.status == 7'></sort>
+
+    <!-- 资产设置 -->
+    <asset :obj='asset' v-if='dialogConfig.status == 8'></asset>
 
     <span slot="footer" class="dialog-footer" v-if='[3].indexOf(dialogConfig.status) === -1'>
       <el-button @click="closeDialog" >取消</el-button>
@@ -54,6 +61,7 @@ import remark from '@/components/form/remark'
 import refuse from '@/components/form/refuse'
 import down from '@/components/form/down'
 import sort from '@/components/form/sort'
+import asset from '@/components/form/storeAsset'
 import { export_json_to_excel as toExcel } from "@/vendor/Export2Excel";
 import { format } from 'url';
 
@@ -67,6 +75,7 @@ export default {
     refuse,
     down,
     sort,
+    asset,
   },
 
   mixins: [check, all, recommend, storeClass],
