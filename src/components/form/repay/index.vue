@@ -90,7 +90,7 @@ export default {
           { key: '分期总额', value: 'order_amount' },
           { key: '逾期总额', value: 'repay_amount' },
           { key: '到期时间', value: 'repay_time' },
-          { key: '超时时间', value: 'over_time' },
+          { key: '超时时间', value: 'overTimeStr' },
         ],
       },
       list: [],
@@ -129,6 +129,9 @@ export default {
 
       v.goods_image = goods.goods_image;
       v.goods_name = goods.goods_name;
+
+      // 超时时间
+      v.overTimeStr = `${Math.floor(v.over_time / 86400)}天${Math.floor(v.over_time % 86400 / 3600)}时`;
     },
 
     close() {

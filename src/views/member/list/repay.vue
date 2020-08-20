@@ -228,7 +228,7 @@ export default {
           { key: '注册时间', value: 'time' },
           { key: '分期总额', value: 'repay_total' },
           { key: '逾期总额', value: 'repay_amount' },
-          { key: '超时时间', value: 'delay_time' },
+          { key: '超时时间', value: 'overTimeStr' },
           { key: '账号状态', value: 'statusStr' },
         ],
         DETAIL: 1,
@@ -370,6 +370,9 @@ export default {
       let t = new Date(item.member.member_addtime * 1000);
       item.time = `${t.getFullYear()}-${t.getMonth() < 9 ? '0' : ''}${t.getMonth() + 1}-${t.getDate() < 10 ? '0' : ''}${t.getDate()} 
                     ${t.getHours() < 10 ? '0' : ''}${t.getHours()}:${t.getMinutes() < 10 ? '0' : ''}${t.getMinutes()}:${t.getSeconds() < 10 ? '0' : ''}${t.getSeconds()}`;
+
+      // 超时时间
+      item.overTimeStr = `${Math.floor(item.over_time / 86400)}天${Math.floor(item.over_time % 86400 / 3600)}时`;
     },
     // member table 操作
     emitHandle(index){
