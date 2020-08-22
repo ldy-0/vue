@@ -145,6 +145,7 @@ export default {
       if(!res || typeof res === 'string' || res.error) return this.doing = false, this.$toast.fail(res ? res.error || res : '评价失败!');
 
       if(res.data){
+        localStorage.setItem('isBack', 1);
         this.$toast.success('评价成功!');
         setTimeout(() => this.$router.back(), 1000);
       }

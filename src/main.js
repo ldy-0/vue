@@ -14,7 +14,7 @@ Vue.use(Swipe).use(SwipeItem).use(Lazyload).use(CountDown).use(Rate).use(Uploade
 Vue.use(Radio).use(RadioGroup).use(Checkbox).use(CheckboxGroup).use(Field).use(Icon).use(Switch).use(ActionSheet).use(PasswordInput).use(NumberKeyboard);
 
 // 轮播图
-import 'swiper/swiper-bundle.css'
+import 'swiper/css/swiper.css'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 Vue.use(VueAwesomeSwiper);
 

@@ -1,6 +1,7 @@
 <style lang="less" scoped>
 .tabbar_wrap{
   position: fixed;
+  z-index: 1;
 }
 
 .all_wrap{
@@ -19,28 +20,8 @@
 .s_bg_12{ background: #FF0032; }
 </style>
 <style lang="less">
-.home .goods .van-tab__text {
-  font-size: 30px;
-}
-
-.home .goods .van-tabs__wrap {
-  background: #fff;
-}
-.home .goods .van-tab--active .van-tab__text {
-  font-size: 32px;
-  font-weight: 600;
-}
-.home .goods .van-tabs__nav--line {
-  padding-bottom: 20px;
-}
-.home .goods .van-tabs__line {
-  width: 30px !important;
-}
-.home .goods .van-tabs--line .van-tabs__wrap {
-  height: 102px !important;
-}
-.home .goods .van-sticky--fixed {
-  top: 88px !important;
+.store_list_page_wrap .van-tabs__wrap--scrollable .van-tab--complete{
+  flex: 0 0 25% !important;
 }
 
 .store_list_page_wrap .van-grid-item__content{
@@ -55,7 +36,7 @@
       <van-tabs class="tabbar_wrap" v-model="classIndex" @change="changeClass" sticky :border="false" :ellipsis="false" line-height="2"
         :color="'#fff'" :title-inactive-color="'#aaa'"
         :title-active-color="'#fff'" :background="'#6A6A6A'">
-        <van-tab v-for="item in classList" :key="item.storeclass_id" :title="item.storeclass_name"></van-tab>
+        <van-tab class="tabbar_item" v-for="item in classList" :key="item.storeclass_id" :title="item.storeclass_name"></van-tab>
       </van-tabs>
 
       <div class="all_wrap">
@@ -121,7 +102,7 @@ export default {
     title(){
       let list = this.classList;
 
-      return '商家店铺';
+      return '购购商家';
     },
   },
 

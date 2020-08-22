@@ -70,7 +70,8 @@ export default {
     },
 
     onLoad(e) {
-      if(this.total <= this.page++ * this.limit) return this.finished = true;
+      if(this.total <= this.page * this.limit) return this.finished = true;
+      this.page++;
 
       this.getList();
     },
@@ -100,14 +101,15 @@ export default {
         this.total = res.pagination ? res.pagination.total : this.list.length;
       }
 
-      this.loading = this.refreshing = false;
+      this.loading = this.refreshing = this.finished = false;
       this.$toast.clear();
     },
 
     clear() {
       this.list = [];
       this.page = 1;
-      this.finished = false;
+      this.total = 0;
+      this.finished = true;
 
       scrollTo(0, 0);
     },
@@ -118,7 +120,7 @@ export default {
 
   },
 
-  created() {
+  activated() {
     this.init();
   },
 };

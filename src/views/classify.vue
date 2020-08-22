@@ -96,7 +96,7 @@ export default {
 
     goSearch(item) {
       let id = item.storegc_id;
-      this.$router.push({ name: 'searchResult', query: { id, }, });
+      this.$router.push({ name: 'searchResult', query: { id, name: item.storegc_name, }, });
     },
   }
 };

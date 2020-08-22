@@ -1,8 +1,9 @@
 <template>
   <div class="store_goods_page_wrap page_wrap">
-    <van-nav-bar left-arrow :title="title" fixed @click-left="goBack" @click-right="openShareDialog">
+    <van-nav-bar left-arrow :title="title" fixed @click-left="goBack">
       <template #right>
-        <img class="i_share" src="../../assets/images/store/share.png" alt="">
+        <a :href="phone"><img class="i_contact" src="../../assets/images/store/contact.png" alt=""></a>
+        <img class="i_share" src="../../assets/images/store/share.png" alt="" @click="openShareDialog">
       </template>
     </van-nav-bar>
     
@@ -91,6 +92,7 @@ export default {
 
       showShareDialog: false,
       url: '',
+      phone: '',
     };
   },
 
@@ -215,6 +217,8 @@ export default {
       v.store_goods.forEach(goods => {
         goods.priceArr = String(goods.goods_price).split('.');
       });
+
+      this.phone = `tel:${v.contacts_phone}`;
 
       return v;
     },
@@ -361,11 +365,18 @@ export default {
   width: 240px;
   height: 240px;
 }
+.i_contact{
+  position: relative;
+  top: 12px;
+  width: 44px;
+  height: 40px;
+}
 .i_share{
   position: relative;
   top: 12px;
   width: 48px;
   height: 40px;
+  margin: 0 0 0 20px;
 }
 
 .ml10{ margin-left: 10px; }

@@ -16,14 +16,20 @@
       <div class='detail_wrap' v-html="detailInfo"></div>
     </div>
 
-    <div class="bottom_bar_wrap flex s_fc_f" @click="share">
-      <div class='share_btn flex center s_bg_14' @click="copy">
+    <div class="bottom_bar_wrap flex s_fc_f">
+      <div class='share_btn flex center s_bg_14' @click="openShareDialog">
         <span>分享</span>
         <img class='i_share' src='../../assets/images/activity/m_share.png' />
       </div>
 
       <div class='buy_btn s_bg_13' @click='goGoodsDetail'>购买此商品</div>
     </div>
+
+    <!-- 分享 -->
+    <van-dialog v-model="showShareDialog" title="复制链接,打开微信粘贴分享好友" show-cancel-button confirm-button-text="复制" confirm-button-color="#333" cancel-button-color="#999"
+                @cancel="closeShareDialog" @confirm="copy">
+      <div class="url_wrap s_bg_16">{{url}}</div>
+    </van-dialog>
 
   </div>
 </template>
@@ -43,7 +49,9 @@ export default {
       type: null,
 
       detail: {},
-
+      
+      showShareDialog: false,
+      url: null,
       clip: null,
     };
   },
@@ -66,8 +74,6 @@ export default {
       this.type = query.type;
       this.id = query.id;
 
-      this.getInfo();
-
       this.recordView();
     },
 
@@ -81,10 +87,24 @@ export default {
       this.$router.push({ name: 'goodsDetail', query: { id } });
     },
 
+    openShareDialog() {
+      // if(!valid.isAuth()) return this.$router.push({ name: 'login', });
+
+      // if(this.user && !this.user.member_mobile) return this.$router.push({ name: 'login', });
+
+      this.showShareDialog = true;
+      this.url = `${location.href}`;
+    },
+
+    closeShareDialog() {
+      this.showShareDialog = false;
+      this.url = '';
+    },
+
     copy() {
       if(this.clip) this.clip.destroy();
 
-      let clip = new ClipboardJS('.share_btn', {
+      let clip = new ClipboardJS('.van-dialog__confirm', {
         text: e => location.href,
       });
 
@@ -92,9 +112,7 @@ export default {
       clip.on('error', e => this.$toast.fail(`复制失败!`));
 
       this.clip = clip;
-    },
 
-    share() {
       this.recordShare();
     },
 
@@ -124,6 +142,8 @@ export default {
       const res = await apiGoods.recordReadView(this.id);
 
       if(!res || typeof res === 'string' || res.error) return console.log(res ? res.error || res : '统计访问失败!');
+
+      this.getInfo();
     },
 
     async recordShare(){
@@ -142,7 +162,7 @@ export default {
   },
 
   deactivated() {
-    this.clip.destroy();
+    if(this.clip) this.clip.destroy();
   },
 };
 </script>
@@ -200,6 +220,13 @@ export default {
   flex-grow: 1;
 }
 
+.url_wrap{
+  margin: 30px 36px;
+  padding: 30px 24px;
+  font-size: 24px;
+  word-break: break-all;
+}
+
 .i_goods{
   width: 180px;
   height: 180px;
@@ -226,6 +253,7 @@ export default {
 .s_bg_13{ background: #FF003A; }
 .s_bg_14{ background: #58BEB5; }
 .s_bg_f5{ background: #f5f5f5; }
+.s_bg_16{ background: #F7F4F8; }
 </style>
 <style>
 

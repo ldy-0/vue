@@ -229,6 +229,7 @@ export default {
 
       this.id = query.id;
       this.showSkuDialog = false;
+      this.commentTotal = 0;
 
       this.user = gd.getUser();
 
@@ -239,7 +240,10 @@ export default {
     },
 
     handleMenu(item) {
-      if(item.isHome) this.$router.replace({ name: this.isStoreGoods ? 'storeGoodsList' : 'home', query: { id: this.detail.store_id, } });
+      if(item.isHome){
+        scrollTo(0, 0);
+        return this.$router.replace({ name: this.isStoreGoods ? 'storeGoodsList' : 'home', query: { id: this.detail.store_id, } });
+      }
 
       if(item.isCart) this.$router.push({ name: 'shoppingCar' });
 

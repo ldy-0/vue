@@ -12,8 +12,8 @@
       <div class="comment_ctn s_fc_2">{{config.geval_content}}</div>
     </div>
 
-    <div class="img_wrap between" @click="preview">
-      <img class="i_eval" :src="item" alt="" v-for="(item, index) in config.imgList" :key="index" />
+    <div class="img_wrap flex" @click="preview">
+      <img class="i_eval" :src="item" alt="" v-for="(item, index) in imgList" :key="index" />
     </div>
   </div>
 </template>
@@ -29,7 +29,7 @@ export default {
 
   data() {
     return {
-      
+      imgList: [],
     };
   },
 
@@ -40,16 +40,16 @@ export default {
 
     format(v) {
       try{
-        v.imgList = JSON.parse(v.geval_image);
+        this.imgList = JSON.parse(v.geval_image);
       }catch(e){
-        v.imgList = [];
+        this.imgList = [];
         console.error(e.message);
       }
     },
 
     preview() {
       ImagePreview({
-        images: this.config.imgList,
+        images: this.imgList,
       });
     },
   },
@@ -96,7 +96,7 @@ export default {
   flex-shrink: 0;
   width: 176px;
   height: 176px;
-  margin: 4px 0 0;
+  margin: 4px 30px 0 0;
   border-radius: 5px;
 }
 

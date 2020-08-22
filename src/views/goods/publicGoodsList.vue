@@ -178,7 +178,7 @@ export default {
   },
 
   computed: {
-    title() { return this.classObj.storegc_name; },
+    title() { return this.configInfo.menus ? this.configInfo.menus[1].appName: '购购商城'; },
 
     isBack() { return this.$route.meta.isBack; },
 
@@ -191,6 +191,8 @@ export default {
           query = route.query;
 
       this.type = query.type;
+      
+      this.clear(true);
 
       this.getClassList();
       this.getGoodsList();

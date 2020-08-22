@@ -67,6 +67,17 @@
   height: 230px;
 }
 
+.swiper_wrap{
+  position: relative;
+  overflow: hidden;
+  height: 350px;
+  transition-property: transform;
+}
+.swiper_item{
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
 .ml10{ margin-left: 10px; }
 
@@ -77,29 +88,6 @@
 .s_bg_12{ background: #FF0032; }
 </style>
 <style lang="less">
-.home .goods .van-tab__text {
-  font-size: 30px;
-}
-
-.home .goods .van-tabs__wrap {
-  background: #fff;
-}
-.home .goods .van-tab--active .van-tab__text {
-  font-size: 32px;
-  font-weight: 600;
-}
-.home .goods .van-tabs__nav--line {
-  padding-bottom: 20px;
-}
-.home .goods .van-tabs__line {
-  width: 30px !important;
-}
-.home .goods .van-tabs--line .van-tabs__wrap {
-  height: 102px !important;
-}
-.home .goods .van-sticky--fixed {
-  top: 88px !important;
-}
 
 .store_list_page_wrap .van-grid-item__content{
   padding: 0;
@@ -139,6 +127,35 @@
           </van-swipe-item>
         </van-swipe>
       </div>
+      
+      <!-- <div class="recommend_wrap s_bg_f" v-if="recommendList.length">
+        <swiper ref="swiper" :options="swiperOption">
+          <swiper-slide class="recommend_store_wrap" v-for="(item, index) in recommendList" :key="index">
+            <div class="recommend_store" @click="goStore(item)">
+              <img class="i_recommend" :src="item.store_avatar" />
+              <div class="recommend_info_wrap s_bg_11">
+                <div class="store_title">{{item.store_name}}</div>
+                <div class="recommend_class s_fc_11">{{item.storeclass.storeclass_name}}</div>
+              </div>
+            </div>
+          </swiper-slide>
+        </swiper>
+      </div> -->
+
+      <!-- <div class="recommend_wrap swiper_wrap s_bg_f" v-if="rList.length">
+        <div :style="{ transform: 'translateX('+ translate +'px)', transitionDuration: duration + 's', }" @touchstart="touchstart" @touchend="touchend">
+          <div ref="swiper" :style="{ left: (swiperList[index] ? swiperList[index].left : 0) + 'px', }"
+             class="recommend_store_wrap swiper_item" v-for="(item, index) in rList" :key="index">
+            <div class="recommend_store" @click="goStore(item)">
+              <img class="i_recommend" :src="item.store_avatar" />
+              <div class="recommend_info_wrap s_bg_11">
+                <div class="store_title">{{item.store_name}}</div>
+                <div class="recommend_class s_fc_11">{{item.storeclass.storeclass_name}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> -->
 
       <div class="all_wrap">
         <div class="all_title s_fc_3">全部店铺</div>
@@ -177,17 +194,28 @@ export default {
         bgImg: null,
       },
       swiperOption: {
-        slidesPerView: 1,
-        spaceBetween: 20,
+        // notNextTick: true,
+        slidesPerView: 3,
+        // spaceBetween: 20,
         loop: true,
+        speed:500,
         autoplay: {
-          delay: 2500,
-          disableOnInteraction: false
-        },
+　　　　   delay: 1500,
+　　       disableOnInteraction: false,
+　　    },
       },
 
       classList: [],
       recommendList: [],
+
+      rList: [],
+      swiperList: [],
+      currentSwiper: 0,
+      preSwiper: -1,
+      translate: 0,
+      duration: 0,
+      interval: null,
+      startX: 0,
 
       list: [],
       page: 1,
@@ -222,6 +250,10 @@ export default {
       let menus = this.configInfo.menus;
 
       return '购购商家'; // menus ? menus[2].appName : '商家店铺';
+    },
+
+    swiper() {
+      return this.$refs.swiper.swiper;
     },
   },
 
@@ -266,7 +298,9 @@ export default {
       if(!res || typeof res === 'string' || res.error) return this.$toast.fail(res ? res.error || res : '获取店铺信息失败!')
 
       if(res && res.data){
-        res.data.forEach(v => this.recommendList.push(this.format(v)));
+        res.data.forEach(this.format);
+        this.recommendList = res.data;
+        // this.initSwiper(res.data.slice());
       }
 
       this.loading = this.refreshing = false;
@@ -348,6 +382,8 @@ export default {
 
   activated() {
     this.doing = false;
+    this.rList = [];
+    this.translate = 0;
 
     this.clear();
     this.getConfig();
@@ -355,6 +391,10 @@ export default {
     this.getList();
     this.getRecommendList();
   },
+
+  deactivated() {
+    if(this.interval) clearInterval(this.interval);
+  }
 
 }
 </script>

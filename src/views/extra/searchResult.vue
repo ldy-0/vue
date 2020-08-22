@@ -52,6 +52,8 @@ export default {
       activeName: 'goods',
       sercherStorageList: [],
 
+      className: '',
+
       page: 1,
       limit: 10,
       total: 0,
@@ -62,7 +64,7 @@ export default {
   },
   
   computed: {
-    title(){ return '搜索'; },
+    title(){ return this.id ? this.className : '搜索'; },
     
     isBack() { return this.$route.meta.isBack; },
 
@@ -222,7 +224,10 @@ export default {
       this.isHave = true;
     }
 
-    if(query.id) this.getGoodsList(this.id = query.id);
+    if(query.id){
+      this.className = query.name;
+      this.getGoodsList(this.id = query.id);
+    }
 
     if(query.search){
       this.value = query.search;

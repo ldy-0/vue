@@ -79,9 +79,11 @@ export default {
     },
 
     goSearchResult() {
-      if(!this.liveId) return this.$toast.fail(`直播礼包分类Id不存在!`);
+      // if(!this.liveId) return this.$toast.fail(`直播礼包分类Id不存在!`);
       
-      this.$router.push({ name: 'searchResult', query: { id: this.liveId, }, });
+      // this.$router.push({ name: 'searchResult', query: { id: this.liveId, }, });
+
+      this.$router.push({ name: 'publicGoodsList' });
     },
 
     updateIndex(index) {
@@ -157,7 +159,7 @@ export default {
 .goods_list_wrap{
   box-sizing: border-box;
   flex-wrap: wrap;
-  padding: 0 10px;
+  padding: 0 20px;
 }
 .goods_wrap{
   flex-shrink: 0;
@@ -165,6 +167,7 @@ export default {
 
 .indicator_wrap{
   width: 100%;
+  padding: 20px 0 0;
 }
 .indicator{
   width: 10px;

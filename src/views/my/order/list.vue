@@ -179,11 +179,11 @@ export default {
   activated() {
     let isBack = localStorage.getItem('isBack');
 
-    if(this.isBack) return ;
+    if(this.isBack && !isBack) return ;
 
     this.clear();
 
-    // 退款页返回
+    // 评价, 退款页返回
     if(isBack){
       localStorage.removeItem('isBack');
       return this.getList();

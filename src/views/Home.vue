@@ -5,27 +5,32 @@
 
 .banner {
   width: 100%;
-  height: 612px;
+  height: 512px;
   position: relative;
   .banner_bg {
     width: 100%;
     height: 100%;
     z-index: -1;
   }
-  .swipe {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 702px;
-    height: 400px;
-    border-radius: 20px;
-    img {
-      width: 100%;
-      height: 100%;
-    }
+}
+.swipe {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 702px;
+  height: 400px;
+  border-radius: 20px;
+  img {
+    width: 100%;
+    height: 100%;
   }
 }
+.swipe_small{
+  height: 300px;
+  // margin: 0 0 50px 0;
+}
+
 .module {
   margin: 0 auto;
   margin-top: -175px;
@@ -90,11 +95,10 @@
 .goods {
   width: 100%;
   background: #fff;
-  padding: 0 20px 0 20px;
+  padding: 0 20px;
   box-sizing: border-box;
   .goods_box {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
     flex-wrap: wrap;
     box-sizing: border-box;
@@ -157,6 +161,9 @@
       font-size: 24px;
     }
   }
+}
+.goods_list_wrap{
+  min-height: 100vh;
 }
 
 .newPeople_wrap{
@@ -227,7 +234,7 @@
   background: #fff;
 }
 .home .goods .van-tab--active .van-tab__text {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 600;
 }
 .home .goods .van-tabs__nav--line {
@@ -239,30 +246,31 @@
 .home .goods .van-tabs--line .van-tabs__wrap {
   height: 102px !important;
 }
-.home .goods .van-sticky--fixed {
-  top: 88px !important;
+.home_page_wrap .van-sticky--fixed {
+  top: 140px !important;
 }
 </style>
 <template>
   <div class="home home_page_wrap">
     <!-- app -->
-    <div class="app_wrap between s_fc_f" @click="goApp">
+    <div ref="app" class="app_wrap between s_fc_f" @click="goApp">
       <div>健德购购,资源整合的新电商综合体平台,为了更好的体验,请在APP中打开!</div>
       <div class="app_btn">打开app</div>
     </div>
 
     <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
-      <header-bar :bgColor="headerBgColor"></header-bar>
+      <header-bar ref="headerBar" :bgColor="headerBgColor"></header-bar>
 
       <!-- 轮播领域 -->
-      <div class="banner">
+      <div class="banner banner_small">
         <img class="banner_bg" :src="imgs.home" alt="">
-        <van-swipe :autoplay="3000" indicator-color="rgba(82, 190, 79, 1)" class="swipe" :stop-propagation="false">
+        <van-swipe :autoplay="3000" indicator-color="rgba(82, 190, 79, 1)" class="swipe swipe_small" :stop-propagation="false">
           <van-swipe-item v-for="(image, index) in bannerList" :key="index">
             <img v-lazy="image.banner_pic" @click="goModule(image)" />
           </van-swipe-item>
         </van-swipe>
       </div>
+
       <!-- 图标领域 -->
       <div class="module s_bg_f">
         <van-grid :column-num="5" :border="false">
@@ -306,28 +314,31 @@
       <!-- 商品领域 -->
       <div class="goods">
         <van-tabs v-model="customcatalogIndex" @scroll="tabScroll" sticky :border="false" :ellipsis="false" line-height="2"
+          :offset-top="offsetTop"
           :color="isFiexd?'#fff':'#4FB84A'" :title-inactive-color="isFiexd?'#fff':'#000'"
           :title-active-color="isFiexd?'#fff':'#4FB84A'" :background="isFiexd?headerBgColor:'#fff'">
-          <van-tab v-for="item in goodsList" :key="item.customcatalog_id" :title="item.customcatalog_name">
-          </van-tab>
-        </van-tabs>
+          <van-tab v-for="item in goodsList" :key="item.customcatalog_id" :title="item.customcatalog_name"></van-tab>
 
-        <div class="goods_box" v-if="goodsList[customcatalogIndex]">
-          <div class="goods_item" @click="toGoods(good.goods_commonid)" v-for="good in goodsList[customcatalogIndex].goods" :key="good.cataloggoods_id">
-            <img class="goods_item-img" :src="good.goodscommon.goods_image" alt="">
-            <div class="goods_item-name">{{good.goodscommon.goods_name}}</div>
+          <div class="goods_list_wrap">
+            <div class="goods_box" v-if="goodsList[customcatalogIndex]">
+              <div class="goods_item" @click="toGoods(good.goods_commonid)" v-for="good in goodsList[customcatalogIndex].goods" :key="good.cataloggoods_id">
+                <img class="goods_item-img" :src="good.goodscommon.goods_image" alt="">
+                <div class="goods_item-name">{{good.goodscommon.goods_name}}</div>
 
-            <div class='goods_integral_wrap s_fc_16' v-if="good.goodscommon.goods_integral">
-              <span class="goods_integral_pre s_fc_f s_bg_12">返</span><span class="goods_integral">{{good.goodscommon.goods_integral}}积分</span>
-            </div>
+                <div class='goods_integral_wrap s_fc_16' v-if="good.goodscommon.goods_integral">
+                  <span class="goods_integral_pre s_fc_f s_bg_12">返</span><span class="goods_integral">{{good.goodscommon.goods_integral}}积分</span>
+                </div>
 
-            <div class="goods_item-price">
-              <img v-if="good.goodscommon.tag_image" class="goods_item-tag" :src="good.goodscommon.tag_image" alt="">
-              <span class="price_wrap">￥<span class="price">{{good.priceInteger}}</span>.{{good.priceDecimal}}</span>
-              <div class="sale_wrap s_fc_9">热销{{good.goodscommon.goods_salenum}}</div>
+                <div class="goods_item-price">
+                  <img v-if="good.goodscommon.tag_image" class="goods_item-tag" :src="good.goodscommon.tag_image" alt="">
+                  <span class="price_wrap">￥<span class="price">{{good.priceInteger}}</span>.{{good.priceDecimal}}</span>
+                  <div class="sale_wrap s_fc_9">热销{{good.goodscommon.goods_salenum}}</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </van-tabs>
+        
       </div>
       <van-divider :style="{ color: '#333', borderColor: '#ccc', padding: '0 30px',fontSize:'12px' }">
         已经没有了哦~
@@ -374,6 +385,8 @@ export default {
       liveId: null, // 直播礼包分类Id
 
       isOpenCoupon: false, // 优惠券开启状态
+
+      offsetTop: 0,
     }
   },
   
@@ -388,8 +401,10 @@ export default {
     headerBar: HeaderBar,
     goTop: goTop,
   },
-  filters: {
+
+  computed: {
   },
+  
   methods: {
     handleMenu(item, index) {
       if(this.doing) return ;
@@ -592,6 +607,9 @@ export default {
 
   activated() {
     this.doing = false;
+
+    this.offsetTop = this.$refs.headerBar.$el.offsetHeight + this.$refs.app.offsetHeight;
+    console.log(this.$refs.headerBar.$el.offsetHeight, this.$refs.headerBar.$el.innerHeight);
 
     this.getBanner();
     this.getGoodsList();

@@ -1,7 +1,7 @@
 <template>
-  <div class="page_wrap s_bg_f5">
+  <div class="page_wrap vip_goods_page_wrap s_bg_f5">
     <!-- <van-nav-bar left-arrow :title="title" fixed @click-left="goBack"></van-nav-bar> -->
-    <title-bar :title="title" :bgColor="bgColor"></title-bar>
+    <title-bar ref="titleBar" :title="title" :bgColor="bgColor"></title-bar>
     
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
       <banner :config="bannerConfig"></banner>
@@ -100,6 +100,7 @@ export default {
       loading: false,
       finished: false,
       isFixed: false,
+      offsetTop: 0,
 
       page: 1,
       limit: 10,
@@ -120,7 +121,6 @@ export default {
 
     isVip(){ return this.status === 1; },
     isRead(){ return this.status === 2; },
-    offsetTop(){ console.log(devicePixelRatio); return 88 / devicePixelRatio; },
 
     vipList(){
       let arr = [];
@@ -243,6 +243,8 @@ export default {
 
   activated() {
     if(this.isBack) return ;
+    
+    this.offsetTop = this.$refs.titleBar.$el.offsetHeight;
 
     this.getConfig();
     this.init();
@@ -279,7 +281,7 @@ export default {
 }
 
 .goods_list_wrap{
-  padding: 0 10px; 
+  padding: 0 20px; 
 }
 
 .read_list_wrap{
@@ -304,13 +306,13 @@ export default {
 }
 
 .van-tabs__wrap--scrollable .van-tab{
-  flex: 0 0 20% !important;
+  flex: 0 0 20%;
 }
 .van-tabs__line{
   background: #FF557A;
 }
 
-.van-sticky--fixed{
-  top: 88px;
+.vip_goods_page_wrap .van-sticky--fixed{
+  top: 88px !important;
 } 
 </style>
