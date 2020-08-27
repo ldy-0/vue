@@ -1,0 +1,477 @@
+<style scoped="scoped">
+.graphic {
+  border: solid #d5dbe7 1px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 30px 0;
+}
+.detial_content {
+  border-bottom: solid 1px #f7f7f7;
+  display: flex;
+  padding-top: 20px;
+}
+.detial_content > div:first-child {
+  min-width: 200px;
+}
+.company-video {
+  width: 300px;
+  height: 150px;
+}
+</style>
+<template>
+  <div class="app-container">
+    <!--预览图片开始 -->
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt>
+    </el-dialog>
+    <!--顶部菜单开始 -->
+    <div class="filter-container">
+      <el-button
+        class="filter-item"
+        style="margin-left: 10px;"
+        type="primary"
+        icon="el-icon-edit"
+        @click="CreateItem"
+      >添加</el-button>
+    </div>
+    <!--顶部菜单结束 -->
+    <!--中间表格开始 -->
+    <el-table :data="tableData" style="width: 100%">
+      <el-table-column label="视频标题" prop="video_title"></el-table-column>
+      <el-table-column label="视频封面" prop="video_image">
+        <template slot-scope="scope">
+          <img
+            :key="item"
+            @click="handlePictureCardPreview(item)"
+            v-for="item in scope.row.video_image"
+            :src="item"
+            style="width:80px;margin-right: 10px;"
+          >
+        </template>
+      </el-table-column>
+      <el-table-column label="添加时间" prop="addtime"></el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button size="mini" type="primary" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-footer>
+      <el-pagination
+        background
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="listQuery.page"
+        :page-sizes="[10,20,30,50]"
+        :page-size="listQuery.limit"
+        layout="total, sizes, prev, pager, next"
+        :total="total"
+      ></el-pagination>
+    </el-footer>
+    <!--中间表格结束 -->
+    <!--内容弹框开始 -->
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="90%">
+      <el-form :rules="rules" ref="form" :model="form" label-width="120px">
+        <el-form-item label="视频标题" prop="video_title">
+          <el-input v-model="form.video_title" placeholder="请输入视频标题"></el-input>
+        </el-form-item>
+        <el-form-item label="视频封面" prop="video_image">
+          <el-upload
+            action
+            list-type="picture-card"
+            accept="image/*"
+            :limit="1"
+            :auto-upload="false"
+            :file-list="form.video_image | filterUrl"
+            :on-change="handleImgChange"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemoveOne"
+          >
+            <i class="el-icon-plus"></i>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="视频内容">
+          <el-upload
+            v-if="form.video_lik ==null"
+            class="avatar-uploader el-upload--text"
+            :auto-upload="false"
+            action
+            :show-file-list="false"
+            :on-change="addVideo"
+            :before-upload="beforeUploadVideo"
+          >
+            <i class="el-icon-plus" style="font-size: 30px"></i>
+            <i v-if="isUpimg">上传中...</i>
+          </el-upload>
+          <video
+            v-if="form.video_lik !=null"
+            :src="form.video_lik"
+            class="company-video"
+            controls="controls"
+          >您的浏览器不支持视频播放</video>
+          <el-button @click="deleteVideo" v-if="form.video_lik !=null" type="danger">删除</el-button>
+        </el-form-item>
+        <el-form-item label="排序序号" prop="video_order">
+          <el-input v-model="form.video_order" placeholder="请输入排序序号0为最前，以此类推"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            @click="onSubmit(form)"
+            :disabled="isUpimg"
+            :loading="isloading"
+          >保存</el-button>
+          <el-button @click="dialogFormVisible = false">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+    <!-- 内容弹框结束-->
+  </div>
+</template>
+<script>
+import {
+  addVideo_api,
+  getVideo_api,
+  deleteVideo_api,
+  putVideo_api
+} from "@/api/seller";
+import uploadFn from "@/utils/tencent_cos";
+import config from "@/utils/config";
+const form = {
+  video_title: "",
+  video_lik: null,
+  video_image: [],
+  video_order: ''
+};
+import Moment from "@/utils/moment";
+export default {
+  mixins: [config],
+  created() {
+    //获取首页列表
+    this.dynamicList();
+  },
+  filters: {
+    //这里进行加入url到Ui框架
+    filterUrl: function(value) {
+      let arr = [];
+      // console.log(value)
+      if (!Array.isArray(value)) {
+        arr.push({
+          url: value
+        }),
+          (value = arr);
+      } else {
+        for (let i = 0; i < value.length; i++) {
+          if (!value[i].url) {
+            value[i] = {
+              url: value[i]
+            };
+          }
+        }
+      }
+      //console.log("过滤的")
+      //console.log(value)
+      return value;
+    }
+  },
+  data() {
+    return {
+      //视频列表
+      tableData: [
+        {
+          video_image: [],
+          video_title: ""
+        }
+      ],
+      //弹框动态详情
+      formObjRepeat: [
+        {
+          Repeat_images: [],
+          Repeat_title: ""
+        }
+      ],
+      //动态模块当前索引
+      moddele_idx: "",
+      //分页（请求参数）
+      listQuery: {
+        page: 1,
+        limit: 10
+      },
+      //总条数
+      total: 0,
+      //判断弹框是新增还是编辑
+      textMap: {
+        edit: "编辑",
+        create: "添加"
+      },
+      //默认弹框隐藏
+      dialogFormVisible: false,
+      //弹框状态
+      dialogStatus: "",
+      //表单内容
+      form: Object.assign({}, form),
+      //图片预览弹框是否打开
+      dialogVisible: false,
+      //要预览的图片
+      dialogImageUrl: "",
+      //表单验证规则
+      rules: {
+        video_title: [
+          {
+            required: true,
+            message: "请输入视频名称",
+            trigger: "blur"
+          },
+          {
+            min: 1,
+            max: 50,
+            message: "长度在1到20个字"
+          }
+        ],
+        video_image: [
+          {
+            required: true,
+            message: "请传1至3张图片",
+            trigger: "change"
+          }
+        ]
+      },
+      //正在保存
+      isloading: false,
+      //正在上传图片
+      isUpimg: false,
+      editId: null,
+      categoryStateOptions: [
+        {
+          value: "",
+          label: "无"
+        },
+        {
+          value: 1,
+          label: "分类一"
+        },
+        {
+          value: 2,
+          label: "分类二"
+        },
+        {
+          value: 3,
+          label: "分类三"
+        }
+      ],
+      category: ""
+    };
+  },
+  methods: {
+    //新增
+    CreateItem() {
+      this.category = "";
+      this.dialogFormVisible = true; //打开内容弹框
+      this.dialogStatus = "create";
+      this.form = Object.assign({}, form);
+      this.form.video_image = []
+    },
+    //上传图片
+    async handleImgChange(file, fileList) {
+      this.isUpimg = true;
+      let imgurl = await uploadFn(file.raw);
+      this.isUpimg = false;
+      this.form.video_image.push({
+        url: imgurl[0]
+      });
+    },
+    //上传视频
+    async addVideo(file, fileList, index) {
+      this.isUpimg = true;
+      let imgurl = await uploadFn(file.raw);
+      if (imgurl) {
+        this.isUpimg = false;
+        this.form.video_lik = imgurl[0];
+      }
+    },
+    beforeUploadVideo(file) {
+      if (
+        [
+          "video/mp4",
+          "video/ogg",
+          "video/flv",
+          "video/avi",
+          "video/wmv",
+          "video/rmvb"
+        ].indexOf(file.type) == -1
+      ) {
+        this.$message.error("请上传正确的视频格式");
+        return false;
+      }
+    },
+    deleteVideo() {
+      this.form.video_lik = null;
+      this.form = Object.assign({}, this.form);
+    },
+    //预览图片
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    //删除图片
+    handleRemoveOne(file, fileList) {
+      this.form.video_image = [];
+    },
+    //保存内容
+    onSubmit(form) {
+      console.log(this.$refs);
+      this.isloading = true;
+      // return
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.isloading = false;
+          this.addDynamic();
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    //编辑对应项
+    handleEdit(row) {
+      this.form = Object.assign({}, row);
+      this.dialogStatus = "edit";
+      this.categoryStateOptions.forEach(item => {
+        if (item.value == row.classify_id) {
+          this.category = item.label;
+        }
+      });
+      this.editId = row.video_id;
+      this.dialogFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs["form"].clearValidate();
+      });
+    },
+    //删除
+    handleDelete(index, row) {
+      console.log(index, row);
+      this.$confirm("此操作将永久删除该视频信息, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          console.log(row);
+          this.deleteDynamic(row.video_id);
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
+    //改变每页条数
+    handleSizeChange(val) {
+      this.listQuery.limit = val;
+      this.dynamicList();
+    },
+    //选择哪一页
+    handleCurrentChange(val) {
+      console.log(val);
+      this.listQuery.page = val;
+      this.dynamicList();
+    },
+    //以下为api操作
+    //获取视频列表
+    dynamicList() {
+      let sendData = Object.assign({}, this.listQuery);
+      console.log(sendData);
+      getVideo_api(sendData).then(res => {
+        if (res.status == 0) {
+          this.total = res.pagination.total;
+          res.data.forEach(item => {
+            item.addtime = Moment(item.addtime * 1000).format(
+              "yyyy-MM-dd HH:mm:ss"
+            );
+            item.video_image = JSON.parse(item.video_image);
+            this.categoryStateOptions.forEach(itemOptions => {
+              if (itemOptions.value == item.classify_id) {
+                item.label = itemOptions.label;
+              }
+            });
+          });
+          this.tableData = res.data;
+        }
+      });
+    },
+    delUrlfun(e) {
+      let arr = [];
+      for (let i = 0; i < e.length; i++) {
+        arr.push(e[i].url);
+      }
+      return arr;
+    },
+    //新增/编辑视频
+    addDynamic() {
+      let sendData = {};
+      for (let key in this.form) {
+        if (key == "video_image") {
+          this.form.video_image = this.delUrlfun(this.form.video_image);
+          sendData[key] = JSON.stringify(this.form.video_image);
+        } else {
+          sendData[key] = this.form[key];
+        }
+      }
+
+      if (this.dialogStatus === "create") {
+        addVideo_api(sendData).then(res => {
+          if (res.status == 0) {
+            this.dialogFormVisible = false;
+            this.isloading = false;
+            this.$notify({
+              title: "成功",
+              message: "保存成功",
+              type: "success",
+              duration: 2000
+            });
+            this.dynamicList();
+          }
+        });
+      } else if (this.dialogStatus === "edit") {
+        putVideo_api(this.editId, sendData).then(res => {
+          if (res.status == 0) {
+            this.dialogFormVisible = false;
+            this.isloading = false;
+            this.$notify({
+              title: "成功",
+              message: "保存成功",
+              type: "success",
+              duration: 2000
+            });
+            this.dynamicList();
+          }
+        });
+      }
+    },
+    //删除视频
+    deleteDynamic(id) {
+      deleteVideo_api(id).then(res => {
+        if (res.status == 0) {
+          this.$notify({
+            title: "成功",
+            message: "删除成功",
+            type: "success",
+            duration: 2000
+          });
+          this.dynamicList();
+        }
+      });
+    },
+    handleSelect(e) {
+      console.log("列表状态");
+      console.log(e);
+      this.form.classify_id = e;
+    }
+  }
+};
+</script>
