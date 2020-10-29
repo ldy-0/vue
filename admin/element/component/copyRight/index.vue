@@ -2,6 +2,8 @@
   <div class='footer_wrap'>
     <span class='copyright_wrap'>©{{obj.year}}&nbsp;&nbsp;{{obj.company}}</span>
 
+    <span>{{obj.province}}ICP备{{obj.ICP}}</span>
+
     <a class='record_wrap' target="_black" :href='url'>{{obj.province}}公网安备 {{obj.record}}号</a>
 
     <!-- <img src='https://ss1.bdstatic.com/5eN1bjq8AAUYm2zgoY3K/r/www/cache/static/protocol/https/global/img/icons_441e82f.png' /> -->
