@@ -1,0 +1,24 @@
+{
+  "name": "vue",
+  "version": "0.0.1",
+  "description": "- [utils](https://github.com/ldy-0/vue/utils)",
+  "main": "nod.js",
+  "scripts": {
+    "test": "jest",
+    "te": "node ./test/e2e/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ldy-0/vue.git"
+  },
+  "author": "ldy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ldy-0/vue/issues"
+  },
+  "homepage": "https://github.com/ldy-0/vue#readme",
+  "devDependencies": {
+    "jest": "^26.6.1",
+    "puppeteer": "^5.4.1"
+  }
+}
